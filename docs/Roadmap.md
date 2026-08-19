@@ -1,4 +1,4 @@
-# myAPI — Build Roadmap
+# lifelog — Build Roadmap
 
 Personal data warehouse in Go. One binary, SQLite, collectors pull from external
 sources into a unified event store.
@@ -12,11 +12,11 @@ sources into a unified event store.
 
 Time: ~30 min
 
-- [x] Pick the final project name (currently `myapi`)
+- [x] Pick the final project name (currently `lifelog`)
 - [x] Create GitHub repo, private for now
 - [x] Add `.gitignore` (Go template + `*.db`, `*.db-wal`, `*.db-shm`, `.env`)
-- [ ] Add `LICENSE` — AGPL-3.0 if you plan to open source, otherwise skip for now (for noe private)
-- [ ] Create GitHub Personal Access Token, scope `read:user` — store in `.env`
+- [x] Add `LICENSE` — AGPL-3.0 if you plan to open source, otherwise skip for now (for noe private)
+- [x] Create GitHub Personal Access Token, scope `read:user` — store in `.env`
 
 **Done when:** empty repo cloned locally, token in `.env`, `.env` is gitignored.
 
@@ -26,17 +26,17 @@ Time: ~30 min
 
 Time: ~1 h · ~200 LOC
 
-- [ ] `go mod init github.com/<user>/myapi`
-- [ ] `cmd/myapi/main.go` — entry point, nothing but startup
-- [ ] `internal/config/config.go` — struct loaded from environment
+- [x] `go mod init github.com/<user>/lifelog`
+- [ ] `cmd/lifelog/main.go` — entry point, nothing but startup
+- [x] `internal/config/config.go` — struct loaded from environment
       (`DatabasePath`, `GitHubToken`, `ListenAddress`)
 - [ ] Load `.env` at startup (`github.com/joho/godotenv`)
 - [ ] `log/slog` handler, level from environment
-- [ ] Open SQLite with `modernc.org/sqlite`, connection string:
+- [x] Open SQLite with `modernc.org/sqlite`, connection string:
       `file:data.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)`
 - [ ] Ping the database, log success, exit cleanly on `SIGINT`
 
-**Done when:** `go run ./cmd/myapi` creates `data.db` and logs a startup line.
+**Done when:** `go run ./cmd/lifelog` creates `data.db` and logs a startup line.
 
 **Watch out:** without WAL mode a running sync blocks all reads. Set it in the
 connection string, not with a separate `PRAGMA` statement — the pool opens more
@@ -150,7 +150,7 @@ Time: ~3 h · ~250 LOC
 Do **not** parse the payload beyond extracting the ID and timestamp. Store the
 JSON as it arrived.
 
-**Done when:** `go run ./cmd/myapi -sync` twice in a row produces the same row
+**Done when:** `go run ./cmd/lifelog -sync` twice in a row produces the same row
 count. That is your idempotency check.
 
 **Watch out:** GitHub GraphQL returns HTTP 200 with an `errors` array on failure.
@@ -325,9 +325,9 @@ Merging them is the actual work, the XML parsing is trivial.
 Single Go module, monorepo.
 
 ```
-myapi/
+lifelog/
 ├── cmd/
-│   └── myapi/
+│   └── lifelog/
 │       └── main.go
 ├── internal/
 │   ├── config/

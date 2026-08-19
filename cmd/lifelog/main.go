@@ -26,6 +26,10 @@ func main() {
 		os.Exit(1)
 	}
 	defer db.Close()
+	if err := store.Migrate(db); err != nil {
+		slog.Error("run migrations", "error", err)
+		os.Exit(1)
+	}
 	slog.Info("lifelog started", "database", cfg.DatabasePath, "address", cfg.ListenAddress)
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()

@@ -27,14 +27,14 @@ Time: ~30 min
 Time: ~1 h · ~200 LOC
 
 - [x] `go mod init github.com/<user>/lifelog`
-- [ ] `cmd/lifelog/main.go` — entry point, nothing but startup
+- [x] `cmd/lifelog/main.go` — entry point, nothing but startup
 - [x] `internal/config/config.go` — struct loaded from environment
       (`DatabasePath`, `GitHubToken`, `ListenAddress`)
-- [ ] Load `.env` at startup (`github.com/joho/godotenv`)
-- [ ] `log/slog` handler, level from environment
+- [x] Load `.env` at startup (`github.com/joho/godotenv`)
+- [x] `log/slog` handler, level from environment
 - [x] Open SQLite with `modernc.org/sqlite`, connection string:
       `file:data.db?_pragma=journal_mode(WAL)&_pragma=busy_timeout(5000)&_pragma=foreign_keys(1)`
-- [ ] Ping the database, log success, exit cleanly on `SIGINT`
+- [x] Ping the database, log success, exit cleanly on `SIGINT`
 
 **Done when:** `go run ./cmd/lifelog` creates `data.db` and logs a startup line.
 
@@ -48,9 +48,9 @@ than one connection and a manual pragma only applies to whichever one ran it.
 
 Time: ~1 h · ~150 LOC SQL
 
-- [ ] Add `github.com/pressly/goose/v3`
-- [ ] `internal/store/migrations/00001_init.sql`
-- [ ] Embed the migrations directory with `embed.FS`
+- [x] Add `github.com/pressly/goose/v3`
+- [x] `internal/store/migrations/00001_init.sql`
+- [x] Embed the migrations directory with `embed.FS`
 - [ ] Run migrations on startup, before anything else touches the database
 
 Schema:

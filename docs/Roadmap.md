@@ -140,12 +140,12 @@ Time: ~3 h · ~250 LOC
 
 - [x] `internal/github/client.go` — HTTP client with a 30 s timeout,
       bearer token from config
-- [ ] `internal/github/fetch.go` — execute the query, return
+- [x] `internal/github/fetch.go` — execute the query, return
       `[]RawItem{ExternalID, OccurredAt, Payload json.RawMessage}`
-- [ ] `internal/store/raw.go` — `InsertRaw` using
+- [x] `internal/store/raw.go` — `InsertRaw` using
       `INSERT ... ON CONFLICT (source, external_id) DO UPDATE SET payload = excluded.payload, fetched_at = excluded.fetched_at`
-- [ ] Wire it into `main.go` behind a temporary flag: `-sync`
-- [ ] Write `sync_state` after a successful run
+- [x] Wire it into `main.go` behind a temporary flag: `-sync`
+- [x] Write `sync_state` after a successful run
 
 Do **not** parse the payload beyond extracting the ID and timestamp. Store the
 JSON as it arrived.
@@ -165,11 +165,11 @@ Time: ~2 h · ~200 LOC
 Separate command, separate code path. This is the whole point of storing raw
 payloads.
 
-- [ ] `internal/github/normalize.go` — `RawItem` → `[]Event`
-- [ ] `internal/store/events.go` — delete existing events for a `raw_id`,
+- [x] `internal/github/normalize.go` — `RawItem` → `[]Event`
+- [x] `internal/store/events.go` — delete existing events for a `raw_id`,
       then insert the new ones (makes re-running safe)
-- [ ] Flag `-normalize` that reprocesses every raw payload for a source
-- [ ] Event shape: `type = "commit"`, `value = commitCount`, `unit = "count"`,
+- [x] Flag `-normalize` that reprocesses every raw payload for a source
+- [x] Event shape: `type = "commit"`, `value = commitCount`, `unit = "count"`,
       `meta = {"repository": "owner/repo"}`
 
 **Done when:** `-normalize` can run five times without changing the row count in

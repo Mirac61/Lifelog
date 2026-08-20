@@ -51,7 +51,7 @@ Time: ~1 h · ~150 LOC SQL
 - [x] Add `github.com/pressly/goose/v3`
 - [x] `internal/store/migrations/00001_init.sql`
 - [x] Embed the migrations directory with `embed.FS`
-- [ ] Run migrations on startup, before anything else touches the database
+- [x] Run migrations on startup, before anything else touches the database
 
 Schema:
 
@@ -138,7 +138,7 @@ parse `git log` locally instead. Start with the aggregate.
 
 Time: ~3 h · ~250 LOC
 
-- [ ] `internal/github/client.go` — HTTP client with a 30 s timeout,
+- [x] `internal/github/client.go` — HTTP client with a 30 s timeout,
       bearer token from config
 - [ ] `internal/github/fetch.go` — execute the query, return
       `[]RawItem{ExternalID, OccurredAt, Payload json.RawMessage}`

@@ -4,11 +4,13 @@ import (
 	"context"
 	"flag"
 	"log/slog"
+	"net/http"
 	"os"
 	"os/signal"
 	"syscall"
 	"time"
 
+	"github.com/Mirac61/lifelog/internal/api"
 	"github.com/Mirac61/lifelog/internal/config"
 	"github.com/Mirac61/lifelog/internal/github"
 	"github.com/Mirac61/lifelog/internal/store"
@@ -78,7 +80,23 @@ func main() {
 		return
 	}
 
+	srv := &http.Server{
+		Addr:    cfg.ListenAddress,
+		Handler: api.New(db).Routes(),
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			slog.Error("server failed", "error", err)
+		}
+	}()
+
 	slog.Info("lifelog started", "database", cfg.DatabasePath, "address", cfg.ListenAddress)
 	<-ctx.Done()
+	shutdownCtx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+	if err := srv.Shutdown(shutdownCtx); err != nil {
+		slog.Error("shutdown", "error", err)
+	}
 	slog.Info("shutting down")
 }

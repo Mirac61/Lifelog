@@ -119,14 +119,14 @@ dependency for nothing here; Fiber/fasthttp would additionally break
 compatibility with `http.Handler`, `httptest`, and `net/http/pprof` in exchange
 for microseconds that are invisible next to a SQLite query.
 
-- [ ] `internal/store/events.go` — `DailyTotals(ctx, db, eventType, from, to)`
+- [x] `internal/store/events.go` — `DailyTotals(ctx, db, eventType, from, to)`
       returning `[]DailyTotal{LocalDate string, Value float64}`
-- [ ] `internal/store/events.go` — `ListTypes(ctx, db)` returning the distinct
+- [x] `internal/store/events.go` — `ListTypes(ctx, db)` returning the distinct
       `type` values present, so the dashboard discovers sources on its own
-- [ ] `internal/api/server.go` — `http.ServeMux`, bound to `cfg.ListenAddress`
-- [ ] `GET /health` — database ping plus the last sync state per source
-- [ ] Graceful shutdown: `srv.Shutdown(ctx)` driven by the existing SIGINT context
-- [ ] Remove the `-sync`/`-normalize` early `return` path so the server actually
+- [x] `internal/api/server.go` — `http.ServeMux`, bound to `cfg.ListenAddress`
+- [x] `GET /health` — database ping plus the last sync state per source
+- [x] Graceful shutdown: `srv.Shutdown(ctx)` driven by the existing SIGINT context
+- [x] Remove the `-sync`/`-normalize` early `return` path so the server actually
       starts when no flag is given
 
 ```sql

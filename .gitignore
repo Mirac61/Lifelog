@@ -36,3 +36,7 @@ go.work.sum
 *.db
 *.db-wal
 *.db-shm
+
+# Design
+Lifelog Daily Cockpit.zip
+Lifelog Daily Cockpit

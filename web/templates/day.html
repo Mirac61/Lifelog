@@ -1,0 +1,10 @@
+<div class="panel day">
+  <h2>{{.Date}}</h2>
+  {{if .Events}}
+  <ul>
+    {{range .Events}}<li><span>{{.Type}}</span><b>{{.Value}} {{.Unit}}</b></li>{{end}}
+  </ul>
+  {{else}}
+  <p class="empty">No events</p>
+  {{end}}
+</div>

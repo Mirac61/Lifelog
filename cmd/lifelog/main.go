@@ -20,6 +20,7 @@ import (
 func main() {
 	syncMode := flag.Bool("sync", false, "this is a bool argument")
 	normalizeMode := flag.Bool("normalize", false, "rebuild events from stored payloads")
+	syncYear := flag.Int("year", time.Now().Year(), "year to sync")
 	flag.Parse()
 
 	_ = godotenv.Load()
@@ -44,7 +45,7 @@ func main() {
 
 	if *syncMode {
 		client := github.New(cfg.GitHubToken)
-		item, err := client.FetchContributions(ctx, time.Now().Year())
+		item, err := client.FetchContributions(ctx, *syncYear)
 		if err != nil {
 			slog.Error("fetch contributions", "error", err)
 			os.Exit(1)
@@ -80,9 +81,15 @@ func main() {
 		return
 	}
 
+	apiServer, err := api.New(db)
+	if err != nil {
+		slog.Error("init api", "error", err)
+		os.Exit(1)
+	}
+
 	srv := &http.Server{
 		Addr:    cfg.ListenAddress,
-		Handler: api.New(db).Routes(),
+		Handler: apiServer.Routes(),
 	}
 
 	go func() {

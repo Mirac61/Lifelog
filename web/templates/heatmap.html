@@ -1,0 +1,31 @@
+<svg viewBox="0 0 {{.Width}} {{.Height}}" width="{{.Width}}" 
+     height="{{.Height}}" xmlns="http://www.w3.org/2000/svg">
+
+  <style>.lbl{fill:#727169;font:9px ui-monospace,monospace}</style>
+
+  {{range .Days}}
+  <text x="0" y="{{.Y}}" class="lbl">{{.Text}}</text>
+  {{end}}
+
+  {{range .Months}}
+  <text x="{{.X}}" y="{{.Y}}" class="lbl">{{.Text}}</text>
+  {{end}}
+
+  {{range .Cells}}
+  <rect x="{{.X}}" y="{{.Y}}"
+        width="{{$.CellSize}}" height="{{$.CellSize}}"
+        rx="2" fill="{{.Color}}"
+        data-date="{{.Label}}" data-value="{{.Value}}"
+        hx-get="/day?date={{.Date}}" hx-target="#detail" 
+        hx-swap="innerHTML"/>
+  {{end}}
+
+  <text x="{{.LessX}}" y="{{.LegendY}}" class="lbl">less</text>
+  {{range .Legend}}
+  <rect x="{{.X}}" y="{{.Y}}"
+        width="{{$.CellSize}}" height="{{$.CellSize}}"
+        rx="2" fill="{{.Color}}"/>
+  {{end}}
+  <text x="{{.MoreX}}" y="{{.LegendY}}" class="lbl">more</text>
+
+</svg>

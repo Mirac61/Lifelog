@@ -14,6 +14,12 @@ type DailyTotal struct {
 	Value     float64
 }
 
+type DayEvent struct {
+	Type  string
+	Value float64
+	Unit  string
+}
+
 func InsertEvents(ctx context.Context, db *sql.DB, source string, rawID int64, events []collector.Event) error {
 	const delQuery = `DELETE FROM events WHERE raw_id = ?`
 	const insertQuery = `INSERT INTO events (source, type, occurred_at, local_date, value, unit, meta, raw_id) VALUES (?,?,?,?,?,?,?,?)`
@@ -81,4 +87,72 @@ func ListTypes(ctx context.Context, db *sql.DB) ([]string, error) {
 		return nil, fmt.Errorf("iterating types: %w", err)
 	}
 	return types, nil
+}
+
+type Stats struct {
+	Total         float64
+	ActiveDays    int
+	LongestStreak int
+	BestDate      string
+	BestValue     float64
+}
+
+func DailyStats(ctx context.Context, db *sql.DB, eventType, from, to string) (Stats, error) {
+	totals, err := DailyTotals(ctx, db, eventType, from, to)
+	if err != nil {
+		return Stats{}, fmt.Errorf("daily stats: %w", err)
+	}
+
+	var s Stats
+	var prev time.Time
+	streak := 0
+	for _, t := range totals {
+		if t.Value <= 0 {
+			continue
+		}
+		day, err := time.Parse("2006-01-02", t.LocalDate)
+		if err != nil {
+			return Stats{}, fmt.Errorf("parse local date %q: %w", t.LocalDate, err)
+		}
+		s.Total += t.Value
+		s.ActiveDays++
+		if t.Value > s.BestValue {
+			s.BestValue, s.BestDate = t.Value, t.LocalDate
+		}
+		if !prev.IsZero() && day.Sub(prev) == 24*time.Hour {
+			streak++
+		} else {
+			streak = 1
+		}
+		if streak > s.LongestStreak {
+			s.LongestStreak = streak
+		}
+		prev = day
+	}
+	return s, nil
+}
+
+func EventsForDay(ctx context.Context, db *sql.DB, date string) ([]DayEvent, error) {
+	const query = `SELECT type, COALESCE(value, 0), COALESCE(unit, '')
+		FROM events
+		WHERE local_date = ?
+		ORDER BY occurred_at, type`
+
+	rows, err := db.QueryContext(ctx, query, date)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var events []DayEvent
+	for rows.Next() {
+		var e DayEvent
+		if err := rows.Scan(&e.Type, &e.Value, &e.Unit); err != nil {
+			return nil, fmt.Errorf("scan day event: %w", err)
+		}
+		events = append(events, e)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate day events: %w", err)
+	}
+	return events, nil
 }

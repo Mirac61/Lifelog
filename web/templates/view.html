@@ -1,0 +1,8 @@
+<div class="stats">
+  <div class="stat"><b>{{.Stats.Total}}</b><span>contributions</span></div>
+  <div class="stat"><b>{{.Stats.ActiveDays}}</b><span>active days</span></div>
+  <div class="stat"><b>{{.Stats.LongestStreak}}</b><span>longest streak</span></div>
+  <div class="stat"><b>{{.Stats.BestValue}}</b><span>best day{{with .Stats.BestDate}} · {{.}}{{end}}</span></div>
+</div>
+
+<div id="chart">{{template "heatmap.html" .Heatmap}}</div>

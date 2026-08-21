@@ -1,0 +1,124 @@
+:root {
+  --bg: #1F1F28;
+  --fg: #DCD7BA;
+  --muted: #727169;
+  --panel: #22222B;
+  --border: #363646;
+  --accent: #E6C384;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--fg);
+  font: 14px ui-monospace, SFMono-Regular, Menlo, monospace;
+  margin: 0 auto;
+  padding: 48px 40px;
+  max-width: 1000px;
+}
+
+h1 {
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  margin: 0 0 28px;
+}
+
+h1 span { color: var(--muted); }
+
+.controls {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 16px;
+}
+
+select {
+  background: var(--panel);
+  color: var(--fg);
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 7px 11px;
+  font: inherit;
+  cursor: pointer;
+}
+
+select:hover { border-color: var(--muted); }
+
+.panel {
+  background: var(--panel);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 20px;
+  overflow-x: auto;
+  margin-bottom: 16px;
+}
+
+.stats {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 40px;
+  margin-bottom: 24px;
+}
+
+.stat b {
+  display: block;
+  font-size: 26px;
+  font-weight: 500;
+  line-height: 1.1;
+}
+
+.stat span {
+  color: var(--muted);
+  font-size: 12px;
+}
+
+.day h2 {
+  font-size: 13px;
+  font-weight: 500;
+  margin: 0 0 12px;
+  color: var(--muted);
+}
+
+.day ul {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.day li {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 6px 0;
+  border-top: 1px solid var(--border);
+}
+
+.day li b { font-weight: 500; }
+
+.empty {
+  color: var(--muted);
+  margin: 0;
+  font-size: 13px;
+}
+
+#tip {
+  position: absolute;
+  background: #16161D;
+  border: 1px solid var(--border);
+  border-radius: 5px;
+  padding: 5px 9px;
+  font-size: 12px;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.1s;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+#chart rect { stroke: none; }
+#chart rect[data-date] { cursor: pointer; }
+#chart rect:hover { stroke: var(--fg); stroke-width: 1.5; }
+#chart rect.sel { stroke: var(--accent); stroke-width: 1.5; }
+
+.htmx-request { opacity: 0.5; }

@@ -1,0 +1,41 @@
+<div class="hero">
+  <div class="hero-main">
+    <div class="hero-value">{{printf "%.0f" .Stats.Total}}</div>
+    <div class="hero-label">Commits · {{.Year}}</div>
+  </div>
+  <div class="hero-stats">
+    <div class="hstat"><b>{{.Stats.ActiveDays}}</b><span>aktive Tage</span></div>
+    <div class="hstat"><b>{{.Stats.LongestStreak}}</b><span>längste Streak</span></div>
+    <div class="hstat"><b>{{printf "%.0f" .Stats.BestValue}}</b><span>bester Tag{{with .Stats.BestDate}} · {{.}}{{end}}</span></div>
+    <div class="hstat"><b>{{len .Repos}}</b><span>Repos berührt</span></div>
+  </div>
+</div>
+
+<div class="dash">
+  <div class="panel panel-static" id="chart">
+    <div class="box-head">
+      <span class="box-title">Commits · 53 Wochen</span>
+    </div>
+    {{template "heatmap.html" .Heatmap}}
+  </div>
+
+  <div class="panel">
+    <div class="box-head">
+      <span class="box-title">Repos · {{.Year}}</span>
+      <span class="box-meta">{{len .Repos}}</span>
+    </div>
+    {{if .Repos}}
+    <ul class="repos">
+      {{range .Repos}}
+      <li>
+        <span class="repo-name" title="{{.Repo}}">{{.Repo}}</span>
+        <span class="repo-bar"><i style="width:{{printf "%.1f" .Percent}}%"></i></span>
+        <b>{{.Commits}}</b>
+      </li>
+      {{end}}
+    </ul>
+    {{else}}
+    <p class="empty">Keine Commits in {{.Year}}</p>
+    {{end}}
+  </div>
+</div>

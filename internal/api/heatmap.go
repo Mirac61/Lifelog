@@ -16,7 +16,7 @@ const (
 	topMargin  = 20
 )
 
-var scale = [5]string{"#363646", "#2D4F67", "#4A7A96", "#7E9CD8", "#A3D4D5"}
+var scale = [5]string{"#1E1E1C", "#2D4F67", "#4A7A96", "#7E9CD8", "#A3D4D5"}
 
 func colorFor(v float64) string {
 	switch {
@@ -39,6 +39,7 @@ type cell struct {
 	Date  string
 	Label string
 	Value float64
+	Best  bool
 }
 
 type textLabel struct {
@@ -62,9 +63,10 @@ type heatmapData struct {
 	LessX    int
 	MoreX    int
 	LegendY  int
+	Detail   bool
 }
 
-func buildHeatmap(totals []store.DailyTotal, year int) heatmapData {
+func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) heatmapData {
 	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
 	start = start.AddDate(0, 0, -((int(start.Weekday()) + 6) % 7))
 	end := time.Date(year, time.December, 31, 0, 0, 0, 0, time.UTC)
@@ -98,15 +100,17 @@ func buildHeatmap(totals []store.DailyTotal, year int) heatmapData {
 			Date:  date,
 			Label: d.Format("Mon, 2 Jan 2006"),
 			Value: v,
+			Best:  date == bestDate,
 		})
 	}
 	width := leftMargin + (week+1)*cellStep
 	height := topMargin + 7*cellStep + 28
 	legendY := height - 6
+	legendX := width - 130
 	var legend []swatch
 	for i, c := range scale {
 		legend = append(legend, swatch{
-			X:     leftMargin + 30 + i*cellStep,
+			X:     legendX + 30 + i*cellStep,
 			Y:     legendY - 9,
 			Color: c,
 		})
@@ -128,8 +132,8 @@ func buildHeatmap(totals []store.DailyTotal, year int) heatmapData {
 		Months:   months,
 		Days:     days,
 		Legend:   legend,
-		LessX:    leftMargin,
-		MoreX:    leftMargin + 36 + 5*cellStep,
+		LessX:    legendX,
+		MoreX:    legendX + 36 + 5*cellStep,
 		LegendY:  legendY,
 	}
 }

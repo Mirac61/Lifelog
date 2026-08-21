@@ -3,6 +3,7 @@ package store
 import (
 	"context"
 	"database/sql"
+	"encoding/json"
 	"fmt"
 	"time"
 
@@ -18,6 +19,22 @@ type DayEvent struct {
 	Type  string
 	Value float64
 	Unit  string
+}
+
+type RepoCommit struct {
+	Name          string
+	NameWithOwner string
+	OccurredAt    string
+	LocalDate     string
+	Value         float64
+}
+
+type Stats struct {
+	Total         float64
+	ActiveDays    int
+	LongestStreak int
+	BestDate      string
+	BestValue     float64
 }
 
 func InsertEvents(ctx context.Context, db *sql.DB, source string, rawID int64, events []collector.Event) error {
@@ -89,14 +106,6 @@ func ListTypes(ctx context.Context, db *sql.DB) ([]string, error) {
 	return types, nil
 }
 
-type Stats struct {
-	Total         float64
-	ActiveDays    int
-	LongestStreak int
-	BestDate      string
-	BestValue     float64
-}
-
 func DailyStats(ctx context.Context, db *sql.DB, eventType, from, to string) (Stats, error) {
 	totals, err := DailyTotals(ctx, db, eventType, from, to)
 	if err != nil {
@@ -155,4 +164,61 @@ func EventsForDay(ctx context.Context, db *sql.DB, date string) ([]DayEvent, err
 		return nil, fmt.Errorf("iterate day events: %w", err)
 	}
 	return events, nil
+}
+
+func ListRepoCommits(ctx context.Context, db *sql.DB, year int) ([]RepoCommit, error) {
+	const query = `SELECT occurred_at, local_date, value, meta
+		FROM events
+		WHERE source = ?
+		  AND type = ?
+		  AND local_date BETWEEN ? AND ?
+		ORDER BY value DESC`
+
+	from := fmt.Sprintf("%d-01-01", year)
+	to := fmt.Sprintf("%d-12-31", year)
+	rows, err := db.QueryContext(ctx, query, "github", "repo_commit", from, to)
+	if err != nil {
+		return nil, fmt.Errorf("query repo commits: %w", err)
+	}
+	defer rows.Close()
+
+	var commits []RepoCommit
+	for rows.Next() {
+		var commit RepoCommit
+		var meta json.RawMessage
+		if err := rows.Scan(&commit.OccurredAt, &commit.LocalDate, &commit.Value, &meta); err != nil {
+			return nil, fmt.Errorf("scan repo commit: %w", err)
+		}
+
+		var details struct {
+			Name          string `json:"name"`
+			NameWithOwner string `json:"nameWithOwner"`
+		}
+		if err := json.Unmarshal(meta, &details); err != nil {
+			return nil, fmt.Errorf("decode repo metadata: %w", err)
+		}
+		commit.Name = details.Name
+		commit.NameWithOwner = details.NameWithOwner
+		commits = append(commits, commit)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate repo commits: %w", err)
+	}
+
+	return commits, nil
+}
+
+func FirstRepoCommitYear(ctx context.Context, db *sql.DB) (int, error) {
+	const query = `SELECT MIN(substr(local_date, 1, 4))
+		FROM events
+		WHERE source = ? AND type = ?`
+
+	var year sql.NullInt64
+	if err := db.QueryRowContext(ctx, query, "github", "repo_commit").Scan(&year); err != nil {
+		return 0, fmt.Errorf("query first repo commit year: %w", err)
+	}
+	if !year.Valid {
+		return 0, nil
+	}
+	return int(year.Int64), nil
 }

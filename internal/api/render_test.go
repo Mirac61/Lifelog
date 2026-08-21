@@ -14,13 +14,13 @@ func TestGitPageRendersOwnBody(t *testing.T) {
 	}
 
 	rec := httptest.NewRecorder()
-	s.Routes().ServeHTTP(rec, httptest.NewRequest("GET", "/git", nil))
+	s.renderPage(rec, "git.html", gitPage{Active: "git"})
 
 	body := rec.Body.String()
 	if rec.Code != 200 {
 		t.Fatalf("status %d: %s", rec.Code, body)
 	}
-	if !strings.Contains(body, "Coming soon") {
+	if !strings.Contains(body, "gitview") {
 		t.Errorf("git body missing:\n%s", body)
 	}
 	if strings.Contains(body, "personal data warehouse") {

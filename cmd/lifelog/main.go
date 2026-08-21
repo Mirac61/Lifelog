@@ -7,6 +7,7 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
+	"strings"
 	"syscall"
 	"time"
 
@@ -55,6 +56,17 @@ func main() {
 			os.Exit(1)
 		}
 		slog.Info("sync complete", "external_id", item.ExternalID, "bytes", len(item.Payload))
+
+		repoItem, err := client.FetchRepoCommits(ctx, *syncYear)
+		if err != nil {
+			slog.Error("fetch repo contributions", "error", err)
+			os.Exit(1)
+		}
+		if err := store.InsertRaw(ctx, db, "github", repoItem); err != nil {
+			slog.Error("insert repo payload", "error", err)
+			os.Exit(1)
+		}
+		slog.Info("sync complete", "external_id", repoItem.ExternalID, "bytes", len(repoItem.Payload))
 		return
 	}
 
@@ -66,7 +78,19 @@ func main() {
 		}
 		total := 0
 		for _, row := range list {
-			events, err := github.NormalizeContributions(row.Payload)
+			normalize := github.NormalizeContributions
+			switch {
+			case strings.HasPrefix(row.ExternalID, "repo-commits:"):
+				normalize = github.NormalizeRepoContributions
+			case strings.HasPrefix(row.ExternalID, "pull-requests:"):
+				normalize = github.NormalizePRContributions
+			case strings.HasPrefix(row.ExternalID, "contributions:"):
+			default:
+				slog.Warn("skip unknown raw payload", "external_id", row.ExternalID)
+				continue
+			}
+
+			events, err := normalize(row.Payload)
 			if err != nil {
 				slog.Error("fetching events", "error", err)
 				os.Exit(1)

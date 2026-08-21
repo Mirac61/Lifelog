@@ -25,7 +25,9 @@ func (s *Server) view(ctx context.Context, eventType string, year int) (viewData
 	if err != nil {
 		return viewData{}, fmt.Errorf("daily stats: %w", err)
 	}
-	return viewData{stats, buildHeatmap(totals, year)}, nil
+	hm := buildHeatmap(totals, year, stats.BestDate)
+	hm.Detail = true
+	return viewData{stats, hm}, nil
 }
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {

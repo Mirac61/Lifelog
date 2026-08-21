@@ -48,6 +48,7 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /health", s.handleHealth)
 	mux.HandleFunc("GET /heatmap", s.handleHeatmap)
 	mux.HandleFunc("GET /day", s.handleDay)
+	mux.HandleFunc("GET /git/view", s.handleGitView)
 	mux.HandleFunc("GET /", s.handleIndex)
 	mux.HandleFunc("GET /git", s.handleGit)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))

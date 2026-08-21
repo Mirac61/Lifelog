@@ -1,5 +1,4 @@
-<svg viewBox="0 0 {{.Width}} {{.Height}}" width="{{.Width}}" 
-     height="{{.Height}}" xmlns="http://www.w3.org/2000/svg">
+<svg viewBox="0 0 {{.Width}} {{.Height}}" xmlns="http://www.w3.org/2000/svg">
 
   <style>.lbl{fill:#727169;font:9px ui-monospace,monospace}</style>
 
@@ -14,17 +13,17 @@
   {{range .Cells}}
   <rect x="{{.X}}" y="{{.Y}}"
         width="{{$.CellSize}}" height="{{$.CellSize}}"
-        rx="2" fill="{{.Color}}"
+        rx="3" fill="{{.Color}}"
         data-date="{{.Label}}" data-value="{{.Value}}"
-        hx-get="/day?date={{.Date}}" hx-target="#detail" 
-        hx-swap="innerHTML"/>
+        {{if .Best}}class="best"{{end}}
+        {{if $.Detail}}hx-get="/day?date={{.Date}}" hx-target="#detail" hx-swap="innerHTML"{{end}}/>
   {{end}}
 
   <text x="{{.LessX}}" y="{{.LegendY}}" class="lbl">less</text>
   {{range .Legend}}
   <rect x="{{.X}}" y="{{.Y}}"
         width="{{$.CellSize}}" height="{{$.CellSize}}"
-        rx="2" fill="{{.Color}}"/>
+        rx="3" fill="{{.Color}}"/>
   {{end}}
   <text x="{{.MoreX}}" y="{{.LegendY}}" class="lbl">more</text>
 

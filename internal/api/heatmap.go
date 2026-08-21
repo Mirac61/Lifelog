@@ -1,7 +1,6 @@
 package api
 
 import (
-	"fmt"
 	"net/http"
 	"strconv"
 	"time"
@@ -144,16 +143,10 @@ func (s *Server) handleHeatmap(w http.ResponseWriter, r *http.Request) {
 	if y, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
 		year = y
 	}
-	from := fmt.Sprintf("%d-01-01", year)
-	to := fmt.Sprintf("%d-12-31", year)
-	totals, err := store.DailyTotals(r.Context(), s.db, eventType, from, to)
+	view, err := s.view(r.Context(), eventType, year)
 	if err != nil {
 		http.Error(w, "query failed", http.StatusInternalServerError)
 		return
 	}
-	data := buildHeatmap(totals, year)
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.templates.ExecuteTemplate(w, "heatmap.html", data); err != nil {
-		http.Error(w, "render failed", http.StatusInternalServerError)
-	}
+	s.renderPartial(w, "view.html", view)
 }

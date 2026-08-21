@@ -3,7 +3,6 @@ package api
 import (
 	"context"
 	"fmt"
-	"log/slog"
 	"net/http"
 	"time"
 
@@ -49,16 +48,14 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 	}
 
 	data := struct {
+		Active  string
 		Year    int
 		Years   []int
+		Type    string
 		Types   []string
 		Stats   store.Stats
 		Heatmap heatmapData
-	}{year, years, types, view.Stats, view.Heatmap}
+	}{"dashboard", year, years, types[0], types, view.Stats, view.Heatmap}
 
-	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	if err := s.templates.ExecuteTemplate(w, "index.html", data); err != nil {
-		slog.Error("render index", "error", err)
-		http.Error(w, "render failed", http.StatusInternalServerError)
-	}
+	s.renderPage(w, "dashboard.html", data)
 }

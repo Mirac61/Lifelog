@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>lifelog</title>
+  <link rel="stylesheet" href="/static/style.css">
+  <script src="/static/htmx.min.js"></script>
+</head>
+<body>
+  <aside class="sidebar">
+    <a href="/" class="logo">◆</a>
+    <nav>
+      <a href="/" class="nav-item {{if eq .Active "dashboard"}}active{{end}}" title="Dashboard">D</a>
+      <a href="/git" class="nav-item {{if eq .Active "git"}}active{{end}}" title="Git">G</a>
+      <a href="/todos" class="nav-item {{if eq .Active "todos"}}active{{end}}" title="Todos">T</a>
+      <a href="/calendar" class="nav-item {{if eq .Active "calendar"}}active{{end}}" title="Kalender">C</a>
+    </nav>
+  </aside>
+
+  <main class="content">
+    {{template "body" .}}
+  </main>
+
+  <div id="tip"></div>
+
+  <script>
+    document.addEventListener('mouseover', e => {
+      const r = e.target.closest('rect[data-date]');
+      const tip = document.getElementById('tip');
+      if (!r) { tip.style.opacity = 0; return; }
+      const n = r.dataset.value;
+      tip.textContent = `${n} ${n === '1' ? 'contribution' : 'contributions'} · ${r.dataset.date}`;
+      const box = r.getBoundingClientRect();
+      tip.style.left = (box.left + window.scrollX + 6) + 'px';
+      tip.style.top = (box.top + window.scrollY - 34) + 'px';
+      tip.style.opacity = 1;
+    });
+    document.addEventListener('click', e => {
+      const r = e.target.closest('rect[data-date]');
+      if (!r) return;
+      document.querySelectorAll('rect.sel').forEach(c => c.classList.remove('sel'));
+      r.classList.add('sel');
+    });
+  </script>
+</body>
+</html>

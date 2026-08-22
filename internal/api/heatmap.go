@@ -146,7 +146,7 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) heatmapD
 func (s *Server) handleHeatmap(w http.ResponseWriter, r *http.Request) {
 	eventType := r.URL.Query().Get("type")
 	if eventType == "" {
-		eventType = "commit"
+		eventType = "contributions"
 	}
 	year := time.Now().Year()
 	if y, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {

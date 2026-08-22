@@ -129,7 +129,7 @@ func NormalizeContributions(payload json.RawMessage) ([]collector.Event, error) 
 				return nil, fmt.Errorf("parse date %s: %w", d.Date, err)
 			}
 			events = append(events, collector.Event{
-				Type:        "commit",
+				Type:        "contributions",
 				OccurredAt:  occurredAt,
 				LocalDate:   d.Date,
 				Granularity: "day",

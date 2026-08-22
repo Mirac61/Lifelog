@@ -55,7 +55,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int) (gitPage, error) {
 		}
 	}
 
-	view, err := s.view(ctx, "commit", year)
+	view, err := s.view(ctx, "contributions", year)
 	if err != nil {
 		return gitPage{}, fmt.Errorf("fetching view: %w", err)
 	}

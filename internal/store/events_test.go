@@ -31,13 +31,13 @@ func TestDailyStats(t *testing.T) {
 	}
 	for _, d := range days {
 		if _, err := db.ExecContext(ctx,
-			`INSERT INTO events (source, type, occurred_at, local_date, value, unit) VALUES ('t','commit',?,?,?,'count')`,
+			`INSERT INTO events (source, type, occurred_at, local_date, value, unit) VALUES ('t','contributions',?,?,?,'count')`,
 			d.date+"T12:00:00Z", d.date, d.value); err != nil {
 			t.Fatal(err)
 		}
 	}
 
-	got, err := DailyStats(ctx, db, "commit", "2026-01-01", "2026-12-31")
+	got, err := DailyStats(ctx, db, "contributions", "2026-01-01", "2026-12-31")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -50,7 +50,7 @@ func TestDailyStats(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(events) != 1 || events[0].Type != "commit" || events[0].Value != 5 {
+	if len(events) != 1 || events[0].Type != "contributions" || events[0].Value != 5 {
 		t.Errorf("EventsForDay = %+v", events)
 	}
 }
@@ -68,7 +68,7 @@ func TestYearGranularityOffDayAxis(t *testing.T) {
 
 	// A daily commit and a yearly repo total, both bucketed on Jan 1.
 	if _, err := db.ExecContext(ctx,
-		`INSERT INTO events (source, type, occurred_at, local_date, value, unit, granularity) VALUES ('github','commit',?,?,?,'count','day')`,
+		`INSERT INTO events (source, type, occurred_at, local_date, value, unit, granularity) VALUES ('github','contributions',?,?,?,'count','day')`,
 		"2026-01-01T12:00:00Z", "2026-01-01", 3); err != nil {
 		t.Fatal(err)
 	}
@@ -78,7 +78,7 @@ func TestYearGranularityOffDayAxis(t *testing.T) {
 		t.Fatal(err)
 	}
 
-	totals, err := DailyTotals(ctx, db, "commit", "2026-01-01", "2026-12-31")
+	totals, err := DailyTotals(ctx, db, "contributions", "2026-01-01", "2026-12-31")
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -116,7 +116,7 @@ func TestYearGranularityOffDayAxis(t *testing.T) {
 	if err != nil {
 		t.Fatal(err)
 	}
-	if len(dayEvents) != 1 || dayEvents[0].Type != "commit" {
+	if len(dayEvents) != 1 || dayEvents[0].Type != "contributions" {
 		t.Errorf("EventsForDay(2026-01-01) = %+v, want only the daily commit", dayEvents)
 	}
 }

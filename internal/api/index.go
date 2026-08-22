@@ -37,7 +37,7 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	if len(types) == 0 {
-		types = []string{"commit"}
+		types = []string{"contributions"}
 	}
 
 	year := time.Now().Year()

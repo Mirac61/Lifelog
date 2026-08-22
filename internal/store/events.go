@@ -37,9 +37,18 @@ type Stats struct {
 	BestValue     float64
 }
 
+type PullRequest struct {
+	OccurredAt string
+	LocalDate  string
+	Title      string `json:"title"`
+	URL        string `json:"url"`
+	Repo       string `json:"repository"`
+	State      string `json:"state"`
+}
+
 func InsertEvents(ctx context.Context, db *sql.DB, source string, rawID int64, events []collector.Event) error {
 	const delQuery = `DELETE FROM events WHERE raw_id = ?`
-	const insertQuery = `INSERT INTO events (source, type, occurred_at, local_date, value, unit, meta, raw_id) VALUES (?,?,?,?,?,?,?,?)`
+	const insertQuery = `INSERT INTO events (source, type, occurred_at, local_date, value, unit, meta, raw_id, granularity) VALUES (?,?,?,?,?,?,?,?,?)`
 	tx, err := db.BeginTx(ctx, nil)
 	if err != nil {
 		return err
@@ -51,7 +60,11 @@ func InsertEvents(ctx context.Context, db *sql.DB, source string, rawID int64, e
 	}
 
 	for _, e := range events {
-		if _, err := tx.ExecContext(ctx, insertQuery, source, e.Type, e.OccurredAt.Format(time.RFC3339), e.LocalDate, e.Value, e.Unit, e.Meta, rawID); err != nil {
+		granularity := "day"
+		if e.Granularity == "year" {
+			granularity = "year"
+		}
+		if _, err := tx.ExecContext(ctx, insertQuery, source, e.Type, e.OccurredAt.Format(time.RFC3339), e.LocalDate, e.Value, e.Unit, e.Meta, rawID, granularity); err != nil {
 			return fmt.Errorf("insert events: %w", err)
 		}
 	}
@@ -59,9 +72,10 @@ func InsertEvents(ctx context.Context, db *sql.DB, source string, rawID int64, e
 }
 
 func DailyTotals(ctx context.Context, db *sql.DB, eventType, from, to string) ([]DailyTotal, error) {
+	// repo_commit is a yearly total with no real day; the chart only reads day-granularity rows.
 	const query = `SELECT local_date, SUM(value)
 		FROM events
-		WHERE type = ? AND local_date BETWEEN ? AND ?
+		WHERE type = ? AND granularity = 'day' AND local_date BETWEEN ? AND ?
 		GROUP BY local_date
 		ORDER BY local_date`
 
@@ -85,7 +99,7 @@ func DailyTotals(ctx context.Context, db *sql.DB, eventType, from, to string) ([
 }
 
 func ListTypes(ctx context.Context, db *sql.DB) ([]string, error) {
-	const query = `SELECT DISTINCT type FROM events ORDER BY type`
+	const query = `SELECT DISTINCT type FROM events WHERE granularity = 'day' ORDER BY type`
 
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
@@ -144,7 +158,7 @@ func DailyStats(ctx context.Context, db *sql.DB, eventType, from, to string) (St
 func EventsForDay(ctx context.Context, db *sql.DB, date string) ([]DayEvent, error) {
 	const query = `SELECT type, COALESCE(value, 0), COALESCE(unit, '')
 		FROM events
-		WHERE local_date = ?
+		WHERE local_date = ? AND granularity = 'day'
 		ORDER BY occurred_at, type`
 
 	rows, err := db.QueryContext(ctx, query, date)
@@ -208,17 +222,47 @@ func ListRepoCommits(ctx context.Context, db *sql.DB, year int) ([]RepoCommit, e
 	return commits, nil
 }
 
-func FirstRepoCommitYear(ctx context.Context, db *sql.DB) (int, error) {
+func FirstEventYear(ctx context.Context, db *sql.DB) (int, error) {
 	const query = `SELECT MIN(substr(local_date, 1, 4))
 		FROM events
-		WHERE source = ? AND type = ?`
+		WHERE source = ?`
 
 	var year sql.NullInt64
-	if err := db.QueryRowContext(ctx, query, "github", "repo_commit").Scan(&year); err != nil {
-		return 0, fmt.Errorf("query first repo commit year: %w", err)
+	if err := db.QueryRowContext(ctx, query, "github").Scan(&year); err != nil {
+		return 0, fmt.Errorf("query first event year: %w", err)
 	}
 	if !year.Valid {
 		return 0, nil
 	}
 	return int(year.Int64), nil
+}
+
+func ListPullRequests(ctx context.Context, db *sql.DB, year int) ([]PullRequest, error) {
+	const query = `SELECT occurred_at, local_date, meta FROM events WHERE source = ? 
+		AND type = ? 
+		AND local_date BETWEEN ? AND ? 
+		ORDER BY occurred_at DESC`
+	from := fmt.Sprintf("%d-01-01", year)
+	to := fmt.Sprintf("%d-12-31", year)
+	rows, err := db.QueryContext(ctx, query, "github", "pull_request", from, to)
+	if err != nil {
+		return nil, err
+	}
+	defer rows.Close()
+	var prs []PullRequest
+	var meta json.RawMessage
+	for rows.Next() {
+		var pr PullRequest
+		if err := rows.Scan(&pr.OccurredAt, &pr.LocalDate, &meta); err != nil {
+			return nil, fmt.Errorf("scan pr contributions: %w", err)
+		}
+		if err := json.Unmarshal(meta, &pr); err != nil {
+			return nil, fmt.Errorf("decode pr metadata: %w", err)
+		}
+		prs = append(prs, pr)
+	}
+	if err := rows.Err(); err != nil {
+		return nil, fmt.Errorf("iterate pull requests: %w", err)
+	}
+	return prs, nil
 }

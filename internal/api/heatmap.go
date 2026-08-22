@@ -16,26 +16,31 @@ const (
 	topMargin  = 20
 )
 
-var scale = [5]string{"#1E1E1C", "#2D4F67", "#4A7A96", "#7E9CD8", "#A3D4D5"}
+// levels is the number of ramp steps; CSS owns the colours behind them
+// (see the .l0-.l4 rules in style.css, mixed from --accent).
+const levels = 5
 
-func colorFor(v float64) string {
+// levelFor buckets a day's commit count into a ramp step. Thresholds live
+// here because they are about the data; the colours do not, because they are
+// about the domain the page is showing.
+func levelFor(v float64) int {
 	switch {
 	case v <= 0:
-		return scale[0]
+		return 0
 	case v <= 3:
-		return scale[1]
+		return 1
 	case v <= 8:
-		return scale[2]
+		return 2
 	case v <= 15:
-		return scale[3]
+		return 3
 	default:
-		return scale[4]
+		return 4
 	}
 }
 
 type cell struct {
 	X, Y  int
-	Color string
+	Level int
 	Date  string
 	Label string
 	Value float64
@@ -49,7 +54,7 @@ type textLabel struct {
 
 type swatch struct {
 	X, Y  int
-	Color string
+	Level int
 }
 
 type heatmapData struct {
@@ -96,7 +101,7 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) heatmapD
 		cells = append(cells, cell{
 			X:     leftMargin + week*cellStep,
 			Y:     topMargin + row*cellStep,
-			Color: colorFor(v),
+			Level: levelFor(v),
 			Date:  date,
 			Label: d.Format("Mon, 2 Jan 2006"),
 			Value: v,
@@ -108,11 +113,11 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) heatmapD
 	legendY := height - 6
 	legendX := width - 130
 	var legend []swatch
-	for i, c := range scale {
+	for i := 0; i < levels; i++ {
 		legend = append(legend, swatch{
 			X:     legendX + 30 + i*cellStep,
 			Y:     legendY - 9,
-			Color: c,
+			Level: i,
 		})
 	}
 	var days []textLabel

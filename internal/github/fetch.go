@@ -38,6 +38,8 @@ const (
           pullRequest {
             title
             url
+						state
+						mergedAt
             repository {
               nameWithOwner
             }
@@ -96,4 +98,27 @@ func (c *Client) FetchRepoCommits(ctx context.Context, year int) (collector.RawI
 		OccurredAt: time.Now().UTC(),
 		Payload:    payload,
 	}, nil
+}
+
+func (c *Client) FetchPRContributions(ctx context.Context, year int) (collector.RawItem, error) {
+	from := fmt.Sprintf("%d-01-01T00:00:00Z", year)
+	to := fmt.Sprintf("%d-12-31T23:59:59Z", year)
+	variables := map[string]any{"from": from, "to": to}
+	payload, err := c.Query(ctx, pullRequestsQuery, variables)
+	if err != nil {
+		return collector.RawItem{}, err
+	}
+	return collector.RawItem{
+		ExternalID: fmt.Sprintf("pull-requests:%d", year),
+		OccurredAt: time.Now().UTC(),
+		Payload:    payload,
+	}, nil
+}
+
+func (c *Client) FetchYears(ctx context.Context) ([]int, error) {
+	payload, err := c.Query(ctx, contributionYearsQuery, nil)
+	if err != nil {
+		return nil, err
+	}
+	return NormalizeContributionYears(payload)
 }

@@ -13,9 +13,8 @@
   {{range .Cells}}
   <rect x="{{.X}}" y="{{.Y}}"
         width="{{$.CellSize}}" height="{{$.CellSize}}"
-        rx="3" fill="{{.Color}}"
+        rx="3" class="l{{.Level}}{{if .Best}} best{{end}}"
         data-date="{{.Label}}" data-value="{{.Value}}"
-        {{if .Best}}class="best"{{end}}
         {{if $.Detail}}hx-get="/day?date={{.Date}}" hx-target="#detail" hx-swap="innerHTML"{{end}}/>
   {{end}}
 
@@ -23,7 +22,7 @@
   {{range .Legend}}
   <rect x="{{.X}}" y="{{.Y}}"
         width="{{$.CellSize}}" height="{{$.CellSize}}"
-        rx="3" fill="{{.Color}}"/>
+        rx="3" class="l{{.Level}}"/>
   {{end}}
   <text x="{{.MoreX}}" y="{{.LegendY}}" class="lbl">more</text>
 

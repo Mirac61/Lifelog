@@ -1,6 +1,6 @@
 {{define "body"}}
   <div class="page-head">
-    <h1><span class="dot dot-git"></span>Git <span>/ {{.Year}}</span></h1>
+    <h1><span class="dot"></span>Git <span>/ {{.Year}}</span></h1>
     <select name="year" hx-get="/git/view" hx-target="#gitview">
       {{range .Years}}<option value="{{.}}"{{if eq . $.Year}} selected{{end}}>{{.}}</option>{{end}}
     </select>

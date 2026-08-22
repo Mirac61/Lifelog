@@ -1,434 +1,600 @@
-:root {
-  --bg:            #0E0E0D;
-  --panel:         #121211;
-  --surface:       #161614;
-  --surface-alt:   #1E1D1C;
-  --border:        #262523;
-  --border-strong: #33322E;
-  --border-hover:  #4A4945;
+/* ═══ Fonts ═══════════════════════════════════════════════════════════
+   Two variable files. Archivo carries both UI and display duty via its
+   width axis (62–125%); the mono owns everything time- or count-shaped. */
 
-  --fg:            #EDEAE3;
-  --fg-muted:      #A8A79E;
-  --fg-dim:        #575651;
-
-  --accent:        #7FB4CA;
+@font-face {
+  font-family: "Archivo";
+  src: url("/static/archivo-var.woff2") format("woff2");
+  font-weight: 400 700;
+  font-stretch: 62% 125%;
+  font-style: normal;
+  font-display: swap;
 }
+
+@font-face {
+  font-family: "Spline Sans Mono";
+  src: url("/static/spline-mono-var.woff2") format("woff2");
+  font-weight: 400 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+/* ═══ Tokens ══════════════════════════════════════════════════════════ */
+
+:root {
+  /* Cold ink. The blue cast is deliberate — neutral grey-black is what
+     every stock dashboard sits on, and it makes data feel unowned. */
+  --ink-950: #0B0E13;
+  --ink-900: #11141B;
+  --ink-850: #161A22;
+  --ink-800: #1C212B;
+  --ink-700: #242B38;
+
+  --line:      #1F2530;
+  --line-loud: #2E3747;
+
+  --paper:       #E8EAEF;
+  --paper-dim:   #98A1B0;
+  --paper-faint: #5A6373;
+
+  /* The one amber. Reserved for a single job: the year's best day.
+     If it starts showing up anywhere else, the signal is gone. */
+  --lamp: #F2A93B;
+
+  /* Domain hue — set per page by body.domain-*, inherited by every
+     accent surface below. One variable, four sections. */
+  --accent:      #8FB8CE;
+  --accent-deep: #3F6076;
+
+  --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --mono: "Spline Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
+
+  --rail: 60px;
+}
+
+body.domain-git       { --accent: #7CC0E0; --accent-deep: #35586C; }
+/* Dashboard is the cross-domain view, so it has no hue of its own — it
+   climbs to paper instead. Achromatic on purpose, but bright enough at the
+   top to read as a choice rather than a missing colour. */
+body.domain-dashboard { --accent: #C9D3E2; --accent-deep: #596273; }
+body.domain-todos     { --accent: #9CCB86; --accent-deep: #41603A; }
+body.domain-calendar  { --accent: #B79AD8; --accent-deep: #574670; }
 
 * { box-sizing: border-box; }
 
+/* ═══ Base ════════════════════════════════════════════════════════════ */
+
 body {
   display: grid;
-  grid-template-columns: 56px 1fr;
+  grid-template-columns: var(--rail) 1fr;
   min-height: 100vh;
   margin: 0;
-  background: var(--bg);
-  color: var(--fg);
-  font: 14px system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+  background: var(--ink-950);
+  color: var(--paper);
+  font-family: var(--sans);
+  font-size: 13.5px;
+  font-stretch: 100%;
+  line-height: 1.5;
   -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
 }
 
-.mono { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; }
+a { color: inherit; }
 
-/* sidebar */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+  border-radius: 3px;
+}
+
+/* Every date, count and axis tick. The shared time-gutter face. */
+.mono, .pr-date, .box-meta, .repos li::before, .hstat b, .hero-value {
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+}
+
+/* Small uppercase label. Used for every section title so the page has
+   exactly one label idiom instead of three near-misses. */
+.eyebrow {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--paper-faint);
+}
+
+/* ═══ Rail ════════════════════════════════════════════════════════════ */
 
 .sidebar {
-  background: var(--bg);
-  border-right: 1px solid var(--surface-alt);
-  padding: 18px 0;
+  background: var(--ink-950);
+  border-right: 1px solid var(--line);
+  padding: 20px 0;
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 14px;
+  gap: 20px;
+  position: sticky;
+  top: 0;
+  height: 100vh;
 }
 
 .sidebar .logo {
   color: var(--accent);
-  height: 34px;
-  display: flex;
-  align-items: center;
-  text-decoration: none;
-}
-
-.sidebar svg {
-  width: 20px;
-  height: 20px;
-  display: block;
-}
-
-.sidebar nav {
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-}
-
-.nav-item {
-  width: 40px;
-  height: 40px;
-  border-radius: 8px;
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--fg-dim);
+  width: 38px;
+  height: 38px;
   text-decoration: none;
-  font-size: 14px;
-  transition: background 0.15s, color 0.15s;
 }
 
-.nav-item:hover {
-  background: var(--surface);
-  color: var(--fg-muted);
+.sidebar svg { width: 19px; height: 19px; display: block; }
+
+.sidebar nav { display: flex; flex-direction: column; gap: 2px; }
+
+/* Active state is a hue, not a fill: the accent bar on the left edge is
+   the same colour the whole page is tinted with. */
+.nav-item {
+  position: relative;
+  width: 38px;
+  height: 38px;
+  border-radius: 9px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--paper-faint);
+  text-decoration: none;
+  transition: color 0.16s ease, background 0.16s ease;
 }
 
-.nav-item.active {
-  color: var(--fg);
-  background: var(--surface);
+.nav-item::before {
+  content: "";
+  position: absolute;
+  left: -11px;
+  top: 50%;
+  width: 2px;
+  height: 0;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: translateY(-50%);
+  transition: height 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-/* content */
+.nav-item:hover { color: var(--paper-dim); background: var(--ink-850); }
+
+.nav-item.active { color: var(--accent); background: var(--ink-850); }
+.nav-item.active::before { height: 18px; }
+
+/* ═══ Content ═════════════════════════════════════════════════════════ */
 
 .content {
-  padding: 48px 40px;
+  padding: 44px 44px 72px;
   min-width: 0;
   width: 100%;
-  max-width: 1520px;
+  max-width: 1460px;
   margin: 0 auto;
 }
-
-h1 {
-  font-size: 15px;
-  font-weight: 500;
-  letter-spacing: 0.02em;
-  margin: 0 0 28px;
-}
-
-h1 span { color: var(--fg-dim); }
-
-/* page header: title left, controls right */
 
 .page-head {
   display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
-  margin: 0 0 26px;
+  margin: 0 0 40px;
 }
 
-.page-head h1 { margin: 0; }
+h1 {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-size: 15px;
+  font-weight: 600;
+  font-stretch: 112%;
+  letter-spacing: 0.01em;
+  margin: 0;
+}
+
+h1 span {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-weight: 400;
+  letter-spacing: 0;
+  color: var(--paper-faint);
+}
 
 .dot {
-  display: inline-block;
-  width: 6px;
-  height: 6px;
-  border-radius: 6px;
-  margin-right: 10px;
-  vertical-align: 2px;
+  align-self: center;
+  width: 7px;
+  height: 7px;
+  border-radius: 7px;
+  background: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-.dot-git { background: var(--accent); }
+select {
+  background: var(--ink-850);
+  color: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 7px 12px;
+  font-family: var(--mono);
+  font-size: 12px;
+  cursor: pointer;
+  transition: border-color 0.16s ease;
+}
+
+select:hover { border-color: var(--line-loud); }
 
 .controls {
   display: flex;
   gap: 10px;
-  margin-bottom: 16px;
+  margin: 0 0 22px;
 }
 
-select {
-  background: var(--surface);
-  color: var(--fg);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  padding: 8px 12px;
-  font: inherit;
-  font-size: 13px;
-  cursor: pointer;
-}
-
-select:hover { border-color: var(--border-hover); }
-
-select:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
-
-.panel {
-  background: var(--panel);
-  border: 1px solid var(--border);
-  border-radius: 12px;
-  padding: 24px;
-  overflow-x: auto;
-  margin-bottom: 16px;
-}
-
-/* key stats hero */
+/* ═══ Hero ════════════════════════════════════════════════════════════ */
 
 .hero {
   display: grid;
   grid-template-columns: auto 1fr;
-  gap: 64px;
+  gap: 72px;
   align-items: end;
-  padding-bottom: 32px;
-  margin-bottom: 28px;
-  border-bottom: 1px solid var(--border);
+  padding-bottom: 34px;
+  margin-bottom: 0;
+  border-bottom: 1px solid var(--line);
 }
 
+/* Width axis, not just size, separates the headline number from the
+   labels around it — that is the whole point of shipping a variable font. */
 .hero-value {
-  font-size: 72px;
-  line-height: 0.9;
+  font-size: clamp(56px, 7vw, 82px);
+  line-height: 0.86;
   font-weight: 600;
-  letter-spacing: -0.04em;
-  font-variant-numeric: tabular-nums;
-  color: var(--fg);
+  font-stretch: 118%;
+  letter-spacing: -0.015em;
+  color: var(--paper);
 }
 
 .hero-label {
-  margin-top: 12px;
-  font-size: 11px;
-  letter-spacing: 0.08em;
+  margin-top: 14px;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: var(--paper-faint);
 }
 
-.hero-stats {
+/* .stats/.stat is the dashboard's row; it reads the same information shape
+   as the git hero, so it shares the idiom rather than inventing a second. */
+.hero-stats, .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
-  gap: 20px 32px;
+  gap: 20px 28px;
 }
 
-.hstat {
-  border-left: 1px solid var(--border);
-  padding-left: 24px;
-}
+.stats { margin: 0 0 26px; }
 
-.hstat:first-child { border-left: none; padding-left: 0; }
+.hstat, .stat { border-left: 1px solid var(--line); padding-left: 22px; }
+.hstat:first-child, .stat:first-child { border-left: none; padding-left: 0; }
 
-.hstat b {
+.hstat b, .stat b {
   display: block;
-  font-size: 24px;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-size: 23px;
   line-height: 1;
   font-weight: 500;
-  letter-spacing: -0.02em;
-  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.01em;
 }
 
-.hstat span {
+.hstat span, .stat span {
   display: block;
-  margin-top: 9px;
-  font-size: 11px;
-  letter-spacing: 0.04em;
-  color: var(--fg-dim);
+  margin-top: 10px;
+  font-size: 11.5px;
+  color: var(--paper-faint);
 }
 
-/* dashboard grid */
+/* ═══ Grid & panels ═══════════════════════════════════════════════════ */
 
 .dash {
   display: grid;
-  grid-template-columns: minmax(0, 2fr) minmax(0, 1fr);
-  gap: 24px;
+  grid-template-columns: minmax(0, 1.55fr) minmax(0, 1fr);
+  gap: 22px;
   align-items: start;
 }
 
-.dash .panel { margin-bottom: 0; }
+.panel {
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px 22px;
+  min-width: 0;
+}
 
 .box-head {
   display: flex;
   align-items: baseline;
   justify-content: space-between;
   gap: 16px;
-  margin-bottom: 16px;
+  padding-bottom: 12px;
+  margin-bottom: 6px;
+  border-bottom: 1px solid var(--line);
 }
 
 .box-title {
-  font-size: 11px;
-  letter-spacing: 0.1em;
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 500;
+  letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--fg-dim);
+  color: var(--paper-faint);
 }
 
-.box-meta {
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 11px;
-  color: var(--fg-dim);
-}
-
-/* stats */
-
-.stats {
-  display: flex;
-  flex-wrap: wrap;
-  gap: 40px;
-  margin-bottom: 24px;
-}
-
-.stat b {
-  display: block;
-  font-size: 26px;
-  font-weight: 500;
-  line-height: 1.1;
-}
-
-.stat span {
-  color: var(--fg-dim);
-  font-size: 12px;
-}
-
-/* day detail */
-
-.day h2 {
-  font-size: 13px;
-  font-weight: 500;
-  margin: 0 0 12px;
-  color: var(--fg-dim);
-}
-
-.day ul {
-  list-style: none;
-  margin: 0;
-  padding: 0;
-}
-
-.day li {
-  display: flex;
-  justify-content: space-between;
-  gap: 24px;
-  padding: 6px 0;
-  border-top: 1px solid var(--border);
-}
-
-.day li b { font-weight: 500; }
+.box-meta { font-size: 11px; color: var(--paper-faint); }
 
 .empty {
-  color: var(--fg-dim);
-  margin: 0;
-  font-size: 13px;
+  margin: 14px 0 4px;
+  font-size: 12.5px;
+  color: var(--paper-faint);
 }
 
-/* tooltip */
+/* ═══ The spine ═══════════════════════════════════════════════════════
+   The year of commits is the one thing this page exists to show, so it
+   does not sit in a card competing with two lists. It runs full width
+   on the page ground with hairlines above and below — the spine the
+   panels below hang off. */
 
-#tip {
-  position: absolute;
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: 5px;
-  padding: 5px 9px;
-  font-size: 12px;
-  color: var(--fg);
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.1s;
-  white-space: nowrap;
-  z-index: 10;
+#chart.panel {
+  grid-column: 1 / -1;
+  background: none;
+  border: none;
+  border-radius: 0;
+  /* No border-top: the hero's rule above already draws this edge. */
+  border-bottom: 1px solid var(--line);
+  padding: 22px 0 16px;
+  margin-bottom: 8px;
+  overflow-x: auto;
 }
 
-/* chart */
+#chart .box-head { border-bottom: none; padding-bottom: 14px; margin-bottom: 0; }
 
-#chart svg {
-  display: block;
-  width: 100%;
-  height: auto;
+#chart svg { display: block; width: 100%; height: auto; min-width: 680px; }
+
+#chart .lbl {
+  font-family: var(--mono);
+  font-size: 9px;
+  fill: var(--paper-faint);
 }
 
 #chart rect { stroke: none; }
-#chart rect[data-date] { cursor: pointer; }
-#chart rect:hover { stroke: var(--fg); stroke-width: 1.5; }
-#chart rect.sel { stroke: var(--accent); stroke-width: 1.5; }
 
-/* heatmap without day details: cells are inert */
-#chart.panel-static rect[data-date] { cursor: default; }
-#chart.panel-static rect:hover,
-#chart.panel-static rect.sel { stroke: none; }
+/* Affordance follows behaviour: only cells that actually carry an hx-get
+   look clickable and take a selection ring. The git page renders the same
+   partial without hx-get, so it goes inert with no modifier class to keep
+   in sync. */
+#chart rect[hx-get] { cursor: pointer; }
+#chart rect[hx-get]:hover { stroke: var(--paper); stroke-width: 1.5; }
+#chart rect[hx-get].sel { stroke: var(--accent); stroke-width: 1.5; }
 
-/* best day of the year gets an accent ring, even on inert heatmaps */
-#chart rect.best { stroke: var(--accent); stroke-width: 1.5; }
-#chart.panel-static rect.best { stroke: var(--accent); stroke-width: 1.5; }
+/* The ramp. Go emits a level (0–4); the colour is mixed here so it follows
+   whatever --accent the current domain set — the heatmap turns green on
+   Todos and violet on Calendar without a second ramp existing anywhere.
+   Mixed in oklab, not sRGB: sRGB is not perceptually uniform, so its mid
+   steps sag and muddy. The percentages are the perceived climb.
 
-.htmx-request { opacity: 0.5; }
+   That climb is weighted low on purpose: l1 (1–3 commits) and l2 (4–8) hold
+   most days of a real year, so they get the readable half of the range —
+   a ramp that only separates at the top describes a year nobody has. */
 
-/* responsive: stack boxes and hero on narrow viewports */
+#chart rect.l0 { fill: var(--ink-850); }  /* silent: no commits, just grid */
+#chart rect.l1 { fill: color-mix(in oklab, var(--accent) 34%, var(--ink-900)); }
+#chart rect.l2 { fill: color-mix(in oklab, var(--accent) 57%, var(--ink-900)); }
+#chart rect.l3 { fill: color-mix(in oklab, var(--accent) 78%, var(--ink-900)); }
+#chart rect.l4 { fill: var(--accent); }   /* full signal, same tone as the nav */
 
-@media (max-width: 1150px) {
-  .dash { grid-template-columns: minmax(0, 1fr); }
-
-  .hero-stats { grid-template-columns: repeat(2, 1fr); }
-
-  .hstat:nth-child(odd) { border-left: none; padding-left: 0; }
+/* The single amber: the best day of the year, lit like one lamp on an
+   otherwise cold panel. Nothing else on the page may use --lamp. */
+#chart rect.best {
+  fill: var(--lamp);
+  stroke: var(--lamp);
+  stroke-width: 3;
+  paint-order: stroke;
+  stroke-opacity: 0.22;
 }
 
-@media (max-width: 820px) {
-  .content { padding: 32px 24px; }
+/* ═══ Lists ═══════════════════════════════════════════════════════════ */
 
-  .page-head { margin-bottom: 20px; }
-
-  .hero {
-    grid-template-columns: 1fr;
-    gap: 28px;
-    align-items: start;
-  }
-
-  .hero-value { font-size: 44px; }
-}
-
-/* panels with a heading */
-
-.panel-title {
-  font-size: 12px;
-  font-weight: 500;
-  color: var(--fg-muted);
-  margin: 0 0 14px;
-}
-
-.panel-title span { color: var(--fg-dim); }
-
-/* repo list */
-
-.repos {
+.prs, .repos {
   list-style: none;
   margin: 0;
   padding: 0;
-  counter-reset: rank;
+  max-height: 460px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--ink-700) transparent;
 }
 
-.repos li {
-  counter-increment: rank;
-  display: grid;
-  grid-template-columns: 20px minmax(110px, 150px) 1fr auto;
+.prs li, .repos li {
   align-items: center;
   gap: 12px;
-  padding: 8px 0;
-  border-top: 1px solid var(--border);
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
 }
 
-.repos li::before {
-  content: counter(rank, decimal-leading-zero);
-  font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
-  font-size: 10px;
-  color: var(--fg-dim);
+.prs li:last-child, .repos li:last-child { border-bottom: none; }
+
+/* Pull requests ---------------------------------------------------- */
+
+.prs li {
+  display: grid;
+  grid-template-columns: 52px 7px minmax(0, 1fr);
+  grid-template-areas: "date state title" ".  .  repo";
+  row-gap: 3px;
 }
 
-.repos li:first-child { border-top: none; }
+.pr-date {
+  grid-area: date;
+  font-size: 10.5px;
+  color: var(--paper-faint);
+}
 
-.repo-name {
+.pr-dot {
+  grid-area: state;
+  width: 7px;
+  height: 7px;
+  border-radius: 7px;
+  background: var(--paper-faint);
+}
+
+.pr-dot[data-state="MERGED"] { background: #A98CD8; }
+.pr-dot[data-state="OPEN"]   { background: #8FC97C; }
+.pr-dot[data-state="CLOSED"] { background: #E4707F; }
+
+.pr-title {
+  grid-area: title;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   font-size: 13px;
-  transition: color 0.15s;
+  text-decoration: none;
+  transition: color 0.16s ease;
+}
+
+.prs li:hover .pr-title { color: var(--accent); }
+
+.pr-repo {
+  grid-area: repo;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  color: var(--paper-faint);
+}
+
+/* Repos ------------------------------------------------------------ */
+
+.repos { counter-reset: rank; }
+
+.repos li {
+  counter-increment: rank;
+  display: grid;
+  grid-template-columns: 22px minmax(0, 1fr) 34px;
+  grid-template-areas: "rank name count" ".  bar  bar";
+  row-gap: 7px;
+}
+
+.repos li::before {
+  content: counter(rank, decimal-leading-zero);
+  grid-area: rank;
+  font-size: 10px;
+  color: var(--paper-faint);
+}
+
+.repo-name {
+  grid-area: name;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 13px;
+  transition: color 0.16s ease;
 }
 
 .repos li:hover .repo-name { color: var(--accent); }
 
+.repos b {
+  grid-area: count;
+  justify-self: end;
+  font-family: var(--mono);
+  font-variant-numeric: tabular-nums;
+  font-weight: 500;
+  font-size: 12px;
+  color: var(--paper-dim);
+}
+
 .repo-bar {
-  height: 4px;
-  border-radius: 2px;
-  background: var(--surface-alt);
+  grid-area: bar;
+  height: 3px;
+  border-radius: 3px;
+  background: var(--ink-800);
   overflow: hidden;
 }
 
 .repo-bar i {
   display: block;
   height: 100%;
-  border-radius: 2px;
-  background: linear-gradient(90deg, #4A7A96, var(--accent));
+  border-radius: 3px;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent));
 }
 
-.repos b {
+/* ═══ Tooltip ═════════════════════════════════════════════════════════ */
+
+#tip {
+  position: absolute;
+  background: var(--ink-700);
+  border: 1px solid var(--line-loud);
+  border-radius: 7px;
+  padding: 6px 10px;
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--paper);
+  box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.12s ease;
+  white-space: nowrap;
+  z-index: 10;
+}
+
+.htmx-request { opacity: 0.45; transition: opacity 0.15s ease; }
+
+/* ═══ Day detail (dashboard) ══════════════════════════════════════════ */
+
+.day h2 {
+  font-family: var(--mono);
+  font-size: 11px;
   font-weight: 500;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  margin: 0 0 12px;
+  color: var(--paper-faint);
+}
+
+.day ul { list-style: none; margin: 0; padding: 0; }
+
+.day li {
+  display: flex;
+  justify-content: space-between;
+  gap: 24px;
+  padding: 8px 0;
+  border-bottom: 1px solid var(--line);
   font-size: 13px;
-  font-variant-numeric: tabular-nums;
+}
+
+.day li:last-child { border-bottom: none; }
+.day li b { font-family: var(--mono); font-weight: 500; }
+
+/* ═══ Responsive ══════════════════════════════════════════════════════ */
+
+@media (max-width: 1120px) {
+  .dash { grid-template-columns: minmax(0, 1fr); }
+  .hero { gap: 44px; }
+  .hero-stats, .stats { grid-template-columns: repeat(2, 1fr); }
+  .hstat:nth-child(odd), .stat:nth-child(odd) { border-left: none; padding-left: 0; }
+}
+
+@media (max-width: 820px) {
+  :root { --rail: 52px; }
+  .content { padding: 30px 20px 56px; }
+  .page-head { margin-bottom: 28px; }
+  .hero {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    align-items: start;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition-duration: 0.01ms !important;
+    animation-duration: 0.01ms !important;
+  }
 }

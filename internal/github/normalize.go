@@ -55,6 +55,7 @@ type prRepository struct {
 type prPullRequest struct {
 	Title      string       `json:"title"`
 	URL        string       `json:"url"`
+	State      string       `json:"state"`
 	Repository prRepository `json:"repository"`
 }
 
@@ -128,11 +129,12 @@ func NormalizeContributions(payload json.RawMessage) ([]collector.Event, error) 
 				return nil, fmt.Errorf("parse date %s: %w", d.Date, err)
 			}
 			events = append(events, collector.Event{
-				Type:       "commit",
-				OccurredAt: occurredAt,
-				LocalDate:  d.Date,
-				Value:      float64(d.ContributionCount),
-				Unit:       "count",
+				Type:        "commit",
+				OccurredAt:  occurredAt,
+				LocalDate:   d.Date,
+				Granularity: "day",
+				Value:       float64(d.ContributionCount),
+				Unit:        "count",
 			})
 		}
 	}
@@ -174,12 +176,13 @@ func NormalizePRContributions(payload json.RawMessage) ([]collector.Event, error
 		}
 
 		events = append(events, collector.Event{
-			Type:       "pull_request",
-			OccurredAt: occurredAt,
-			LocalDate:  occurredAt.Format("2006-01-02"),
-			Value:      1,
-			Unit:       "pr",
-			Meta:       meta,
+			Type:        "pull_request",
+			OccurredAt:  occurredAt,
+			LocalDate:   occurredAt.Format("2006-01-02"),
+			Granularity: "day",
+			Value:       1,
+			Unit:        "pr",
+			Meta:        meta,
 		})
 	}
 	return events, nil
@@ -209,12 +212,15 @@ func NormalizeRepoContributions(payload json.RawMessage) ([]collector.Event, err
 		}
 
 		events = append(events, collector.Event{
-			Type:       "repo_commit",
-			OccurredAt: startedAt,
-			LocalDate:  startedAt.Format("2006-01-02"),
-			Value:      float64(repo.Contributions.TotalCount),
-			Unit:       "commits",
-			Meta:       meta,
+			// Per-repo yearly totals: GitHub gives no dates, only a count for
+			// the whole collection window, so this is the window's start.
+			Type:        "repo_commit",
+			OccurredAt:  startedAt,
+			LocalDate:   startedAt.Format("2006-01-02"),
+			Granularity: "year",
+			Value:       float64(repo.Contributions.TotalCount),
+			Unit:        "commits",
+			Meta:        meta,
 		})
 	}
 	return events, nil

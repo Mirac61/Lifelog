@@ -14,8 +14,11 @@ type RawItem struct {
 type Event struct {
 	Type       string
 	OccurredAt time.Time
-	LocalDate  string
-	Value      float64
-	Unit       string
-	Meta       json.RawMessage
+	// LocalDate is the start of the period this event covers; Granularity
+	// says how long that period is ("day" or "year").
+	LocalDate   string
+	Granularity string
+	Value       float64
+	Unit        string
+	Meta        json.RawMessage
 }

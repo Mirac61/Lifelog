@@ -12,13 +12,33 @@
 </div>
 
 <div class="dash">
-  <div class="panel panel-static" id="chart">
+  <div class="panel" id="chart">
     <div class="box-head">
       <span class="box-title">Commits · 53 Wochen</span>
     </div>
     {{template "heatmap.html" .Heatmap}}
   </div>
 
+  <div class="panel">
+    <div class="box-head">
+      <span class="box-title">Pull Requests · {{.Year}}</span>
+      <span class="box-meta">{{len .PRs}}</span>
+    </div>
+    {{if .PRs}}
+    <ul class="prs">
+      {{range .PRs}}
+      <li>
+        <span class="pr-date">{{slice .LocalDate 5}}</span>
+        <span class="pr-dot" data-state="{{.State}}" title="{{.State}}"></span>
+        <a class="pr-title" href="{{.URL}}" target="_blank" rel="noopener" title="{{.Title}}">{{.Title}}</a>
+        <span class="pr-repo">{{.Repo}}</span>
+      </li>
+      {{end}}
+    </ul>
+    {{else}}
+    <p class="empty">Keine Pull Requests in {{.Year}}</p>
+    {{end}}
+  </div>
   <div class="panel">
     <div class="box-head">
       <span class="box-title">Repos · {{.Year}}</span>
@@ -38,4 +58,5 @@
     <p class="empty">Keine Commits in {{.Year}}</p>
     {{end}}
   </div>
+
 </div>

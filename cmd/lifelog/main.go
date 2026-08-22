@@ -7,7 +7,6 @@ import (
 	"net/http"
 	"os"
 	"os/signal"
-	"strings"
 	"syscall"
 	"time"
 
@@ -21,7 +20,8 @@ import (
 func main() {
 	syncMode := flag.Bool("sync", false, "this is a bool argument")
 	normalizeMode := flag.Bool("normalize", false, "rebuild events from stored payloads")
-	syncYear := flag.Int("year", time.Now().Year(), "year to sync")
+	year := flag.Int("year", time.Now().Year(), "year to sync")
+	backfill := flag.Bool("backfill", false, "sync every year GitHub knows")
 	flag.Parse()
 
 	_ = godotenv.Load()
@@ -44,64 +44,40 @@ func main() {
 	ctx, stop := signal.NotifyContext(context.Background(), os.Interrupt, syscall.SIGTERM)
 	defer stop()
 
-	if *syncMode {
-		client := github.New(cfg.GitHubToken)
-		item, err := client.FetchContributions(ctx, *syncYear)
-		if err != nil {
-			slog.Error("fetch contributions", "error", err)
-			os.Exit(1)
-		}
-		if err := store.InsertRaw(ctx, db, "github", item); err != nil {
-			slog.Error("insert raw payload", "error", err)
-			os.Exit(1)
-		}
-		slog.Info("sync complete", "external_id", item.ExternalID, "bytes", len(item.Payload))
+	client := github.New(cfg.GitHubToken)
 
-		repoItem, err := client.FetchRepoCommits(ctx, *syncYear)
-		if err != nil {
-			slog.Error("fetch repo contributions", "error", err)
+	if *syncMode {
+		if err := syncYear(ctx, db, client, *year); err != nil {
+			slog.Error("sync", "error", err)
 			os.Exit(1)
 		}
-		if err := store.InsertRaw(ctx, db, "github", repoItem); err != nil {
-			slog.Error("insert repo payload", "error", err)
-			os.Exit(1)
-		}
-		slog.Info("sync complete", "external_id", repoItem.ExternalID, "bytes", len(repoItem.Payload))
 		return
 	}
 
 	if *normalizeMode {
-		list, err := store.ListRaw(ctx, db, "github")
-		if err != nil {
-			slog.Error("fetching Raw list", "error", err)
+		if err := normalizeAll(ctx, db); err != nil {
+			slog.Error("normalize", "error", err)
 			os.Exit(1)
 		}
-		total := 0
-		for _, row := range list {
-			normalize := github.NormalizeContributions
-			switch {
-			case strings.HasPrefix(row.ExternalID, "repo-commits:"):
-				normalize = github.NormalizeRepoContributions
-			case strings.HasPrefix(row.ExternalID, "pull-requests:"):
-				normalize = github.NormalizePRContributions
-			case strings.HasPrefix(row.ExternalID, "contributions:"):
-			default:
-				slog.Warn("skip unknown raw payload", "external_id", row.ExternalID)
+		return
+	}
+
+	if *backfill {
+		years, err := client.FetchYears(ctx)
+		if err != nil {
+			slog.Error("backfill", "error", err)
+			os.Exit(1)
+		}
+		for _, y := range years {
+			if err := syncYear(ctx, db, client, y); err != nil {
+				slog.Error("sync backfill", "error", err)
 				continue
 			}
-
-			events, err := normalize(row.Payload)
-			if err != nil {
-				slog.Error("fetching events", "error", err)
-				os.Exit(1)
-			}
-			if err := store.InsertEvents(ctx, db, "github", row.ID, events); err != nil {
-				slog.Error("insert events", "error", err)
-				os.Exit(1)
-			}
-			total += len(events)
 		}
-		slog.Info("normalize complete", "events", total)
+		if err := normalizeAll(ctx, db); err != nil {
+			slog.Error("normalize backfill", "error", err)
+			os.Exit(1)
+		}
 		return
 	}
 
@@ -119,6 +95,16 @@ func main() {
 	go func() {
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			slog.Error("server failed", "error", err)
+		}
+	}()
+
+	go func() {
+		if err := syncYear(ctx, db, client, time.Now().Year()); err != nil {
+			slog.Error("startup sync", "error", err)
+			return
+		}
+		if err := normalizeAll(ctx, db); err != nil {
+			slog.Error("startup normalize", "error", err)
 		}
 	}()
 

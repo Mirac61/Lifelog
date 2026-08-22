@@ -23,10 +23,11 @@ type gitPage struct {
 	Stats   store.Stats
 	Heatmap heatmapData
 	Repos   []repoRow
+	PRs     []store.PullRequest
 }
 
 func (s *Server) loadGitPage(ctx context.Context, year int) (gitPage, error) {
-	firstYear, err := store.FirstRepoCommitYear(ctx, s.db)
+	firstYear, err := store.FirstEventYear(ctx, s.db)
 	if err != nil {
 		return gitPage{}, fmt.Errorf("fetching commit years: %w", err)
 	}
@@ -58,6 +59,12 @@ func (s *Server) loadGitPage(ctx context.Context, year int) (gitPage, error) {
 	if err != nil {
 		return gitPage{}, fmt.Errorf("fetching view: %w", err)
 	}
+
+	prs, err := store.ListPullRequests(ctx, s.db, year)
+	if err != nil {
+		return gitPage{}, fmt.Errorf("fetching pull requests: %w", err)
+	}
+
 	// Die Git-Seite hat keine Tagesdetail-Ansicht, Zellen bleiben inert.
 	view.Heatmap.Detail = false
 	return gitPage{
@@ -67,6 +74,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int) (gitPage, error) {
 		Stats:   view.Stats,
 		Heatmap: view.Heatmap,
 		Repos:   rows,
+		PRs:     prs,
 	}, nil
 }
 

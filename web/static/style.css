@@ -258,11 +258,11 @@ select:hover { border-color: var(--line-loud); }
 .hero-label {
   margin-top: 14px;
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 12px;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--paper-faint);
+  color: var(--paper-dim);
 }
 
 /* .stats/.stat is the dashboard's row; it reads the same information shape
@@ -291,8 +291,8 @@ select:hover { border-color: var(--line-loud); }
 .hstat span, .stat span {
   display: block;
   margin-top: 10px;
-  font-size: 11.5px;
-  color: var(--paper-faint);
+  font-size: 12.5px;
+  color: var(--paper-dim);
 }
 
 /* ═══ Grid & panels ═══════════════════════════════════════════════════ */
@@ -324,19 +324,19 @@ select:hover { border-color: var(--line-loud); }
 
 .box-title {
   font-family: var(--mono);
-  font-size: 10px;
+  font-size: 11.5px;
   font-weight: 500;
   letter-spacing: 0.14em;
   text-transform: uppercase;
-  color: var(--paper-faint);
+  color: var(--paper-dim);
 }
 
-.box-meta { font-size: 11px; color: var(--paper-faint); }
+.box-meta { font-size: 12px; color: var(--paper-dim); }
 
 .empty {
   margin: 14px 0 4px;
-  font-size: 12.5px;
-  color: var(--paper-faint);
+  font-size: 13px;
+  color: var(--paper-dim);
 }
 
 /* ═══ The spine ═══════════════════════════════════════════════════════
@@ -363,8 +363,8 @@ select:hover { border-color: var(--line-loud); }
 
 #chart .lbl {
   font-family: var(--mono);
-  font-size: 9px;
-  fill: var(--paper-faint);
+  font-size: 10px;
+  fill: var(--paper-dim);
 }
 
 #chart rect { stroke: none; }

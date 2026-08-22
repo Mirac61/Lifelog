@@ -1,6 +1,6 @@
 <svg viewBox="0 0 {{.Width}} {{.Height}}" xmlns="http://www.w3.org/2000/svg">
 
-  <style>.lbl{fill:#727169;font:9px ui-monospace,monospace}</style>
+  <style>.lbl{fill:var(--paper-dim);font:10px ui-monospace,monospace}</style>
 
   {{range .Days}}
   <text x="0" y="{{.Y}}" class="lbl">{{.Text}}</text>

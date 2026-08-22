@@ -14,7 +14,7 @@
 <div class="dash">
   <div class="panel" id="chart">
     <div class="box-head">
-      <span class="box-title">Commits · 53 Wochen</span>
+      <span class="box-title">Commits · {{.Year}}</span>
     </div>
     {{template "heatmap.html" .Heatmap}}
   </div>
@@ -60,3 +60,5 @@
   </div>
 
 </div>
+
+<span hx-swap-oob="innerHTML:#git-year" style="display:none">{{.Year}}</span>

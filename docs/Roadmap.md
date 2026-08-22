@@ -8,7 +8,46 @@ sources into a unified event store.
 
 ---
 
-## Phase 0 — Decide and prepare 
+## Current state (August 2026)
+
+The GitHub vertical slice is shipped end to end: one binary serves a browser UI
+(dashboard + git pages) over htmx/server-rendered SVG from a single SQLite event
+store. The event store is honest about granularity — daily events and yearly
+aggregates carry different `granularity`, and only day events feed the day axis.
+
+**Next milestone: Obsidian.** It is the second collector, so it is the real test
+of whether the store and dashboard are actually generic — and it unlocks the
+Todos and Calendar domains that already have their accent tokens in the CSS.
+
+---
+
+## Deferred design changes (decided, not started)
+
+Two UI decisions were agreed on 2026-08-22 but deliberately parked. Do these
+when the Obsidian slice is done and the abstraction (Phase 9) exists.
+
+**1. Remove the heatmap from the dashboard — replace with a rolling daily digest.**
+The dashboard and git page currently render the same year-grid heatmap
+redundantly. The dashboard is the cross-domain "what is going on?" view, so the
+year grid belongs to git.
+
+- Dashboard `/`: drop the year grid, year stats and the year/type selector.
+- Show a rolling window instead (today / 7 days / 30 days).
+- One aggregated number across **all** event types, plus a per-domain split.
+- Below it a day-by-day list (like `/day`, but for the window).
+- Optional small bar/line sparkline for the window in place of the 53-column grid.
+
+**2. Add a type filter to the git page (filter by PR).**
+Once the heatmap lives only on git, give the git page the type selector the
+dashboard used to have — `Contributions` / `Pull requests` (maybe `Commits`).
+Hero stats + heatmap follow the selected type; the PR list stays.
+
+Both are pure presentation changes over the existing event data. No new
+collectors, no schema change needed.
+
+---
+
+## Phase 0 — Decide and prepare — **done**
 
 - [x] Pick the final project name (`lifelog`)
 - [x] Create GitHub repo, private for now
@@ -21,7 +60,7 @@ sources into a unified event store.
 
 ---
 
-## Phase 1 — Skeleton 
+## Phase 1 — Skeleton — **done**
 
 - [x] `go mod init github.com/Mirac61/lifelog`
 - [x] `cmd/lifelog/main.go` — entry point, nothing but startup
@@ -36,7 +75,7 @@ like curl, load it explicitly: `set -a; source .env; set +a`.
 
 ---
 
-## Phase 2 — Schema and migrations 
+## Phase 2 — Schema and migrations — **done**
 
 - [x] Add `github.com/pressly/goose/v3`
 - [x] `internal/store/migrations/00001_init.sql`
@@ -45,27 +84,19 @@ like curl, load it explicitly: `set -a; source .env; set +a`.
 
 Three tables: `raw_payloads`, `events`, `sync_state`.
 
-**Watch out:** `//go:embed` must sit directly above the variable with no blank
-line, or it is treated as a plain comment and the FS stays empty.
-
 ---
 
-## Phase 3 — Explore the GitHub API by hand 
+## Phase 3 — Explore the GitHub API by hand — **done**
 
 - [x] Run the contributions query and inspect the response
 - [x] Decide the natural unique key: `contributions:<year>`
 - [ ] Save a sample response to `docs/samples/github-contributions.json`
 
-**Note:** the GraphQL Explorer was removed from GitHub's docs in November 2025.
-Use curl, or a client like Altair/Insomnia pointed at
-`https://api.github.com/graphql`. The schema reference lives at
-https://docs.github.com/en/graphql/reference.
-
 **Decision made:** use `contributionCalendar` rather than
 `commitContributionsByRepository`. The calendar returns a flat list of
-`{date, contributionCount}`, which maps almost directly onto an events row.
-The per-repository breakdown becomes a **separate query later** — a second
-`external_id`, not a replacement.
+`{date, contributionCount}` that maps almost directly onto an events row. The
+per-repository breakdown became a **separate query** — a second `external_id`,
+not a replacement.
 
 **Watch out:** `contributionsCollection` accepts a maximum span of one year.
 Query one year at a time, or use GraphQL aliases to request several years in a
@@ -73,7 +104,7 @@ single request.
 
 ---
 
-## Phase 4 — Fetch into raw_payloads 
+## Phase 4 — Fetch into raw_payloads — **done**
 
 - [x] `internal/github/client.go` — HTTP client with a 30 s timeout, bearer token
 - [x] `internal/github/fetch.go` — `FetchContributions(ctx, year)`
@@ -91,104 +122,68 @@ the JSON boundary. A missing tag on `Variables` sends `Variables` instead of
 
 ---
 
-## Phase 5 — Normalize into events 
+## Phase 5 — Normalize into events — **done**
 
 - [x] `internal/github/normalize.go` — payload → `[]collector.Event`
 - [x] `internal/store/raw.go` — `ListRaw` reads payloads back out
-- [x] `internal/store/events.go` — `InsertEvents`, delete-then-insert per `raw_id`,
-      wrapped in a transaction
+- [x] `internal/store/events.go` — `InsertEvents`, delete-then-insert per
+      `raw_id`, wrapped in a transaction
 - [x] Flag `-normalize` that reprocesses every raw payload for a source
 
-**Verified:** 113 events, `SUM(value) = 653`, matching `totalContributions`
-from the payload.
-
 **Decision made:** days with a count of zero are skipped. The absence of a row
-means no activity. This keeps the table at roughly a third of the size and
-removes the future-dated zeros GitHub returns for the rest of the year.
+means no activity.
+
+**Decision made:** three event types. `contributions` (daily, from the calendar;
+this is total contributions, not commits), `pull_request` (daily), and
+`repo_commit` (yearly per-repo commit total, from `commitContributionsByRepository`).
 
 ---
 
-## Phase 6 — Query layer and HTTP server
+## Phase 6 — Query layer and HTTP server — **done**
 
-Time: ~3 h · ~250 LOC
-
-**Stack decision: standard library, no framework.** Go 1.22+ `net/http` has
-method-aware routing (`mux.HandleFunc("GET /path", h)`) and path parameters.
-For a handful of routes with no middleware chain that is enough. Gin adds a
-dependency for nothing here; Fiber/fasthttp would additionally break
-compatibility with `http.Handler`, `httptest`, and `net/http/pprof` in exchange
-for microseconds that are invisible next to a SQLite query.
-
-- [x] `internal/store/events.go` — `DailyTotals(ctx, db, eventType, from, to)`
-      returning `[]DailyTotal{LocalDate string, Value float64}`
-- [x] `internal/store/events.go` — `ListTypes(ctx, db)` returning the distinct
-      `type` values present, so the dashboard discovers sources on its own
+- [x] `internal/store/events.go` — `DailyTotals`, `DailyStats`, `ListTypes`,
+      `EventsForDay`, `ListRepoCommits`, `ListPullRequests`
 - [x] `internal/api/server.go` — `http.ServeMux`, bound to `cfg.ListenAddress`
-- [x] `GET /health` — database ping plus the last sync state per source
+- [x] `GET /health` — database ping (surfacing `sync_state` is still open)
 - [x] Graceful shutdown: `srv.Shutdown(ctx)` driven by the existing SIGINT context
 - [x] Remove the `-sync`/`-normalize` early `return` path so the server actually
       starts when no flag is given
 
-```sql
-SELECT local_date, SUM(value) AS value
-FROM events
-WHERE type = ? AND local_date BETWEEN ? AND ?
-GROUP BY local_date
-ORDER BY local_date;
-```
-
-**Done when:** `curl localhost:8080/health` answers and the process shuts down
-cleanly on Ctrl-C.
-
-**Watch out:** gaps. Days with no events do not appear in the result. The
-heatmap renderer needs a value for every cell, so fill the gaps — either in
-`DailyTotals` or in the renderer, but decide once and write it down.
-
 ---
 
-## Phase 7 — Heatmap in the browser
-
-Time: ~4 h · ~300 LOC
+## Phase 7 — Heatmap in the browser — **done**
 
 **Stack decision: htmx plus server-rendered SVG.** No JSON API, no build step,
-no npm. Handlers return HTML fragments; htmx swaps them into the page. A single
-`<script>` tag from a CDN, or vendored into `web/`.
+no npm. Handlers return HTML fragments; htmx swaps them into the page.
 
-- [ ] `internal/api/heatmap.go` — render an SVG grid from `[]DailyTotal`
-- [ ] `GET /` — full page: type selector plus the heatmap for the default type
-- [ ] `GET /heatmap?type=commit&year=2026` — fragment only, for htmx swaps
-- [ ] `html/template` for the page shell; the SVG can be built with a strings
-      builder or a template, whichever reads better
-- [ ] Type selector populated from `ListTypes` — new collectors appear by
+- [x] `internal/api/heatmap.go` — render an SVG grid from `[]DailyTotal`
+- [x] `GET /` — full page: type selector plus the heatmap for the default type
+- [x] `GET /heatmap?type=...&year=...` — fragment only, for htmx swaps
+- [x] `html/template` for the page shell; SVG built in Go
+- [x] Type selector populated from `ListTypes` — new collectors appear by
       themselves, no code change
 
 Grid layout: 53 columns × 7 rows. Column is the week index, row is the weekday.
-Each day is a `<rect>` with `x = week*13`, `y = weekday*13`, size 11.
+Each day is a `<rect>`; the grid starts at the Sunday on or before 1 January.
 
-Colour scale — five buckets, Kanagawa palette to match the rest of your setup:
+**Note / deviation from the plan:** the ramp thresholds (5 levels) live in
+`levelFor` in Go; the colours are mixed in oklab from `--accent` in CSS, per
+domain (blue for git, achromatic paper for the cross-domain dashboard).
 
-| Count | Meaning |
-| --- | --- |
-| 0 | empty cell |
-| 1–3 | lightest |
-| 4–8 | |
-| 9–15 | |
-| 16+ | darkest |
+**Shipped beyond the original plan** (same slice, no new collectors):
 
-**Done when:** you open `localhost:8080` and see your own commit history as a
-heatmap, and switching the type in the selector swaps the grid without a page
-reload.
-
-**Watch out:** the first cell of the year is not necessarily a Sunday. Start the
-grid at the Sunday on or before 1 January and leave the leading cells empty, the
-same way GitHub does.
-
-**This is the milestone that matters.** Everything before it is plumbing. Use it
-for two weeks before continuing.
+- Git page (`/git`): hero stats, contributions heatmap, PR list, per-repo
+  rankings, year selector
+- `/day` in-page detail via htmx — cells on the dashboard are clickable;
+  git-page cells are inert because the partial renders without `hx-get`
+- `granularity` column (`day`/`year`) + migration, so yearly `repo_commit`
+  totals never land on the day axis
+- `-backfill` via `contributionYears`, plus `FetchRepoCommits` and
+  `FetchPRContributions`
 
 ---
 
-## Phase 8 — Second collector: Obsidian
+## Phase 8 — Second collector: Obsidian — **next**
 
 Time: ~5 h · ~250 LOC
 
@@ -214,9 +209,8 @@ or you will double-count.
 
 Time: ~3 h · ~200 LOC
 
-Only now. You have two implementations and can see what they actually share.
-The `collector` package already exists but currently holds only the shared
-`RawItem` and `Event` types — this phase adds the interface.
+Only after Obsidian. You now have two implementations and can see what they
+actually share.
 
 - [ ] `internal/collector/collector.go` — the `Collector` interface
 - [ ] `internal/sync/runner.go` — iterate registered collectors, record
@@ -234,26 +228,8 @@ type Collector interface {
 ```
 
 **Watch out:** one collector failing must not abort the others. Log the error
-into `sync_state.last_error` and surface it in `/health`.
-
----
-
-## Phase 9.5 — More GitHub queries
-
-Time: ~4 h · ~250 LOC
-
-Cheap once the pattern exists: each is one constant plus one function.
-
-- [ ] `contributionYears` — which years have data, so the first sync can
-      backfill everything instead of only the current year
-- [ ] `commitContributionsByRepository` — per-repo daily breakdown, giving
-      context to the calendar numbers
-- [ ] Repository list with `pushedAt` and `defaultBranchRef.target.history.totalCount`
-      — commits per project and when each was last touched
-
-**Watch out:** `history.totalCount` counts every commit in the default branch,
-not only yours. Identical for solo repos, wrong for shared ones. Filter with
-`history(author: {id: ...})` using your own `viewer { id }` if it matters.
+into `sync_state.last_error` and surface it in `/health`. This also closes the
+two open items from Phase 4 and 6.
 
 ---
 
@@ -285,9 +261,6 @@ Time: ~12 h · ~400 LOC
 **Done when:** a night of sleep produces exactly one event, dated to the
 wake-up day.
 
-**Watch out:** the iterator pattern here is the same one you already used for
-`sql.Rows` — `Next()`, read, `Err()` at the end.
-
 ---
 
 ## Repository layout
@@ -296,31 +269,23 @@ Single Go module, monorepo. Go lives at the repo root — no `backend/` director
 
 ```
 lifelog/
-├── cmd/lifelog/main.go
+├── cmd/lifelog/main.go        # flags, startup sync/normalize, HTTP server
+├── cmd/lifelog/sync.go        # syncYear + normalizeAll (github)
 ├── internal/
-│   ├── api/
-│   │   ├── server.go
-│   │   ├── handlers.go
-│   │   └── heatmap.go
-│   ├── collector/collector.go     # shared RawItem, Event, later the interface
+│   ├── api/                   # server.go, index.go, heatmap.go, git.go, day.go
+│   ├── collector/collector.go # shared RawItem, Event (interface comes in Phase 9)
 │   ├── config/config.go
-│   ├── github/
-│   │   ├── client.go              # how to talk to GraphQL
-│   │   ├── fetch.go               # what to ask for
-│   │   └── normalize.go           # payload → events
-│   ├── obsidian/
-│   ├── strava/
-│   ├── store/
-│   │   ├── migrations/
-│   │   ├── db.go
-│   │   ├── migrate.go
-│   │   ├── raw.go
-│   │   └── events.go
-│   └── sync/runner.go
+│   ├── github/                # client.go, fetch.go, normalize.go (+ tests)
+│   ├── obsidian/              # (Phase 8)
+│   ├── strava/                # (Phase 10)
+│   ├── store/                 # db.go, migrate.go, raw.go, events.go, migrations/
+│   └── sync/runner.go         # (Phase 9)
 ├── docs/
-│   ├── decisions/
-│   └── samples/
-├── web/                           # htmx, any static assets
+│   ├── Roadmap.md
+│   └── samples/               # (open)
+├── web/
+│   ├── templates/             # layout, pages, partials
+│   └── static/                # style.css, fonts
 ├── .env.example
 └── go.mod
 ```
@@ -373,7 +338,7 @@ you will not remember whether a workout's `value` was minutes or seconds.
 
 | Problem | Where it bites | Fix |
 | --- | --- | --- |
-| Missing JSON tag | Any struct crossing the wire | Tag every field; a wrong name fails silently |
+| Missing JSON tag | Any struct crossing the wire | Tag every field |
 | Discarded return value | Everywhere | `go vet ./...` catches most of it |
 | Day boundaries | Sleep, late-night commits | One documented rule, applied everywhere |
 | Timezone drift | Travel, DST | Store UTC plus an explicit `local_date` |
@@ -400,11 +365,12 @@ This database is a precise profile of your life.
 
 | Phase | Deliverable | Hours | Status |
 | --- | --- | --- | --- |
-| 0–5 | GitHub commits in a normalized events table | ~12 | done |
-| 6–7 | Heatmap in the browser | ~7 | next |
-| 8 | Obsidian data alongside it | 5 | |
+| 0–5 | GitHub data in a normalized events table | ~12 | done |
+| 6 | Query layer + HTTP server | ~3 | done |
+| 7 | Heatmap + dashboard, htmx | ~4 | done |
+| 7.5 | Git page, `/day`, granularity, backfill (unplanned) | ~4 | done |
+| 8 | Obsidian data alongside it | 5 | next |
 | 9 | Pluggable collectors, scheduled sync | 3 | |
-| 9.5 | Repo breakdown and multi-year backfill | 4 | |
 | 10 | Strava with working OAuth | 10 | |
 | 11 | Sleep and steps from Apple Health | 12 | |
 

@@ -222,19 +222,21 @@ func ListRepoCommits(ctx context.Context, db *sql.DB, year int) ([]RepoCommit, e
 	return commits, nil
 }
 
-func FirstEventYear(ctx context.Context, db *sql.DB) (int, error) {
-	const query = `SELECT MIN(substr(local_date, 1, 4))
+// EventYearRange returns the earliest and latest year with a github event.
+// Both are 0 when the source has no events yet.
+func EventYearRange(ctx context.Context, db *sql.DB) (first, last int, err error) {
+	const query = `SELECT MIN(substr(local_date, 1, 4)), MAX(substr(local_date, 1, 4))
 		FROM events
 		WHERE source = ?`
 
-	var year sql.NullInt64
-	if err := db.QueryRowContext(ctx, query, "github").Scan(&year); err != nil {
-		return 0, fmt.Errorf("query first event year: %w", err)
+	var minYear, maxYear sql.NullInt64
+	if err := db.QueryRowContext(ctx, query, "github").Scan(&minYear, &maxYear); err != nil {
+		return 0, 0, fmt.Errorf("query event year range: %w", err)
 	}
-	if !year.Valid {
-		return 0, nil
+	if !minYear.Valid {
+		return 0, 0, nil
 	}
-	return int(year.Int64), nil
+	return int(minYear.Int64), int(maxYear.Int64), nil
 }
 
 func ListPullRequests(ctx context.Context, db *sql.DB, year int) ([]PullRequest, error) {

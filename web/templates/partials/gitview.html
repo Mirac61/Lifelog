@@ -1,27 +1,26 @@
 <div class="hero">
   <div class="hero-main">
     <div class="hero-value">{{printf "%.0f" .Stats.Total}}</div>
-    <div class="hero-label">Contributions · {{.Year}}</div>
+    <div class="hero-label">{{.TypeLabel}}</div>
   </div>
   <div class="hero-stats">
     <div class="hstat"><b>{{.Stats.ActiveDays}}</b><span>aktive Tage</span></div>
     <div class="hstat"><b>{{.Stats.LongestStreak}}</b><span>längste Streak</span></div>
     <div class="hstat"><b>{{printf "%.0f" .Stats.BestValue}}</b><span>bester Tag{{with .Stats.BestDate}} · {{.}}{{end}}</span></div>
-    <div class="hstat"><b>{{len .Repos}}</b><span>Repos berührt</span></div>
   </div>
 </div>
 
 <div class="dash">
   <div class="panel" id="chart">
     <div class="box-head">
-      <span class="box-title">Contributions · {{.Year}}</span>
+      <span class="box-title">Heatmap</span>
     </div>
     {{template "heatmap.html" .Heatmap}}
   </div>
 
   <div class="panel">
     <div class="box-head">
-      <span class="box-title">Pull Requests · {{.Year}}</span>
+      <span class="box-title">Pull Requests</span>
       <span class="box-meta">{{len .PRs}}</span>
     </div>
     {{if .PRs}}
@@ -41,7 +40,7 @@
   </div>
   <div class="panel">
     <div class="box-head">
-      <span class="box-title">Repos · {{.Year}}</span>
+      <span class="box-title">Repos</span>
       <span class="box-meta">{{len .Repos}}</span>
     </div>
     {{if .Repos}}
@@ -62,3 +61,4 @@
 </div>
 
 <span hx-swap-oob="innerHTML:#git-year" style="display:none">{{.Year}}</span>
+<div hx-swap-oob="innerHTML:#git-controls">{{template "gitcontrols.html" .}}</div>

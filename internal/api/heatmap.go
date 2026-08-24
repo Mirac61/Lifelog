@@ -1,8 +1,6 @@
 package api
 
 import (
-	"net/http"
-	"strconv"
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
@@ -141,21 +139,4 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) heatmapD
 		MoreX:    legendX + 36 + 5*cellStep,
 		LegendY:  legendY,
 	}
-}
-
-func (s *Server) handleHeatmap(w http.ResponseWriter, r *http.Request) {
-	eventType := r.URL.Query().Get("type")
-	if eventType == "" {
-		eventType = "contributions"
-	}
-	year := time.Now().Year()
-	if y, err := strconv.Atoi(r.URL.Query().Get("year")); err == nil {
-		year = y
-	}
-	view, err := s.view(r.Context(), eventType, year)
-	if err != nil {
-		http.Error(w, "query failed", http.StatusInternalServerError)
-		return
-	}
-	s.renderPartial(w, "view.html", view)
 }

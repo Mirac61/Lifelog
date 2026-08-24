@@ -1,15 +1,12 @@
 {{define "body"}}
   <h1>lifelog <span>/ personal data warehouse</span></h1>
 
-  <div class="controls">
-    <select name="type" hx-get="/heatmap" hx-target="#view" hx-include="[name='year']">
-      {{range .Types}}<option value="{{.}}"{{if eq . $.Type}} selected{{end}}>{{.}}</option>{{end}}
-    </select>
-    <select name="year" hx-get="/heatmap" hx-target="#view" hx-include="[name='type']">
-      {{range .Years}}<option value="{{.}}"{{if eq . $.Year}} selected{{end}}>{{.}}</option>{{end}}
-    </select>
+  <div class="stats">
+    <div class="stat"><b>{{.Stats.Total}}</b><span>contributions</span></div>
+    <div class="stat"><b>{{.Stats.ActiveDays}}</b><span>active days</span></div>
+    <div class="stat"><b>{{.Stats.LongestStreak}}</b><span>longest streak</span></div>
+    <div class="stat"><b>{{.Stats.BestValue}}</b><span>best day{{with .Stats.BestDate}} · {{.}}{{end}}</span></div>
   </div>
 
-  <div class="panel" id="view">{{template "view.html" .}}</div>
   <div id="detail"></div>
 {{end}}

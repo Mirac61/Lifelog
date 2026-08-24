@@ -1,0 +1,20 @@
+{{define "gitcontrols.html"}}
+<div class="pillbar" role="tablist">
+  {{range .TypeOptions}}
+  <button type="button" class="pill{{if eq .Value $.Type}} active{{end}}" role="tab" aria-selected="{{if eq .Value $.Type}}true{{else}}false{{end}}"
+    hx-get="/git/view?type={{.Value}}&year={{$.Year}}" hx-target="#gitview" hx-swap="innerHTML">{{.Label}}</button>
+  {{end}}
+</div>
+
+<div class="yearstep">
+  <button type="button" class="ystep" aria-label="Vorheriges Jahr"{{if not .PrevYear}} disabled{{end}}
+    hx-get="/git/view?type={{.Type}}&year={{.PrevYear}}" hx-target="#gitview" hx-swap="innerHTML">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 9,12 15,19"/></svg>
+  </button>
+  <span class="yval">{{.Year}}</span>
+  <button type="button" class="ystep" aria-label="Nächstes Jahr"{{if not .NextYear}} disabled{{end}}
+    hx-get="/git/view?type={{.Type}}&year={{.NextYear}}" hx-target="#gitview" hx-swap="innerHTML">
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,5 15,12 9,19"/></svg>
+  </button>
+</div>
+{{end}}

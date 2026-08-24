@@ -46,7 +46,6 @@ func (s *Server) Routes() http.Handler {
 
 	mux := http.NewServeMux()
 	mux.HandleFunc("GET /health", s.handleHealth)
-	mux.HandleFunc("GET /heatmap", s.handleHeatmap)
 	mux.HandleFunc("GET /day", s.handleDay)
 	mux.HandleFunc("GET /git/view", s.handleGitView)
 	mux.HandleFunc("GET /", s.handleIndex)

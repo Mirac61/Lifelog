@@ -15,21 +15,21 @@ The GitHub vertical slice is shipped end to end: one binary serves a browser UI
 store. The event store is honest about granularity — daily events and yearly
 aggregates carry different `granularity`, and only day events feed the day axis.
 
-**Next milestone: Obsidian.** It is the second collector, so it is the real test
-of whether the store and dashboard are actually generic — and it unlocks the
-Todos and Calendar domains that already have their accent tokens in the CSS.
+**Next milestone: native Todos.** Decided 2026-08-23: the Obsidian collector is
+shelved — disliking the tool plus the file-scanning/frontmatter complexity it
+would need, when Lifelog can just own the data itself. Todos becomes the first
+domain where Lifelog is the source of truth, not a mirror of an external
+service. See Phase 8 below.
 
 ---
 
 ## Deferred design changes (decided, not started)
 
-Two UI decisions were agreed on 2026-08-22 but deliberately parked. Do these
-when the Obsidian slice is done and the abstraction (Phase 9) exists.
-
 **1. Remove the heatmap from the dashboard — replace with a rolling daily digest.**
-The dashboard and git page currently render the same year-grid heatmap
-redundantly. The dashboard is the cross-domain "what is going on?" view, so the
-year grid belongs to git.
+Agreed 2026-08-22, still parked — do this when the Obsidian slice is done and
+the abstraction (Phase 9) exists. The dashboard and git page currently render
+the same year-grid heatmap redundantly. The dashboard is the cross-domain
+"what is going on?" view, so the year grid belongs to git.
 
 - Dashboard `/`: drop the year grid, year stats and the year/type selector.
 - Show a rolling window instead (today / 7 days / 30 days).
@@ -37,13 +37,38 @@ year grid belongs to git.
 - Below it a day-by-day list (like `/day`, but for the window).
 - Optional small bar/line sparkline for the window in place of the 53-column grid.
 
-**2. Add a type filter to the git page (filter by PR).**
-Once the heatmap lives only on git, give the git page the type selector the
-dashboard used to have — `Contributions` / `Pull requests` (maybe `Commits`).
-Hero stats + heatmap follow the selected type; the PR list stays.
-
-Both are pure presentation changes over the existing event data. No new
+This is a pure presentation change over existing event data. No new
 collectors, no schema change needed.
+
+**2. ~~Add a type filter to the git page~~ — done 2026-08-23.** Git page now
+has a Contributions/Pull Requests pill toggle plus a year stepper (`‹ 2026 ›`)
+next to the page title, state kept in sync via an htmx OOB swap
+(`gitcontrols.html`).
+
+**3. Git page polish — flagged 2026-08-23 in a design pass over the pill/stepper
+work, not started.**
+
+- Heatmap renders the full year through Dec 31 even for the current year, so
+  future days (which haven't happened yet) look visually identical to past
+  days with zero commits — no way to tell "no activity" from "hasn't
+  happened". It also leaves ~40% of the chart empty and dead on the right.
+  Fix: cap the current year's grid at today instead of Dec 31 (past years
+  render in full); shrink the SVG width to match so the empty space goes
+  away too.
+- PR status dots (`.pr-dot[data-state]`) render the same flat grey for every
+  PR regardless of merged/open/closed. `state` is already fetched from
+  GitHub (`fetch.go`) and decoded (`prPullRequest.State` in `normalize.go`),
+  but `NormalizePRContributions` never puts it into the event's `meta` JSON,
+  so it never reaches the template. **No migration needed** — `state` is
+  already sitting in the cached `raw_payloads`. Fix: add
+  `"state": node.PullRequest.State` to the meta map in
+  `NormalizePRContributions`, then `-normalize` re-derives every PR event
+  from payloads already on disk, no re-fetch required.
+- Once state actually reaches the dot, bump `.pr-dot` from 7px to ~9px —
+  at the current size the colour split is unreadable anyway.
+- Heatmap legend reads "less" / "more" in lowercase — the only text on the
+  page not in Sentence/Title Case. Align the casing, or drop the legend text
+  since the colour ramp is fairly self-explanatory without it.
 
 ---
 
@@ -183,25 +208,60 @@ domain (blue for git, achromatic paper for the cross-domain dashboard).
 
 ---
 
-## Phase 8 — Second collector: Obsidian — **next**
+## Phase 8 — Native Todos — **next**
 
-Time: ~5 h · ~250 LOC
+Time: ~3 h · ~150 LOC
 
-No API, no OAuth, no rate limits. Pure local file parsing — and the real test of
-whether the dashboard is actually generic.
+Decided 2026-08-23, replaces the Obsidian collector. Unlike every other domain
+so far, Todos is **not** fed by a collector — there is no external source, no
+`raw_payloads`, no `-sync`/`-normalize`. Lifelog is the source of truth and the
+data is mutable (a todo gets checked off, not appended-to like an event).
+That is a deliberate first: everything up to here has been read-only
+aggregation, this is the first thing you create *in* Lifelog.
 
-- [ ] `internal/obsidian/scan.go` — walk `Cockpit/`, read markdown frontmatter
-- [ ] `external_id` = relative file path + modification time
-- [ ] `internal/obsidian/normalize.go` — frontmatter → events
-      (`book_finished`, `workout`, `todo_done`)
-- [ ] Skip files without relevant frontmatter rather than erroring
-- [ ] Extend `-sync` and `-normalize` to take a source name
+- [ ] New table `todos` (own migration, not the `events` table — it doesn't
+      fit the append-only event shape): `id, text, due_date NULL, done INTEGER,
+      created_at, completed_at NULL`
+- [ ] `internal/store/todos.go` — `ListTodos`, `CreateTodo`, `ToggleTodo`
+- [ ] `GET /todos` — the nav link already exists in `layout.html`
+      (`.nav-item` for Todos), it just 404s today; only the handler is missing
+- [ ] Page: add-todo form (text + optional due date), list sorted by due date
+      (overdue first, undated last), htmx toggle on click like the day-detail
+      pattern
+- [ ] Dashboard `/`: short "open todos" list, ties into the rolling-digest
+      rework already parked above (deferred design change #1)
+- [ ] `--accent: #9CCB86` for `body.domain-todos` is already in `style.css`
+      from the original 4-domain palette — nothing to add there
 
-**Done when:** Obsidian events sit next to GitHub events in the same table and
-the type selector shows both without any dashboard code changing.
+**Done when:** a todo can be added with a due date, shown on `/todos` and on
+the dashboard, and checked off without a page reload.
 
-**Watch out:** Syncthing conflict files (`*.sync-conflict-*.md`). Filter them out
-or you will double-count.
+---
+
+## Phase 8b — Notes / Braindump — **later, only if actually needed**
+
+Parked 2026-08-23. Free-text notes for projects and braindumping, e.g. for
+planning docs. Not started, not committed to — build it only if the "just a
+todo list" itch turns out to be not enough on its own.
+
+- Markdown stored as text in SQLite (`notes(id, title, body, tags,
+  created_at, updated_at)`), **not** files on disk — files-on-disk is the
+  Obsidian complexity this is meant to avoid.
+- Render server-side with `goldmark` (pure Go, no npm/build step, fits the
+  existing htmx/server-rendered-SVG pattern) — no client-side markdown lib.
+- Search: SQLite `FTS5` over title + body is enough; no need for anything
+  fancier at this scale.
+- Tags: simple, e.g. a comma-separated column or a join table — not a
+  full taxonomy.
+- Explicitly **not** doing backlinks (`[[note]]` cross-references + a link
+  graph/index) — real complexity (parse wiki-links, maintain the index, build
+  UI for it) for a feature that only pays off with a much bigger note corpus
+  than "projects + braindump" implies.
+- If this ships, todos-with-a-due-date could optionally also be authored
+  inline in a note via a convention like `- [ ] text @2026-08-25`, parsed out
+  into the `todos` table from Phase 8 on save. That is an alternate entry
+  path layered on top of Phase 8, not a prerequisite for it — Phase 8's
+  `todos` table and UI must work standalone first.
 
 ---
 
@@ -209,8 +269,9 @@ or you will double-count.
 
 Time: ~3 h · ~200 LOC
 
-Only after Obsidian. You now have two implementations and can see what they
-actually share.
+Only after a **second real collector** exists (Strava below, since Obsidian
+is shelved — Todos in Phase 8 is native, not a collector, so it doesn't count
+here). Two implementations, so you can see what they actually share.
 
 - [ ] `internal/collector/collector.go` — the `Collector` interface
 - [ ] `internal/sync/runner.go` — iterate registered collectors, record
@@ -263,6 +324,51 @@ wake-up day.
 
 ---
 
+## Phase 12 — Gym tracking via openGym — later (extended)
+
+Time: ~4 h · ~200 LOC · blocked on running an openGym instance
+
+**Decision made (2026-08-23):** log workouts in
+[openGym](https://gitea.com/DuarteSantos/openGym) (self-hosted, AGPL, free)
+instead of Hevy (subscription, API paywalled) or LiftLog (local-only, would mean
+manual exports every time). openGym covers gym stats only — heart rate, sleep
+and steps stay with Apple Health (Phase 11), Strava stays Phase 10.
+
+Setup outside this repo (one-time, ~30 min):
+
+- [ ] Deploy openGym: VPS (~3–4 €/mo Hetzner/Netcup) or home box + Tailscale Serve
+      (`tailscale serve` gives valid TLS on `*.ts.net`, which passkeys require)
+- [ ] iPhone: install the PWA from Safari ("Add to Home Screen"), create profile
+      with Face ID passkey
+- [ ] Pin the deployed image/version — the project is days old and solo-maintained
+
+Collector work in lifelog:
+
+- [ ] `internal/gym/read.go` — read `state-<uid>.json` straight from the openGym
+      `./data/` directory (shared volume/SSH/Tailscale file access). Do **not**
+      use `GET /api/data`: auth is passkey session cookies, not usable headless.
+      Same shape as `raw_payloads`: store the whole JSON, normalize separately.
+- [ ] `external_id` = workout date + start time (the JSON has no stable id field)
+- [ ] `internal/gym/normalize.go` — one `workout` event per entry: `value` =
+      session duration in minutes (same unit rule as Strava, Phase 10),
+      exercises/sets/volume into `meta`
+- [ ] Bodyweight entries become their own event type (`bodyweight`), not folded
+      into workouts
+- [ ] `-sync-once=gym` works like the other sources once Phase 9 exists
+
+What the source gives us (`state-<uid>.json`): `workouts[]` (date, duration,
+exercises, sets as weight × reps, warm-up flags, optional RIR/RPE), `routines[]`,
+`bodyweight[]` (date + kg), week schedule. No heart rate/sleep/steps — by design.
+
+**Done when:** finishing a session in the openGym PWA puts a `workout` event on
+the dashboard heatmap without any manual step.
+
+**Watch out:** the state schema will drift while the project is young. Normalize
+defensively — ignore unknown fields, never hard-fail on a new shape — and keep
+openGym's one-tap JSON export as the documented escape hatch.
+
+---
+
 ## Repository layout
 
 Single Go module, monorepo. Go lives at the repo root — no `backend/` directory.
@@ -278,6 +384,7 @@ lifelog/
 │   ├── github/                # client.go, fetch.go, normalize.go (+ tests)
 │   ├── obsidian/              # (Phase 8)
 │   ├── strava/                # (Phase 10)
+│   ├── gym/                   # (Phase 12, reads openGym state JSON)
 │   ├── store/                 # db.go, migrate.go, raw.go, events.go, migrations/
 │   └── sync/runner.go         # (Phase 9)
 ├── docs/
@@ -373,6 +480,7 @@ This database is a precise profile of your life.
 | 9 | Pluggable collectors, scheduled sync | 3 | |
 | 10 | Strava with working OAuth | 10 | |
 | 11 | Sleep and steps from Apple Health | 12 | |
+| 12 | Gym workouts from self-hosted openGym | 4 | |
 
 Commit after every phase. This project's payoff arrives in years, so visible
 progress is what keeps it alive — and it ends up tracking exactly those commits.

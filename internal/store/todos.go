@@ -11,13 +11,14 @@ type Todo struct {
 	ID          int64
 	Text        string
 	DueDate     sql.NullString
-	Done        bool
+	Status      string
 	CreatedAt   string
 	CompletedAt sql.NullString
 }
 
 func ListTodos(ctx context.Context, db *sql.DB) ([]Todo, error) {
-	const query = `SELECT id, text, due_date, done FROM todos ORDER BY done, due_date IS NULL, due_date`
+	const query = `SELECT id, text, due_date, status FROM todos ORDER BY CASE status
+			WHEN 'in_progress' THEN 0 WHEN 'todo' THEN 1 ELSE 2 END, due_date IS NULL, due_date`
 	rows, err := db.QueryContext(ctx, query)
 	if err != nil {
 		return nil, fmt.Errorf("query todos: %w", err)
@@ -27,7 +28,7 @@ func ListTodos(ctx context.Context, db *sql.DB) ([]Todo, error) {
 	var todos []Todo
 	for rows.Next() {
 		var t Todo
-		if err := rows.Scan(&t.ID, &t.Text, &t.DueDate, &t.Done); err != nil {
+		if err := rows.Scan(&t.ID, &t.Text, &t.DueDate, &t.Status); err != nil {
 			return nil, fmt.Errorf("scan todo: %w", err)
 		}
 		todos = append(todos, t)
@@ -46,6 +47,10 @@ func CreateTodo(ctx context.Context, db *sql.DB, text string, dueDate *string) e
 	return nil
 }
 
-/* func SwitchTodo(ctx context.Context, db *sql.DB, id int64) error {
-	// TODO: A migration should be implemented to switch statuses from todo, in progress and done
-} */
+func SwitchTodo(ctx context.Context, db *sql.DB, id int64, status string) error {
+	const query = `UPDATE todos SET status = ? WHERE id = ?`
+	if _, err := db.ExecContext(ctx, query, status, id); err != nil {
+		return fmt.Errorf("switching todo status: %w", err)
+	}
+	return nil
+}

@@ -60,6 +60,48 @@ body.domain-dashboard { --accent: #C9D3E2; --accent-deep: #596273; }
 body.domain-todos     { --accent: #9CCB86; --accent-deep: #41603A; }
 body.domain-calendar  { --accent: #B79AD8; --accent-deep: #574670; }
 
+/* ═══ Light mode ══════════════════════════════════════════════════════
+   Dark is primary; light is the same logic run the other direction, not
+   an inverted filter. Elevation still climbs toward the paper end of the
+   ramp (page is the one tinted surface, panels lift to true white); each
+   domain keeps its hue but trades "pale accent on dark ink" for "inked
+   accent on pale paper", since a light tint that read as saturated on
+   near-black turns washed-out on near-white. The lamp still means only
+   the one thing. Only the OS's explicit light preference opts in — no
+   system preference stays on dark. */
+@media (prefers-color-scheme: light) {
+  :root {
+    --ink-950: #EEF0F4;
+    --ink-900: #FFFFFF;
+    --ink-850: #E7EAF0;
+    --ink-800: #DEE2EA;
+    --ink-700: #1B2029;
+
+    --line:      #DBE0E8;
+    --line-loud: #C4CAD6;
+
+    --paper:       #171A21;
+    --paper-dim:   #5B6373;
+    --paper-faint: #8B93A3;
+
+    --lamp: #C97F12;
+  }
+
+  body.domain-git       { --accent: #2B7A9E; --accent-deep: #C3DEE9; }
+  body.domain-dashboard { --accent: #4A5568; --accent-deep: #D3D8E1; }
+  body.domain-todos     { --accent: #3F7A2E; --accent-deep: #CBE0BE; }
+  body.domain-calendar  { --accent: #7A55A8; --accent-deep: #E1D0F0; }
+
+  .pr-dot[data-state="MERGED"] { background: #8C5FBE; }
+  .pr-dot[data-state="OPEN"]   { background: #3C8A2E; }
+  .pr-dot[data-state="CLOSED"] { background: #C94456; }
+
+  /* The tooltip stays the one deliberately-inked chip so it still pops off
+     the page as the most prominent surface — that means its text can't
+     follow --paper like everything else does. */
+  #tip { color: #EEF0F4; box-shadow: 0 8px 24px rgb(20 24 32 / 0.16); }
+}
+
 * { box-sizing: border-box; }
 
 /* ═══ Base ════════════════════════════════════════════════════════════ */
@@ -158,11 +200,9 @@ a { color: inherit; }
 /* ═══ Content ═════════════════════════════════════════════════════════ */
 
 .content {
-  padding: 44px 44px 72px;
+  padding: 20px 20px 72px;
   min-width: 0;
   width: 100%;
-  max-width: 1460px;
-  margin: 0 auto;
 }
 
 .page-head {
@@ -288,7 +328,7 @@ h1 span {
   gap: 72px;
   align-items: end;
   padding-bottom: 34px;
-  margin-bottom: 0;
+  margin-bottom: 32px;
   border-bottom: 1px solid var(--line);
 }
 
@@ -318,7 +358,12 @@ h1 span {
   gap: 20px 28px;
 }
 
-.hero-stats { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+/* max-content, not 1fr: 1fr stretches across the wide row next to the hero
+   number, spacing the short stat pairs further apart toward the right. */
+.hero-stats {
+  grid-template-columns: repeat(3, max-content);
+  justify-content: start;
+}
 
 .stats { margin: 0 0 26px; }
 
@@ -365,17 +410,25 @@ h1 span {
   justify-content: space-between;
   gap: 16px;
   padding-bottom: 12px;
-  margin-bottom: 6px;
+  margin-bottom: 14px;
   border-bottom: 1px solid var(--line);
 }
 
 .box-title {
-  font-size: 13px;
+  font-size: 14.5px;
   font-weight: 600;
   color: var(--paper);
 }
 
-.box-meta { font-size: 12px; color: var(--paper-dim); }
+.box-meta { font-size: 13px; color: var(--paper-dim); }
+
+.box-title-group { display: flex; align-items: baseline; gap: 16px; }
+
+/* Spells out what the pr-dot colours mean (see .pr-dot[data-state] below),
+   so it isn't hover-only knowledge. */
+.pr-legend { display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: var(--paper-dim); }
+.pr-legend span { display: inline-flex; align-items: center; gap: 5px; }
+.pr-legend .pr-dot { width: 7px; height: 7px; }
 
 .empty {
   margin: 14px 0 4px;
@@ -396,14 +449,14 @@ h1 span {
   border-radius: 0;
   /* No border-top: the hero's rule above already draws this edge. */
   border-bottom: 1px solid var(--line);
-  padding: 22px 0 16px;
+  padding: 22px 4px 16px;
   margin-bottom: 8px;
   overflow-x: auto;
 }
 
 #chart .box-head { border-bottom: none; padding-bottom: 14px; margin-bottom: 0; }
 
-#chart svg { display: block; width: 100%; height: auto; min-width: 680px; }
+#chart svg { display: block; width: 100%; height: auto; }
 
 #chart .lbl {
   font-family: var(--mono);
@@ -431,11 +484,16 @@ h1 span {
    most days of a real year, so they get the readable half of the range —
    a ramp that only separates at the top describes a year nobody has. */
 
-#chart rect.l0 { fill: var(--ink-850); }  /* silent: no commits, just grid */
+#chart rect.l0 { fill: var(--ink-850); stroke: var(--line); stroke-width: 1; }  /* silent: no commits, but still a visible grid cell */
 #chart rect.l1 { fill: color-mix(in oklab, var(--accent) 34%, var(--ink-900)); }
 #chart rect.l2 { fill: color-mix(in oklab, var(--accent) 57%, var(--ink-900)); }
 #chart rect.l3 { fill: color-mix(in oklab, var(--accent) 78%, var(--ink-900)); }
 #chart rect.l4 { fill: var(--accent); }   /* full signal, same tone as the nav */
+
+/* Future days haven't happened yet, so they carry no grid at all — they
+   disappear into the panel background instead of competing with l0's
+   visible "no commits" cells. */
+#chart rect.future { fill: var(--ink-900); stroke: none; }
 
 /* The single amber: the best day of the year, lit like one lamp on an
    otherwise cold panel. Nothing else on the page may use --lamp. */
@@ -447,8 +505,59 @@ h1 span {
   stroke-opacity: 0.22;
 }
 
+/* Separates the sequential 0–4 ramp from the categorical best-day swatch —
+   without it the amber cell reads as a fifth, misplaced intensity step. */
+#chart .legend-div { stroke: var(--line-loud); stroke-width: 1; }
+
+/* ═══ Current-year layout ════════════════════════════════════════════
+   The in-progress year's heatmap is intrinsically narrower than a
+   finished year's (buildHeatmap only draws through today + 1 week), so
+   stretching it full-bleed like a finished year blows the cells up and
+   leaves a gap before the legend catches up. Instead it sits boxed at
+   its natural size in the left column, with the repo ranking beside it
+   in the right column; PRs drop to their own full-width row underneath
+   since Repos took its spot next to the chart. */
+
+.dash.current-year { align-items: stretch; }
+
+.dash.current-year #chart.panel {
+  grid-column: 1 / 2;
+  display: flex;
+  flex-direction: column;
+  background: var(--ink-900);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  padding: 20px 22px;
+  margin-bottom: 0;
+}
+
+.dash.current-year #chart .box-head {
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 12px;
+  margin-bottom: 14px;
+}
+
+.dash.current-year #chart svg {
+  width: auto;
+  max-width: 100%;
+  height: auto;
+  margin: auto 0;
+}
+
+/* Capped shorter than the shared 460px: at full height here the row
+   stretches the compact heatmap into a tall box with a huge letterboxed
+   gap above and below it just to match the repo list's length. */
+.dash.current-year .repo-panel .repos { max-height: 260px; }
+
+.dash.current-year .repo-panel { grid-column: 2 / 3; }
+.dash.current-year .pr-panel   { grid-column: 1 / -1; }
+
 /* ═══ Lists ═══════════════════════════════════════════════════════════ */
 
+/* Scrollable, but the boundary is never a hard clip mid-row: the mask
+   fades the last ~28px so a cut-off item recedes instead of snapping off,
+   and it rides along with the scroll position since it's on the box that
+   scrolls, not a fixed overlay. */
 .prs, .repos {
   list-style: none;
   margin: 0;
@@ -457,6 +566,8 @@ h1 span {
   overflow-y: auto;
   scrollbar-width: thin;
   scrollbar-color: var(--ink-700) transparent;
+  mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent 100%);
+  -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent 100%);
 }
 
 .prs li, .repos li {
@@ -472,22 +583,22 @@ h1 span {
 
 .prs li {
   display: grid;
-  grid-template-columns: 52px 7px minmax(0, 1fr);
+  grid-template-columns: 52px 9px minmax(0, 1fr);
   grid-template-areas: "date state title" ".  .  repo";
   row-gap: 3px;
 }
 
 .pr-date {
   grid-area: date;
-  font-size: 10.5px;
+  font-size: 12px;
   color: var(--paper-faint);
 }
 
 .pr-dot {
   grid-area: state;
-  width: 7px;
-  height: 7px;
-  border-radius: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 9px;
   background: var(--paper-faint);
 }
 
@@ -500,7 +611,7 @@ h1 span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14.5px;
   text-decoration: none;
   transition: color 0.16s ease;
 }
@@ -510,7 +621,7 @@ h1 span {
 .pr-repo {
   grid-area: repo;
   font-family: var(--mono);
-  font-size: 10.5px;
+  font-size: 11.5px;
   color: var(--paper-faint);
 }
 
@@ -521,7 +632,7 @@ h1 span {
 .repos li {
   counter-increment: rank;
   display: grid;
-  grid-template-columns: 22px minmax(0, 1fr) 34px;
+  grid-template-columns: 24px minmax(0, 1fr) 38px;
   grid-template-areas: "rank name count" ".  bar  bar";
   row-gap: 7px;
 }
@@ -529,7 +640,7 @@ h1 span {
 .repos li::before {
   content: counter(rank, decimal-leading-zero);
   grid-area: rank;
-  font-size: 10px;
+  font-size: 11.5px;
   color: var(--paper-faint);
 }
 
@@ -538,7 +649,7 @@ h1 span {
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
-  font-size: 13px;
+  font-size: 14.5px;
   transition: color 0.16s ease;
 }
 
@@ -550,7 +661,7 @@ h1 span {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
   font-weight: 500;
-  font-size: 12px;
+  font-size: 13.5px;
   color: var(--paper-dim);
 }
 
@@ -590,6 +701,14 @@ h1 span {
 
 .htmx-request { opacity: 0.45; transition: opacity 0.15s ease; }
 
+/* Crossfade the git-page year/type swap instead of the default hard cut:
+   htmx-swapping is set on #gitview just before old content is removed
+   (held for the swap:120ms modifier on the triggering buttons), then
+   htmx-settling is set on the fresh content until settle:150ms elapses. */
+#gitview { transition: opacity 0.15s ease; }
+#gitview.htmx-swapping,
+#gitview.htmx-settling { opacity: 0; }
+
 /* ═══ Day detail (dashboard) ══════════════════════════════════════════ */
 
 .day h2 {
@@ -620,6 +739,11 @@ h1 span {
 
 @media (max-width: 1120px) {
   .dash { grid-template-columns: minmax(0, 1fr); }
+  .dash.current-year #chart.panel,
+  .dash.current-year .repo-panel,
+  .dash.current-year .pr-panel {
+    grid-column: 1 / -1;
+  }
   .hero { gap: 44px; }
   .hero-stats, .stats { grid-template-columns: repeat(2, 1fr); }
   .hstat:nth-child(odd), .stat:nth-child(odd) { border-left: none; padding-left: 0; }

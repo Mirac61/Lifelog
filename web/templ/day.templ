@@ -1,0 +1,22 @@
+package templ
+
+import (
+	"fmt"
+
+	"github.com/Mirac61/lifelog/internal/store"
+)
+
+templ Day(date string, events []store.DayEvent) {
+	<div class="panel day">
+		<h2>{ date }</h2>
+		if len(events) > 0 {
+			<ul>
+				for _, e := range events {
+					<li><span>{ e.Type }</span><b>{ fmt.Sprint(e.Value) } { e.Unit }</b></li>
+				}
+			</ul>
+		} else {
+			<p class="empty">No events</p>
+		}
+	</div>
+}

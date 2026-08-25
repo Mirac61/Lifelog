@@ -1,0 +1,17 @@
+package templ
+
+import "fmt"
+
+templ Git(page GitPage) {
+	@Layout("git") {
+		<div class="page-head">
+			<h1><span class="dot"></span>Git <span>/ <span id="git-year">{ fmt.Sprint(page.Year) }</span></span></h1>
+			<div class="controls" id="git-controls">
+				@GitControls(page)
+			</div>
+		</div>
+		<div id="gitview">
+			@GitView(page)
+		</div>
+	}
+}

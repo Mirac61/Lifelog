@@ -170,6 +170,7 @@ func NormalizePRContributions(payload json.RawMessage) ([]collector.Event, error
 			"title":      title,
 			"url":        url,
 			"repository": repository,
+			"state":      node.PullRequest.State,
 		})
 		if err != nil {
 			return nil, fmt.Errorf("encode PR metadata: %w", err)

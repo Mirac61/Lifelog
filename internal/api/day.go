@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
+	views "github.com/Mirac61/lifelog/web/templ"
 )
 
 func (s *Server) handleDay(w http.ResponseWriter, r *http.Request) {
@@ -19,10 +20,5 @@ func (s *Server) handleDay(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "query failed", http.StatusInternalServerError)
 		return
 	}
-	data := struct {
-		Date   string
-		Events []store.DayEvent
-	}{day.Format("Mon, 2 Jan 2006"), events}
-
-	s.renderPartial(w, "day.html", data)
+	render(w, r, views.Day(day.Format("Mon, 2 Jan 2006"), events))
 }

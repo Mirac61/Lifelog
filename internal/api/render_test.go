@@ -4,17 +4,14 @@ import (
 	"net/http/httptest"
 	"strings"
 	"testing"
+
+	views "github.com/Mirac61/lifelog/web/templ"
 )
 
-
 func TestGitPageRendersOwnBody(t *testing.T) {
-	s, err := New(nil)
-	if err != nil {
-		t.Fatal(err)
-	}
-
+	req := httptest.NewRequest("GET", "/git", nil)
 	rec := httptest.NewRecorder()
-	s.renderPage(rec, "git.html", gitPage{Active: "git"})
+	render(rec, req, views.Git(views.GitPage{Active: "git"}))
 
 	body := rec.Body.String()
 	if rec.Code != 200 {

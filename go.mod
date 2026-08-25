@@ -3,6 +3,7 @@ module github.com/Mirac61/lifelog
 go 1.26.6
 
 require (
+	github.com/a-h/templ v0.3.1020
 	github.com/joho/godotenv v1.5.1
 	github.com/pressly/goose/v3 v3.27.3
 	modernc.org/sqlite v1.57.0

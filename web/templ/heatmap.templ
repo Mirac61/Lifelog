@@ -1,0 +1,58 @@
+package templ
+
+import "fmt"
+
+templ Heatmap(h HeatmapData) {
+	<svg viewBox={ fmt.Sprintf("0 0 %d %d", h.Width, h.Height) } width={ fmt.Sprint(h.Width) } height={ fmt.Sprint(h.Height) } xmlns="http://www.w3.org/2000/svg">
+		<style>.lbl{fill:var(--paper-dim);font:10px ui-monospace,monospace}</style>
+		for _, d := range h.Days {
+			<text x="0" y={ fmt.Sprint(d.Y) } class="lbl">{ d.Text }</text>
+		}
+		for _, m := range h.Months {
+			<text x={ fmt.Sprint(m.X) } y={ fmt.Sprint(m.Y) } class="lbl">{ m.Text }</text>
+		}
+		for _, c := range h.Cells {
+			<rect
+				x={ fmt.Sprint(c.X) }
+				y={ fmt.Sprint(c.Y) }
+				width={ fmt.Sprint(h.CellSize) }
+				height={ fmt.Sprint(h.CellSize) }
+				rx="3"
+				class={ fmt.Sprintf("l%d", c.Level), templ.KV("best", c.Best), templ.KV("future", c.Future) }
+				if !c.Future {
+					data-date={ c.Label }
+					data-value={ fmt.Sprint(c.Value) }
+				}
+				if h.Detail && !c.Future {
+					hx-get={ "/day?date=" + c.Date }
+					hx-target="#detail"
+					hx-swap="innerHTML"
+				}
+			></rect>
+		}
+		<text x={ fmt.Sprint(h.LessX) } y={ fmt.Sprint(h.LegendY) } class="lbl">Wenig</text>
+		for _, s := range h.Legend {
+			<rect
+				x={ fmt.Sprint(s.X) }
+				y={ fmt.Sprint(s.Y) }
+				width={ fmt.Sprint(h.CellSize) }
+				height={ fmt.Sprint(h.CellSize) }
+				rx="3"
+				class={ fmt.Sprintf("l%d", s.Level) }
+			></rect>
+		}
+		<text x={ fmt.Sprint(h.MoreX) } y={ fmt.Sprint(h.LegendY) } class="lbl">Viel</text>
+		if h.HasBest {
+			<line x1={ fmt.Sprint(h.DividerX) } x2={ fmt.Sprint(h.DividerX) } y1={ fmt.Sprint(h.LegendY - 15) } y2={ fmt.Sprint(h.LegendY - 2) } class="legend-div"></line>
+			<rect
+				x={ fmt.Sprint(h.BestSwatchX) }
+				y={ fmt.Sprint(h.LegendY - 9) }
+				width={ fmt.Sprint(h.CellSize) }
+				height={ fmt.Sprint(h.CellSize) }
+				rx="3"
+				class="best"
+			></rect>
+			<text x={ fmt.Sprint(h.BestLabelX) } y={ fmt.Sprint(h.LegendY) } class="lbl">Bester Tag</text>
+		}
+	</svg>
+}

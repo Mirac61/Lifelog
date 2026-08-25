@@ -1,0 +1,44 @@
+package templ
+
+import "fmt"
+
+templ GitControls(page GitPage) {
+	<div class="pillbar" role="tablist">
+		for _, opt := range page.TypeOptions {
+			<button
+				type="button"
+				class={ "pill", templ.KV("active", opt.Value == page.Type) }
+				role="tab"
+				aria-selected={ fmt.Sprintf("%t", opt.Value == page.Type) }
+				hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", opt.Value, page.Year) }
+				hx-target="#gitview"
+				hx-swap="innerHTML swap:120ms settle:150ms"
+			>{ opt.Label }</button>
+		}
+	</div>
+	<div class="yearstep">
+		<button
+			type="button"
+			class="ystep"
+			aria-label="Vorheriges Jahr"
+			disabled?={ page.PrevYear == 0 }
+			hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", page.Type, page.PrevYear) }
+			hx-target="#gitview"
+			hx-swap="innerHTML swap:120ms settle:150ms"
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 9,12 15,19"></polyline></svg>
+		</button>
+		<span class="yval">{ fmt.Sprint(page.Year) }</span>
+		<button
+			type="button"
+			class="ystep"
+			aria-label="Nächstes Jahr"
+			disabled?={ page.NextYear == 0 }
+			hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", page.Type, page.NextYear) }
+			hx-target="#gitview"
+			hx-swap="innerHTML swap:120ms settle:150ms"
+		>
+			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,5 15,12 9,19"></polyline></svg>
+		</button>
+	</div>
+}

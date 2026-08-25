@@ -9,44 +9,20 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
+	views "github.com/Mirac61/lifelog/web/templ"
 )
-
-type repoRow struct {
-	Repo    string
-	Commits int
-	Percent float64
-}
 
 type viewData struct {
 	Stats   store.Stats
-	Heatmap heatmapData
+	Heatmap views.HeatmapData
 }
 
 // typeLabel is the human-facing name for a pill; typeLabels holds the ones
 // the two day-granularity collectors actually emit; anything else falls
 // back to its raw value so a new collector still renders instead of erroring.
 var typeLabels = map[string]string{
-	"contributions": "Contributions",
+	"contributions": "Beiträge",
 	"pull_request":  "Pull Requests",
-}
-
-type typeOption struct {
-	Value string
-	Label string
-}
-
-type gitPage struct {
-	Active      string
-	Year        int
-	PrevYear    int
-	NextYear    int
-	Type        string
-	TypeLabel   string
-	TypeOptions []typeOption
-	Stats       store.Stats
-	Heatmap     heatmapData
-	Repos       []repoRow
-	PRs         []store.PullRequest
 }
 
 func (s *Server) view(ctx context.Context, eventType string, year int) (viewData, error) {
@@ -65,10 +41,10 @@ func (s *Server) view(ctx context.Context, eventType string, year int) (viewData
 	return viewData{stats, hm}, nil
 }
 
-func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (gitPage, error) {
+func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (views.GitPage, error) {
 	firstYear, lastYear, err := store.EventYearRange(ctx, s.db)
 	if err != nil {
-		return gitPage{}, fmt.Errorf("fetching commit years: %w", err)
+		return views.GitPage{}, fmt.Errorf("fetching commit years: %w", err)
 	}
 	if firstYear == 0 {
 		firstYear = year
@@ -79,7 +55,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (g
 
 	types, err := store.ListTypes(ctx, s.db)
 	if err != nil {
-		return gitPage{}, fmt.Errorf("fetching event types: %w", err)
+		return views.GitPage{}, fmt.Errorf("fetching event types: %w", err)
 	}
 	if !slices.Contains(types, eventType) {
 		eventType = "contributions"
@@ -87,7 +63,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (g
 			eventType = types[0]
 		}
 	}
-	typeOptions := make([]typeOption, len(types))
+	typeOptions := make([]views.TypeOption, len(types))
 	typeLabel := eventType
 	for i, t := range types {
 		label, ok := typeLabels[t]
@@ -97,7 +73,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (g
 		if t == eventType {
 			typeLabel = label
 		}
-		typeOptions[i] = typeOption{Value: t, Label: label}
+		typeOptions[i] = views.TypeOption{Value: t, Label: label}
 	}
 
 	var prevYear, nextYear int
@@ -110,13 +86,13 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (g
 
 	commits, err := store.ListRepoCommits(ctx, s.db, year)
 	if err != nil {
-		return gitPage{}, fmt.Errorf("fetching commits: %w", err)
+		return views.GitPage{}, fmt.Errorf("fetching commits: %w", err)
 	}
-	var rows []repoRow
+	var rows []views.RepoRow
 	if len(commits) > 0 {
 		max := commits[0].Value
 		for _, c := range commits {
-			rows = append(rows, repoRow{
+			rows = append(rows, views.RepoRow{
 				Repo:    c.NameWithOwner,
 				Commits: int(c.Value),
 				Percent: c.Value / max * 100,
@@ -126,28 +102,29 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (g
 
 	view, err := s.view(ctx, eventType, year)
 	if err != nil {
-		return gitPage{}, fmt.Errorf("fetching view: %w", err)
+		return views.GitPage{}, fmt.Errorf("fetching view: %w", err)
 	}
 
 	prs, err := store.ListPullRequests(ctx, s.db, year)
 	if err != nil {
-		return gitPage{}, fmt.Errorf("fetching pull requests: %w", err)
+		return views.GitPage{}, fmt.Errorf("fetching pull requests: %w", err)
 	}
 
-	// Die Git-Seite hat keine Tagesdetail-Ansicht, Zellen bleiben inert.
+	// The git page has no day-detail view, so cells stay inert.
 	view.Heatmap.Detail = false
-	return gitPage{
-		Active:      "git",
-		Year:        year,
-		PrevYear:    prevYear,
-		NextYear:    nextYear,
-		Type:        eventType,
-		TypeLabel:   typeLabel,
-		TypeOptions: typeOptions,
-		Stats:       view.Stats,
-		Heatmap:     view.Heatmap,
-		Repos:       rows,
-		PRs:         prs,
+	return views.GitPage{
+		Active:        "git",
+		Year:          year,
+		IsCurrentYear: year == time.Now().Year(),
+		PrevYear:      prevYear,
+		NextYear:      nextYear,
+		Type:          eventType,
+		TypeLabel:     typeLabel,
+		TypeOptions:   typeOptions,
+		Stats:         view.Stats,
+		Heatmap:       view.Heatmap,
+		Repos:         rows,
+		PRs:           prs,
 	}, nil
 }
 
@@ -158,7 +135,7 @@ func (s *Server) handleGit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	s.renderPage(w, "git.html", page)
+	render(w, r, views.Git(page))
 }
 
 func (s *Server) handleGitView(w http.ResponseWriter, r *http.Request) {
@@ -177,5 +154,5 @@ func (s *Server) handleGitView(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	s.renderPartial(w, "gitview.html", page)
+	render(w, r, views.GitViewSwap(page))
 }

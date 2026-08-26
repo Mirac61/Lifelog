@@ -13,7 +13,7 @@ templ Dashboard(stats store.Stats) {
 			<div class="stat"><b>{ fmt.Sprint(stats.Total) }</b><span>contributions</span></div>
 			<div class="stat"><b>{ fmt.Sprint(stats.ActiveDays) }</b><span>active days</span></div>
 			<div class="stat"><b>{ fmt.Sprint(stats.LongestStreak) }</b><span>longest streak</span></div>
-			<div class="stat"><b>{ fmt.Sprint(stats.BestValue) }</b><span>best day{ bestDaySuffix(stats.BestDate) }</span></div>
+			<div class="stat"><b>{ fmt.Sprint(stats.BestValue) }</b><span>best day{ BestDaySuffix(stats.BestDate) }</span></div>
 		</div>
 		<div id="detail"></div>
 	}

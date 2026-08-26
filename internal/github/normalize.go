@@ -8,7 +8,6 @@ import (
 	"github.com/Mirac61/lifelog/internal/collector"
 )
 
-// NormalizeContributions
 type contributionDay struct {
 	Date              string `json:"date"`
 	ContributionCount int    `json:"contributionCount"`
@@ -34,7 +33,6 @@ type contributionsResponse struct {
 	Viewer viewer `json:"viewer"`
 }
 
-// NormalizeContributionYears
 type yearsContributionsCollection struct {
 	ContributionYears []int `json:"contributionYears"`
 }
@@ -47,7 +45,6 @@ type yearsResponse struct {
 	Viewer yearsViewer `json:"viewer"`
 }
 
-// NormalizePRContributions
 type prRepository struct {
 	NameWithOwner string `json:"nameWithOwner"`
 }
@@ -81,7 +78,6 @@ type prResponse struct {
 	Viewer prViewer `json:"viewer"`
 }
 
-// NormalizeRepoContributions
 type repRepository struct {
 	Name          string `json:"name"`
 	NameWithOwner string `json:"nameWithOwner"`
@@ -212,9 +208,8 @@ func NormalizeRepoContributions(payload json.RawMessage) ([]collector.Event, err
 			return nil, fmt.Errorf("encode repo metadata: %w", err)
 		}
 
+		// GitHub gives no per-repo dates, only a window total, so OccurredAt is the window's start.
 		events = append(events, collector.Event{
-			// Per-repo yearly totals: GitHub gives no dates, only a count for
-			// the whole collection window, so this is the window's start.
 			Type:        "repo_commit",
 			OccurredAt:  startedAt,
 			LocalDate:   startedAt.Format("2006-01-02"),

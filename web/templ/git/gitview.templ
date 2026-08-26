@@ -1,6 +1,10 @@
-package templ
+package git
 
-import "fmt"
+import (
+	"fmt"
+
+	views "github.com/Mirac61/lifelog/web/templ"
+)
 
 templ GitView(page GitPage) {
 	<div class="hero">
@@ -11,7 +15,7 @@ templ GitView(page GitPage) {
 		<div class="hero-stats">
 			<div class="hstat"><b>{ fmt.Sprint(page.Stats.ActiveDays) }</b><span>aktive Tage</span></div>
 			<div class="hstat"><b>{ fmt.Sprint(page.Stats.LongestStreak) }</b><span>längste Streak</span></div>
-			<div class="hstat"><b>{ fmt.Sprintf("%.0f", page.Stats.BestValue) }</b><span>bester Tag{ bestDaySuffix(page.Stats.BestDate) }</span></div>
+			<div class="hstat"><b>{ fmt.Sprintf("%.0f", page.Stats.BestValue) }</b><span>bester Tag{ views.BestDaySuffix(page.Stats.BestDate) }</span></div>
 		</div>
 	</div>
 	<div class={ "dash", templ.KV("current-year", page.IsCurrentYear) }>
@@ -53,7 +57,7 @@ templ prPanel(page GitPage) {
 			<ul class="prs">
 				for _, pr := range page.PRs {
 					<li>
-						<span class="pr-date">{ formatShortDate(pr.LocalDate) }</span>
+						<span class="pr-date">{ views.FormatShortDate(pr.LocalDate) }</span>
 						<span class="pr-dot" data-state={ pr.State } title={ pr.State }></span>
 						<a class="pr-title" href={ templ.URL(pr.URL) } target="_blank" rel="noopener" title={ pr.Title }>{ pr.Title }</a>
 						<span class="pr-repo">{ pr.Repo }</span>
@@ -88,11 +92,8 @@ templ repoPanel(page GitPage) {
 	</div>
 }
 
-// GitViewSwap is GitView plus the out-of-band tags that sync the year and
-// controls in the page header. Only htmx's AJAX swap (/git/view) applies
-// hx-swap-oob; on a normal full page load the browser has no such concept
-// and just renders these tags inline, so the full-page /git route must use
-// GitView instead, or the controls would appear twice.
+// GitViewSwap adds oob tags to sync the header year/controls. Only htmx's AJAX
+// swap honors hx-swap-oob, so full page loads must use GitView instead.
 templ GitViewSwap(page GitPage) {
 	@GitView(page)
 	<span hx-swap-oob="innerHTML:#git-year" style="display:none">{ fmt.Sprint(page.Year) }</span>

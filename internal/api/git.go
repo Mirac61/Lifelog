@@ -9,17 +9,15 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/git"
 )
 
 type viewData struct {
 	Stats   store.Stats
-	Heatmap views.HeatmapData
+	Heatmap git.HeatmapData
 }
 
-// typeLabel is the human-facing name for a pill; typeLabels holds the ones
-// the two day-granularity collectors actually emit; anything else falls
-// back to its raw value so a new collector still renders instead of erroring.
+// Human labels for the pills; unlisted types fall back to their raw value.
 var typeLabels = map[string]string{
 	"contributions": "Beiträge",
 	"pull_request":  "Pull Requests",
@@ -41,10 +39,10 @@ func (s *Server) view(ctx context.Context, eventType string, year int) (viewData
 	return viewData{stats, hm}, nil
 }
 
-func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (views.GitPage, error) {
+func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (git.GitPage, error) {
 	firstYear, lastYear, err := store.EventYearRange(ctx, s.db)
 	if err != nil {
-		return views.GitPage{}, fmt.Errorf("fetching commit years: %w", err)
+		return git.GitPage{}, fmt.Errorf("fetching commit years: %w", err)
 	}
 	if firstYear == 0 {
 		firstYear = year
@@ -55,7 +53,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (v
 
 	types, err := store.ListTypes(ctx, s.db)
 	if err != nil {
-		return views.GitPage{}, fmt.Errorf("fetching event types: %w", err)
+		return git.GitPage{}, fmt.Errorf("fetching event types: %w", err)
 	}
 	if !slices.Contains(types, eventType) {
 		eventType = "contributions"
@@ -63,7 +61,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (v
 			eventType = types[0]
 		}
 	}
-	typeOptions := make([]views.TypeOption, len(types))
+	typeOptions := make([]git.TypeOption, len(types))
 	typeLabel := eventType
 	for i, t := range types {
 		label, ok := typeLabels[t]
@@ -73,7 +71,7 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (v
 		if t == eventType {
 			typeLabel = label
 		}
-		typeOptions[i] = views.TypeOption{Value: t, Label: label}
+		typeOptions[i] = git.TypeOption{Value: t, Label: label}
 	}
 
 	var prevYear, nextYear int
@@ -86,13 +84,13 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (v
 
 	commits, err := store.ListRepoCommits(ctx, s.db, year)
 	if err != nil {
-		return views.GitPage{}, fmt.Errorf("fetching commits: %w", err)
+		return git.GitPage{}, fmt.Errorf("fetching commits: %w", err)
 	}
-	var rows []views.RepoRow
+	var rows []git.RepoRow
 	if len(commits) > 0 {
 		max := commits[0].Value
 		for _, c := range commits {
-			rows = append(rows, views.RepoRow{
+			rows = append(rows, git.RepoRow{
 				Repo:    c.NameWithOwner,
 				Commits: int(c.Value),
 				Percent: c.Value / max * 100,
@@ -102,17 +100,17 @@ func (s *Server) loadGitPage(ctx context.Context, year int, eventType string) (v
 
 	view, err := s.view(ctx, eventType, year)
 	if err != nil {
-		return views.GitPage{}, fmt.Errorf("fetching view: %w", err)
+		return git.GitPage{}, fmt.Errorf("fetching view: %w", err)
 	}
 
 	prs, err := store.ListPullRequests(ctx, s.db, year)
 	if err != nil {
-		return views.GitPage{}, fmt.Errorf("fetching pull requests: %w", err)
+		return git.GitPage{}, fmt.Errorf("fetching pull requests: %w", err)
 	}
 
 	// The git page has no day-detail view, so cells stay inert.
 	view.Heatmap.Detail = false
-	return views.GitPage{
+	return git.GitPage{
 		Active:        "git",
 		Year:          year,
 		IsCurrentYear: year == time.Now().Year(),
@@ -135,7 +133,7 @@ func (s *Server) handleGit(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, r, views.Git(page))
+	render(w, r, git.Git(page))
 }
 
 func (s *Server) handleGitView(w http.ResponseWriter, r *http.Request) {
@@ -154,5 +152,5 @@ func (s *Server) handleGitView(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 		return
 	}
-	render(w, r, views.GitViewSwap(page))
+	render(w, r, git.GitViewSwap(page))
 }

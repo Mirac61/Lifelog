@@ -72,7 +72,7 @@ func InsertEvents(ctx context.Context, db *sql.DB, source string, rawID int64, e
 }
 
 func DailyTotals(ctx context.Context, db *sql.DB, eventType, from, to string) ([]DailyTotal, error) {
-	// repo_commit is a yearly total with no real day; the chart only reads day-granularity rows.
+	// repo_commit is yearly, not day-granularity, so it's excluded here.
 	const query = `SELECT local_date, SUM(value)
 		FROM events
 		WHERE type = ? AND granularity = 'day' AND local_date BETWEEN ? AND ?

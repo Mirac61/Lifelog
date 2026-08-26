@@ -104,7 +104,7 @@ func Dashboard(stats store.Stats) templ.Component {
 				return templ_7745c5c3_Err
 			}
 			var templ_7745c5c3_Var7 string
-			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(bestDaySuffix(stats.BestDate))
+			templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(BestDaySuffix(stats.BestDate))
 			if templ_7745c5c3_Err != nil {
 				return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/dashboard.templ`, Line: 16, Col: 104}
 			}

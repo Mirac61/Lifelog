@@ -4,7 +4,7 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/git"
 )
 
 const (
@@ -14,18 +14,13 @@ const (
 	leftMargin = 32
 	topMargin  = 20
 
-	// Room past the ramp for the divider and best-day swatch label, sized
-	// to the label's own width so the SVG edge lands right after the text.
+	// Sized to the best-day label's width so the SVG edge lands right after it.
 	bestLegendWidth = 106
 )
 
-// levels is the number of ramp steps; CSS owns the colours behind them
-// (see the .l0-.l4 rules in style.css, mixed from --accent).
+// CSS owns the ramp colours (.l0-.l4 in style.css).
 const levels = 5
 
-// levelFor buckets a day's commit count into a ramp step. Thresholds live
-// here because they are about the data; the colours do not, because they are
-// about the domain the page is showing.
 func levelFor(v float64) int {
 	switch {
 	case v <= 0:
@@ -41,7 +36,7 @@ func levelFor(v float64) int {
 	}
 }
 
-func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) views.HeatmapData {
+func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) git.HeatmapData {
 	start := time.Date(year, time.January, 1, 0, 0, 0, 0, time.UTC)
 	start = start.AddDate(0, 0, -((int(start.Weekday()) + 6) % 7))
 	end := time.Date(year, time.December, 31, 0, 0, 0, 0, time.UTC)
@@ -66,8 +61,8 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) views.He
 	lastMonth := time.Month(0)
 	week := 0
 
-	var cells []views.Cell
-	var months []views.TextLabel
+	var cells []git.Cell
+	var months []git.TextLabel
 	for d := start; !d.After(renderEnd); d = d.AddDate(0, 0, 1) {
 		row := (int(d.Weekday()) + 6) % 7
 		if row == 0 && d.After(start) {
@@ -76,15 +71,14 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) views.He
 		if d.Year() != year {
 			continue
 		}
-		// Anchor to the week containing the 1st, regardless of weekday, so
-		// spacing between month labels stays even.
+		// Anchor to the 1st's week so month-label spacing stays even.
 		if d.Month() != lastMonth {
 			lastMonth = d.Month()
-			months = append(months, views.TextLabel{X: leftMargin + week*cellStep, Y: 14, Text: d.Format("Jan")})
+			months = append(months, git.TextLabel{X: leftMargin + week*cellStep, Y: 14, Text: d.Format("Jan")})
 		}
 		date := d.Format("2006-01-02")
 		v := values[date]
-		cells = append(cells, views.Cell{
+		cells = append(cells, git.Cell{
 			X:      leftMargin + week*cellStep,
 			Y:      topMargin + row*cellStep,
 			Level:  levelFor(v),
@@ -98,28 +92,26 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) views.He
 	width := leftMargin + (week+1)*cellStep
 	height := topMargin + 7*cellStep + 28
 	legendY := height - 6
-	// Wider than a plain "Less"/"More" ramp needs, to fit "Wenig"; the
-	// swatch and moreX offsets below shift by the same amount.
+	// 138 fits "Wenig"; offsets below shift with it.
 	legendX := width - 138
 
-	// A second, categorical legend entry past a divider, not another rung
-	// on the intensity ramp — only present when the year has a best day.
+	// Second legend entry (not a ramp rung), only when there's a best day.
 	hasBest := bestDate != ""
 	if hasBest {
 		width += bestLegendWidth
 	}
 
-	var legend []views.Swatch
+	var legend []git.Swatch
 	for i := range levels {
-		legend = append(legend, views.Swatch{
+		legend = append(legend, git.Swatch{
 			X:     legendX + 38 + i*cellStep,
 			Y:     legendY - 9,
 			Level: i,
 		})
 	}
-	var days []views.TextLabel
+	var days []git.TextLabel
 	for i, name := range []string{"Mon", "Wed", "Fri", "Sun"} {
-		days = append(days, views.TextLabel{
+		days = append(days, git.TextLabel{
 			X:    0,
 			Y:    topMargin + i*2*cellStep + 9,
 			Text: name,
@@ -131,7 +123,7 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) views.He
 	bestSwatchX := dividerX + 20
 	bestLabelX := bestSwatchX + cellSize + 7
 
-	return views.HeatmapData{
+	return git.HeatmapData{
 		Width:       width,
 		Height:      height,
 		CellSize:    cellSize,

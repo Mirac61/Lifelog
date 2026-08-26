@@ -14,8 +14,7 @@ type RawItem struct {
 type Event struct {
 	Type       string
 	OccurredAt time.Time
-	// LocalDate is the start of the period this event covers; Granularity
-	// says how long that period is ("day" or "year").
+	// LocalDate is this event's period start; Granularity is the period length ("day" or "year").
 	LocalDate   string
 	Granularity string
 	Value       float64

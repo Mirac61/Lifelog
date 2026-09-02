@@ -70,7 +70,7 @@ func Heatmap(h HeatmapData) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" xmlns=\"http://www.w3.org/2000/svg\"><style>.lbl{fill:var(--paper-dim);font:10px ui-monospace,monospace}</style>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 4, "\" xmlns=\"http://www.w3.org/2000/svg\"><style>.lbl{fill:var(--text-dim);font:10px ui-monospace,monospace}</style>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

@@ -1,6 +1,4 @@
-/* ═══ Fonts ═══════════════════════════════════════════════════════════
-   Two variable files. Archivo carries both UI and display duty via its
-   width axis (62–125%); the mono owns everything time- or count-shaped. */
+/* Fonts */
 
 @font-face {
   font-family: "Archivo";
@@ -19,32 +17,29 @@
   font-display: swap;
 }
 
-/* ═══ Tokens ══════════════════════════════════════════════════════════ */
+/* Tokens */
 
 :root {
-  /* Cold ink. The blue cast is deliberate — neutral grey-black is what
-     every stock dashboard sits on, and it makes data feel unowned. */
-  --ink-950: #0B0E13;
-  --ink-900: #11141B;
-  --ink-850: #161A22;
-  --ink-800: #1C212B;
-  --ink-700: #242B38;
+  /* Warm near-black. --bg is the floor; --panel..--muted rise off it. */
+  --bg:          #14120F;
+  --panel:       #1C1A16;
+  --panel-hi:    #232019;
+  --inset:       #2A2620;
+  --muted:       #38332B;
 
-  --line:      #1F2530;
-  --line-loud: #2E3747;
+  --line:        #2A2721;
+  --line-strong: #3A362E;
 
-  --paper:       #E8EAEF;
-  --paper-dim:   #98A1B0;
-  --paper-faint: #5A6373;
+  --text:        #EDE8E0;
+  --text-dim:    #A39C8E;
+  --text-faint:  #6E675B;
 
-  /* The one amber. Reserved for a single job: the year's best day.
-     If it starts showing up anywhere else, the signal is gone. */
-  --lamp: #F2A93B;
+  /* The one amber: the year's best day, nothing else. */
+  --highlight:   #F2A93B;
 
-  /* Domain hue — set per page by body.domain-*, inherited by every
-     accent surface below. One variable, four sections. */
-  --accent:      #8FB8CE;
-  --accent-deep: #3F6076;
+  /* Per-page hue, set by body.domain-* below. */
+  --accent:      #8FB0AA;
+  --accent-deep: #47584F;
 
   --sans: "Archivo", system-ui, -apple-system, "Segoe UI", sans-serif;
   --mono: "Spline Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace;
@@ -52,67 +47,80 @@
   --rail: 60px;
 }
 
-body.domain-git       { --accent: #7CC0E0; --accent-deep: #35586C; }
-/* Dashboard is the cross-domain view, so it has no hue of its own — it
-   climbs to paper instead. Achromatic on purpose, but bright enough at the
-   top to read as a choice rather than a missing colour. */
-body.domain-dashboard { --accent: #C9D3E2; --accent-deep: #596273; }
-body.domain-todos     { --accent: #9CCB86; --accent-deep: #41603A; }
-body.domain-calendar  { --accent: #B79AD8; --accent-deep: #574670; }
+body.domain-git       { --accent: #7C9CB0; --accent-deep: #3E4E5A; }
+body.domain-dashboard { --accent: #C4BDB2; --accent-deep: #6B6458; }
+body.domain-todos     { --accent: #8FB08A; --accent-deep: #475845; }
+body.domain-calendar  { --accent: #A594B8; --accent-deep: #4C4257; }
 
-/* ═══ Light mode ══════════════════════════════════════════════════════
-   Dark is primary; light is the same logic run the other direction, not
-   an inverted filter. Elevation still climbs toward the paper end of the
-   ramp (page is the one tinted surface, panels lift to true white); each
-   domain keeps its hue but trades "pale accent on dark ink" for "inked
-   accent on pale paper", since a light tint that read as saturated on
-   near-black turns washed-out on near-white. The lamp still means only
-   the one thing. Only the OS's explicit light preference opts in — no
-   system preference stays on dark. */
+/* Theme: caelestia — follows ~/.local/state/caelestia/scheme.json.
+   Set <html data-theme="caelestia">. Static snapshot for now; a later
+   step injects this block per request from the live file. Dark only. */
+:root[data-theme="caelestia"] {
+  --bg:          #0a0f0f;  /* background         */
+  --panel:       #131b1a;  /* surfaceContainer   */
+  --panel-hi:    #192120;  /* surfaceContainerHigh */
+  --inset:       #1d2827;  /* surfaceContainerHighest */
+  --muted:       #353d3c;  /* surface2           */
+
+  --line:        #3f4a49;  /* outlineVariant */
+  --line-strong: #6d7876;  /* outline        */
+
+  --text:        #dce8e6;  /* onSurface        */
+  --text-dim:    #a2adac;  /* onSurfaceVariant */
+  --text-faint:  #6d7876;  /* outline          */
+
+  --accent:      #9bd0cc;  /* primary          */
+  --accent-deep: #255b58;  /* primaryContainer */
+}
+
+:root[data-theme="caelestia"] body.domain-git       { --accent: #7aaee9; --accent-deep: #2f4d7a; }
+:root[data-theme="caelestia"] body.domain-dashboard { --accent: #9bd0cc; --accent-deep: #255b58; }
+:root[data-theme="caelestia"] body.domain-todos     { --accent: #56e2c0; --accent-deep: #1f5a4c; }
+/* caelestia ships no violet — calendar keeps a fixed fallback */
+:root[data-theme="caelestia"] body.domain-calendar  { --accent: #b9a6d6; --accent-deep: #4a3f63; }
+
+/* Light mode — only the OS's explicit light preference opts in. */
 @media (prefers-color-scheme: light) {
   :root {
-    --ink-950: #EEF0F4;
-    --ink-900: #FFFFFF;
-    --ink-850: #E7EAF0;
-    --ink-800: #DEE2EA;
-    --ink-700: #1B2029;
+    --bg:          #F2EFE8;
+    --panel:       #FFFFFF;
+    --panel-hi:    #ECE8DF;
+    --inset:       #E3DED3;
+    --muted:       #201E19;
 
-    --line:      #DBE0E8;
-    --line-loud: #C4CAD6;
+    --line:        #E0DBD0;
+    --line-strong: #C9C3B5;
 
-    --paper:       #171A21;
-    --paper-dim:   #5B6373;
-    --paper-faint: #8B93A3;
+    --text:        #201E19;
+    --text-dim:    #6B6459;
+    --text-faint:  #938B7D;
 
-    --lamp: #C97F12;
+    --highlight:   #C97F12;
   }
 
-  body.domain-git       { --accent: #2B7A9E; --accent-deep: #C3DEE9; }
-  body.domain-dashboard { --accent: #4A5568; --accent-deep: #D3D8E1; }
-  body.domain-todos     { --accent: #3F7A2E; --accent-deep: #CBE0BE; }
-  body.domain-calendar  { --accent: #7A55A8; --accent-deep: #E1D0F0; }
+  body.domain-git       { --accent: #3A6B82; --accent-deep: #CDDDE4; }
+  body.domain-dashboard { --accent: #5A5348; --accent-deep: #DAD5CA; }
+  body.domain-todos     { --accent: #4A6E43; --accent-deep: #D2DFCB; }
+  body.domain-calendar  { --accent: #6E5A86; --accent-deep: #DFD5E8; }
 
   .pr-dot[data-state="MERGED"] { background: #8C5FBE; }
   .pr-dot[data-state="OPEN"]   { background: #3C8A2E; }
   .pr-dot[data-state="CLOSED"] { background: #C94456; }
 
-  /* The tooltip stays the one deliberately-inked chip so it still pops off
-     the page as the most prominent surface — that means its text can't
-     follow --paper like everything else does. */
   #tip { color: #EEF0F4; box-shadow: 0 8px 24px rgb(20 24 32 / 0.16); }
 }
 
 * { box-sizing: border-box; }
 
-/* ═══ Base ════════════════════════════════════════════════════════════ */
+/* Base */
 
 body {
   display: grid;
   grid-template-columns: var(--rail) 1fr;
   min-height: 100vh;
   margin: 0;
-  background: var(--ink-950);
-  color: var(--paper);
+  background: var(--bg);
+  color: var(--text);
   font-family: var(--sans);
   font-size: 13.5px;
   font-stretch: 100%;
@@ -129,16 +137,15 @@ a { color: inherit; }
   border-radius: 3px;
 }
 
-/* Every date, count and axis tick. The shared time-gutter face. */
 .mono, .pr-date, .box-meta, .repos li::before, .hstat b, .hero-value {
   font-family: var(--mono);
   font-variant-numeric: tabular-nums;
 }
 
-/* ═══ Rail ════════════════════════════════════════════════════════════ */
+/* Rail */
 
 .sidebar {
-  background: var(--ink-950);
+  background: var(--bg);
   border-right: 1px solid var(--line);
   padding: 20px 0;
   display: flex;
@@ -164,8 +171,6 @@ a { color: inherit; }
 
 .sidebar nav { display: flex; flex-direction: column; gap: 2px; }
 
-/* Active state is a hue, not a fill: the accent bar on the left edge is
-   the same colour the whole page is tinted with. */
 .nav-item {
   position: relative;
   width: 38px;
@@ -174,7 +179,7 @@ a { color: inherit; }
   display: flex;
   align-items: center;
   justify-content: center;
-  color: var(--paper-faint);
+  color: var(--text-faint);
   text-decoration: none;
   transition: color 0.16s ease, background 0.16s ease;
 }
@@ -192,12 +197,12 @@ a { color: inherit; }
   transition: height 0.2s cubic-bezier(0.2, 0.8, 0.3, 1);
 }
 
-.nav-item:hover { color: var(--paper-dim); background: var(--ink-850); }
+.nav-item:hover { color: var(--text-dim); background: var(--panel-hi); }
 
-.nav-item.active { color: var(--accent); background: var(--ink-850); }
+.nav-item.active { color: var(--accent); background: var(--panel-hi); }
 .nav-item.active::before { height: 18px; }
 
-/* ═══ Content ═════════════════════════════════════════════════════════ */
+/* Content */
 
 .content {
   padding: 20px 20px 72px;
@@ -230,7 +235,7 @@ h1 span {
   font-size: 12px;
   font-weight: 400;
   letter-spacing: 0;
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 
 .dot {
@@ -242,10 +247,7 @@ h1 span {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-/* ═══ Controls: type pills + year stepper ════════════════════════════
-   Both are the same track idiom — a recessed pill housing a lit segment —
-   so switching data source and switching year read as one family of
-   control instead of two competing widgets. */
+/* Controls: type pills + year stepper */
 
 .controls {
   display: flex;
@@ -257,7 +259,7 @@ h1 span {
   display: flex;
   align-items: center;
   gap: 2px;
-  background: var(--ink-900);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 999px;
   padding: 3px;
@@ -267,7 +269,7 @@ h1 span {
   appearance: none;
   border: none;
   background: transparent;
-  color: var(--paper-dim);
+  color: var(--text-dim);
   font-family: var(--sans);
   font-size: 12.5px;
   font-weight: 500;
@@ -278,14 +280,14 @@ h1 span {
   transition: background 0.16s ease, color 0.16s ease;
 }
 
-.pill:hover { color: var(--paper); }
+.pill:hover { color: var(--text); }
 
 .pill.active {
   background: var(--accent);
-  color: var(--ink-950);
+  color: var(--bg);
 }
 
-.pill.active:hover { color: var(--ink-950); }
+.pill.active:hover { color: var(--bg); }
 
 .yearstep { padding: 3px; gap: 0; }
 
@@ -293,7 +295,7 @@ h1 span {
   appearance: none;
   border: none;
   background: transparent;
-  color: var(--paper-dim);
+  color: var(--text-dim);
   width: 26px;
   height: 26px;
   display: flex;
@@ -306,9 +308,9 @@ h1 span {
 
 .ystep svg { width: 15px; height: 15px; }
 
-.ystep:hover:not(:disabled) { background: var(--ink-850); color: var(--paper); }
+.ystep:hover:not(:disabled) { background: var(--panel-hi); color: var(--text); }
 
-.ystep:disabled { color: var(--ink-700); cursor: default; }
+.ystep:disabled { color: var(--muted); cursor: default; }
 
 .yval {
   min-width: 46px;
@@ -317,10 +319,10 @@ h1 span {
   font-size: 12.5px;
   font-weight: 500;
   font-variant-numeric: tabular-nums;
-  color: var(--paper);
+  color: var(--text);
 }
 
-/* ═══ Hero ════════════════════════════════════════════════════════════ */
+/* Hero */
 
 .hero {
   display: grid;
@@ -332,34 +334,30 @@ h1 span {
   border-bottom: 1px solid var(--line);
 }
 
-/* Width axis, not just size, separates the headline number from the
-   labels around it — that is the whole point of shipping a variable font. */
 .hero-value {
   font-size: clamp(56px, 7vw, 82px);
   line-height: 0.86;
   font-weight: 600;
   font-stretch: 118%;
   letter-spacing: -0.015em;
-  color: var(--paper);
+  color: var(--text);
 }
 
 .hero-label {
   margin-top: 14px;
   font-size: 13px;
   font-weight: 500;
-  color: var(--paper-dim);
+  color: var(--text-dim);
 }
 
-/* .stats/.stat is the dashboard's row; it reads the same information shape
-   as the git hero, so it shares the idiom rather than inventing a second. */
 .hero-stats, .stats {
   display: grid;
   grid-template-columns: repeat(4, minmax(0, 1fr));
   gap: 20px 28px;
 }
 
-/* max-content, not 1fr: 1fr stretches across the wide row next to the hero
-   number, spacing the short stat pairs further apart toward the right. */
+/* max-content, not 1fr: 1fr would space the stat pairs apart across the
+   wide row next to the hero number. */
 .hero-stats {
   grid-template-columns: repeat(3, max-content);
   justify-content: start;
@@ -384,10 +382,10 @@ h1 span {
   display: block;
   margin-top: 10px;
   font-size: 12.5px;
-  color: var(--paper-dim);
+  color: var(--text-dim);
 }
 
-/* ═══ Grid & panels ═══════════════════════════════════════════════════ */
+/* Grid & panels */
 
 .dash {
   display: grid;
@@ -397,7 +395,7 @@ h1 span {
 }
 
 .panel {
-  background: var(--ink-900);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 20px 22px;
@@ -417,38 +415,30 @@ h1 span {
 .box-title {
   font-size: 14.5px;
   font-weight: 600;
-  color: var(--paper);
+  color: var(--text);
 }
 
-.box-meta { font-size: 13px; color: var(--paper-dim); }
+.box-meta { font-size: 13px; color: var(--text-dim); }
 
 .box-title-group { display: flex; align-items: baseline; gap: 16px; }
 
-/* Spells out what the pr-dot colours mean (see .pr-dot[data-state] below),
-   so it isn't hover-only knowledge. */
-.pr-legend { display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: var(--paper-dim); }
+.pr-legend { display: flex; align-items: center; gap: 12px; font-size: 11.5px; color: var(--text-dim); }
 .pr-legend span { display: inline-flex; align-items: center; gap: 5px; }
 .pr-legend .pr-dot { width: 7px; height: 7px; }
 
 .empty {
   margin: 14px 0 4px;
   font-size: 13px;
-  color: var(--paper-dim);
+  color: var(--text-dim);
 }
 
-/* ═══ The spine ═══════════════════════════════════════════════════════
-   The year of commits is the one thing this page exists to show, so it
-   does not sit in a card competing with two lists. It runs full width
-   on the page ground with hairlines above and below — the spine the
-   panels below hang off. */
-
+/* The heatmap runs full width on the page ground, not in a card. */
 #chart.panel {
   grid-column: 1 / -1;
   background: none;
   border: none;
   border-radius: 0;
-  /* No border-top: the hero's rule above already draws this edge. */
-  border-bottom: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);  /* top edge is the hero's rule */
   padding: 22px 4px 16px;
   margin-bottom: 8px;
   overflow-x: auto;
@@ -461,62 +451,42 @@ h1 span {
 #chart .lbl {
   font-family: var(--mono);
   font-size: 10px;
-  fill: var(--paper-dim);
+  fill: var(--text-dim);
 }
 
 #chart rect { stroke: none; }
 
-/* Affordance follows behaviour: only cells that actually carry an hx-get
-   look clickable and take a selection ring. The git page renders the same
-   partial without hx-get, so it goes inert with no modifier class to keep
-   in sync. */
+/* Only cells with an hx-get (dashboard) look clickable; the git page
+   renders the same partial without it and stays inert. */
 #chart rect[hx-get] { cursor: pointer; }
-#chart rect[hx-get]:hover { stroke: var(--paper); stroke-width: 1.5; }
+#chart rect[hx-get]:hover { stroke: var(--text); stroke-width: 1.5; }
 #chart rect[hx-get].sel { stroke: var(--accent); stroke-width: 1.5; }
 
-/* The ramp. Go emits a level (0–4); the colour is mixed here so it follows
-   whatever --accent the current domain set — the heatmap turns green on
-   Todos and violet on Calendar without a second ramp existing anywhere.
-   Mixed in oklab, not sRGB: sRGB is not perceptually uniform, so its mid
-   steps sag and muddy. The percentages are the perceived climb.
+/* Level 0–4 from Go; mixed in oklab here so the ramp follows --accent
+   per domain. Weighted low: l1/l2 hold most days of a real year. */
+#chart rect.l0 { fill: var(--panel-hi); stroke: var(--line); stroke-width: 1; }
+#chart rect.l1 { fill: color-mix(in oklab, var(--accent) 34%, var(--panel)); }
+#chart rect.l2 { fill: color-mix(in oklab, var(--accent) 57%, var(--panel)); }
+#chart rect.l3 { fill: color-mix(in oklab, var(--accent) 78%, var(--panel)); }
+#chart rect.l4 { fill: var(--accent); }
 
-   That climb is weighted low on purpose: l1 (1–3 commits) and l2 (4–8) hold
-   most days of a real year, so they get the readable half of the range —
-   a ramp that only separates at the top describes a year nobody has. */
+/* Future days carry no grid — they vanish into the panel. */
+#chart rect.future { fill: var(--panel); stroke: none; }
 
-#chart rect.l0 { fill: var(--ink-850); stroke: var(--line); stroke-width: 1; }  /* silent: no commits, but still a visible grid cell */
-#chart rect.l1 { fill: color-mix(in oklab, var(--accent) 34%, var(--ink-900)); }
-#chart rect.l2 { fill: color-mix(in oklab, var(--accent) 57%, var(--ink-900)); }
-#chart rect.l3 { fill: color-mix(in oklab, var(--accent) 78%, var(--ink-900)); }
-#chart rect.l4 { fill: var(--accent); }   /* full signal, same tone as the nav */
-
-/* Future days haven't happened yet, so they carry no grid at all — they
-   disappear into the panel background instead of competing with l0's
-   visible "no commits" cells. */
-#chart rect.future { fill: var(--ink-900); stroke: none; }
-
-/* The single amber: the best day of the year, lit like one lamp on an
-   otherwise cold panel. Nothing else on the page may use --lamp. */
+/* The one amber. Nothing else on the page may use --highlight. */
 #chart rect.best {
-  fill: var(--lamp);
-  stroke: var(--lamp);
+  fill: var(--highlight);
+  stroke: var(--highlight);
   stroke-width: 3;
   paint-order: stroke;
   stroke-opacity: 0.22;
 }
 
-/* Separates the sequential 0–4 ramp from the categorical best-day swatch —
-   without it the amber cell reads as a fifth, misplaced intensity step. */
-#chart .legend-div { stroke: var(--line-loud); stroke-width: 1; }
+#chart .legend-div { stroke: var(--line-strong); stroke-width: 1; }
 
-/* ═══ Current-year layout ════════════════════════════════════════════
-   The in-progress year's heatmap is intrinsically narrower than a
-   finished year's (buildHeatmap only draws through today + 1 week), so
-   stretching it full-bleed like a finished year blows the cells up and
-   leaves a gap before the legend catches up. Instead it sits boxed at
-   its natural size in the left column, with the repo ranking beside it
-   in the right column; PRs drop to their own full-width row underneath
-   since Repos took its spot next to the chart. */
+/* Current-year layout — the in-progress heatmap is narrower (drawn only
+   through today + 1 week), so it sits boxed in the left column with the
+   repo ranking beside it and PRs on their own full-width row. */
 
 .dash.current-year { align-items: stretch; }
 
@@ -524,7 +494,7 @@ h1 span {
   grid-column: 1 / 2;
   display: flex;
   flex-direction: column;
-  background: var(--ink-900);
+  background: var(--panel);
   border: 1px solid var(--line);
   border-radius: 14px;
   padding: 20px 22px;
@@ -544,20 +514,14 @@ h1 span {
   margin: auto 0;
 }
 
-/* Capped shorter than the shared 460px: at full height here the row
-   stretches the compact heatmap into a tall box with a huge letterboxed
-   gap above and below it just to match the repo list's length. */
 .dash.current-year .repo-panel .repos { max-height: 260px; }
 
 .dash.current-year .repo-panel { grid-column: 2 / 3; }
 .dash.current-year .pr-panel   { grid-column: 1 / -1; }
 
-/* ═══ Lists ═══════════════════════════════════════════════════════════ */
+/* Lists */
 
-/* Scrollable, but the boundary is never a hard clip mid-row: the mask
-   fades the last ~28px so a cut-off item recedes instead of snapping off,
-   and it rides along with the scroll position since it's on the box that
-   scrolls, not a fixed overlay. */
+/* Fade the last ~28px so a cut-off row recedes instead of snapping off. */
 .prs, .repos {
   list-style: none;
   margin: 0;
@@ -565,7 +529,7 @@ h1 span {
   max-height: 460px;
   overflow-y: auto;
   scrollbar-width: thin;
-  scrollbar-color: var(--ink-700) transparent;
+  scrollbar-color: var(--muted) transparent;
   mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent 100%);
   -webkit-mask-image: linear-gradient(to bottom, black calc(100% - 28px), transparent 100%);
 }
@@ -579,7 +543,7 @@ h1 span {
 
 .prs li:last-child, .repos li:last-child { border-bottom: none; }
 
-/* Pull requests ---------------------------------------------------- */
+/* Pull requests */
 
 .prs li {
   display: grid;
@@ -591,7 +555,7 @@ h1 span {
 .pr-date {
   grid-area: date;
   font-size: 12px;
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 
 .pr-dot {
@@ -599,7 +563,7 @@ h1 span {
   width: 9px;
   height: 9px;
   border-radius: 9px;
-  background: var(--paper-faint);
+  background: var(--text-faint);
 }
 
 .pr-dot[data-state="MERGED"] { background: #A98CD8; }
@@ -622,10 +586,10 @@ h1 span {
   grid-area: repo;
   font-family: var(--mono);
   font-size: 11.5px;
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 
-/* Repos ------------------------------------------------------------ */
+/* Repos */
 
 .repos { counter-reset: rank; }
 
@@ -641,7 +605,7 @@ h1 span {
   content: counter(rank, decimal-leading-zero);
   grid-area: rank;
   font-size: 11.5px;
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 
 .repo-name {
@@ -662,14 +626,14 @@ h1 span {
   font-variant-numeric: tabular-nums;
   font-weight: 500;
   font-size: 13.5px;
-  color: var(--paper-dim);
+  color: var(--text-dim);
 }
 
 .repo-bar {
   grid-area: bar;
   height: 3px;
   border-radius: 3px;
-  background: var(--ink-800);
+  background: var(--inset);
   overflow: hidden;
 }
 
@@ -680,17 +644,17 @@ h1 span {
   background: linear-gradient(90deg, var(--accent-deep), var(--accent));
 }
 
-/* ═══ Tooltip ═════════════════════════════════════════════════════════ */
+/* Tooltip */
 
 #tip {
   position: absolute;
-  background: var(--ink-700);
-  border: 1px solid var(--line-loud);
+  background: var(--muted);
+  border: 1px solid var(--line-strong);
   border-radius: 7px;
   padding: 6px 10px;
   font-family: var(--mono);
   font-size: 11px;
-  color: var(--paper);
+  color: var(--text);
   box-shadow: 0 8px 24px rgb(0 0 0 / 0.45);
   pointer-events: none;
   opacity: 0;
@@ -701,15 +665,12 @@ h1 span {
 
 .htmx-request { opacity: 0.45; transition: opacity 0.15s ease; }
 
-/* Crossfade the git-page year/type swap instead of the default hard cut:
-   htmx-swapping is set on #gitview just before old content is removed
-   (held for the swap:120ms modifier on the triggering buttons), then
-   htmx-settling is set on the fresh content until settle:150ms elapses. */
+/* Crossfade the git-page year/type swap instead of a hard cut. */
 #gitview { transition: opacity 0.15s ease; }
 #gitview.htmx-swapping,
 #gitview.htmx-settling { opacity: 0; }
 
-/* ═══ Day detail (dashboard) ══════════════════════════════════════════ */
+/* Day detail (dashboard) */
 
 .day h2 {
   font-family: var(--mono);
@@ -718,7 +679,7 @@ h1 span {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin: 0 0 12px;
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 
 .day ul { list-style: none; margin: 0; padding: 0; }
@@ -735,7 +696,7 @@ h1 span {
 .day li:last-child { border-bottom: none; }
 .day li b { font-family: var(--mono); font-weight: 500; }
 
-/* ═══ Todos ═══════════════════════════════════════════════════════════ */
+/* Todos */
 
 .day h3 {
   display: flex;
@@ -747,7 +708,7 @@ h1 span {
   letter-spacing: 0.1em;
   text-transform: uppercase;
   margin: 20px 0 8px;
-  color: var(--paper-faint);
+  color: var(--text-faint);
 }
 
 .day h3 small { font-size: 10px; color: var(--accent); text-transform: none; letter-spacing: 0; }
@@ -759,7 +720,7 @@ h1 span {
   width: 15px;
   height: 15px;
   padding: 0;
-  border: 1px solid var(--line-loud);
+  border: 1px solid var(--line-strong);
   border-radius: 4px;
   background: none;
   cursor: pointer;
@@ -779,14 +740,14 @@ h1 span {
   width: 4px;
   height: 8px;
   margin: 0 auto;
-  border: solid var(--ink-950);
+  border: solid var(--bg);
   border-width: 0 2px 2px 0;
   transform: translateY(-1px) rotate(45deg);
 }
 
-.check.doing { border-color: var(--lamp); box-shadow: inset 0 0 0 3px var(--lamp); }
+.check.doing { border-color: var(--highlight); box-shadow: inset 0 0 0 3px var(--highlight); }
 
-.todo .done-text { color: var(--paper-faint); text-decoration: line-through; }
+.todo .done-text { color: var(--text-faint); text-decoration: line-through; }
 
 .todo-input {
   width: 100%;
@@ -795,12 +756,12 @@ h1 span {
   border: none;
   border-bottom: 1px solid var(--line);
   background: none;
-  color: var(--paper);
+  color: var(--text);
   font-family: var(--sans);
   font-size: 13px;
 }
 
-.todo-input::placeholder { color: var(--paper-faint); }
+.todo-input::placeholder { color: var(--text-faint); }
 .todo-input:focus { outline: none; border-bottom-color: var(--accent); }
 
 .todo-page { max-width: 620px; }
@@ -812,7 +773,7 @@ h1 span {
   padding: 0 2px;
   border: none;
   background: none;
-  color: var(--paper-faint);
+  color: var(--text-faint);
   font-size: 16px;
   line-height: 1;
   cursor: pointer;
@@ -823,10 +784,7 @@ h1 span {
 .todo:hover .trash, .trash:focus-visible { opacity: 1; }
 .trash:hover { color: #C4544B; }
 
-
-
-
-/* ═══ Responsive ══════════════════════════════════════════════════════ */
+/* Responsive */
 
 @media (max-width: 1120px) {
   .dash { grid-template-columns: minmax(0, 1fr); }

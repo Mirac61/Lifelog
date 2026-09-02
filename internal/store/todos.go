@@ -42,8 +42,14 @@ func ListTodos(ctx context.Context, db *sql.DB) ([]Todo, error) {
 }
 
 func ListTodosForDay(ctx context.Context, db *sql.DB, day string) ([]Todo, error) {
-	const query = `SELECT id, text, due_date, status, estimate, category FROM todos	
-								 WHERE due_date = ? OR (due_date < ? AND status != 'done')`
+	const query = `SELECT id, text, due_date, status, estimate, category
+		FROM todos
+		WHERE due_date = ? OR (due_date < ? AND status != 'done')
+		ORDER BY CASE status
+			WHEN 'in_progress' THEN 0
+			WHEN 'todo'        THEN 1
+			ELSE 2
+		END, due_date`
 	rows, err := db.QueryContext(ctx, query, day, day)
 	if err != nil {
 		return nil, fmt.Errorf("query todo list: %w", err)

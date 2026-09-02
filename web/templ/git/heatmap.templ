@@ -4,7 +4,7 @@ import "fmt"
 
 templ Heatmap(h HeatmapData) {
 	<svg viewBox={ fmt.Sprintf("0 0 %d %d", h.Width, h.Height) } width={ fmt.Sprint(h.Width) } height={ fmt.Sprint(h.Height) } xmlns="http://www.w3.org/2000/svg">
-		<style>.lbl{fill:var(--paper-dim);font:10px ui-monospace,monospace}</style>
+		<style>.lbl{fill:var(--text-dim);font:10px ui-monospace,monospace}</style>
 		for _, d := range h.Days {
 			<text x="0" y={ fmt.Sprint(d.Y) } class="lbl">{ d.Text }</text>
 		}

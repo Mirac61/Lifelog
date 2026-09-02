@@ -1,13 +1,14 @@
 package templ
 
 import (
+	"github.com/Mirac61/lifelog/web/templ/layout"
 	"fmt"
 
 	"github.com/Mirac61/lifelog/internal/store"
 )
 
 templ Dashboard(stats store.Stats) {
-	@Layout("dashboard") {
+	@layout.Shell("dashboard") {
 		<h1>lifelog <span>/ personal data warehouse</span></h1>
 		<div class="stats">
 			<div class="stat"><b>{ fmt.Sprint(stats.Total) }</b><span>contributions</span></div>

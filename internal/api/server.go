@@ -28,6 +28,10 @@ func (s *Server) Routes() http.Handler {
 	mux.HandleFunc("GET /git/view", s.handleGitView)
 	mux.HandleFunc("GET /", s.handleIndex)
 	mux.HandleFunc("GET /git", s.handleGit)
+	mux.HandleFunc("GET /todos", s.handleTodos)
+	mux.HandleFunc("POST /todos", s.handleCreateTodo)
+	mux.HandleFunc("POST /todos/{id}/{status}", s.handleTodo)
+	mux.HandleFunc("DELETE /todos/{id}", s.handleDeleteTodo)
 	mux.Handle("GET /static/", http.StripPrefix("/static/", http.FileServer(http.FS(static))))
 	return mux
 }

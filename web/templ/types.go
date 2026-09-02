@@ -1,8 +1,6 @@
 package templ
 
-import (
-	"time"
-)
+import "time"
 
 // BestDaySuffix renders " · <date>" when a best date exists, or nothing.
 func BestDaySuffix(date string) string {

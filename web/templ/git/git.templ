@@ -3,11 +3,11 @@ package git
 import (
 	"fmt"
 
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/layout"
 )
 
 templ Git(page GitPage) {
-	@views.Layout("git") {
+	@layout.Shell("git") {
 		<div class="page-head">
 			<h1><span class="dot"></span>Git <span>/ <span id="git-year">{ fmt.Sprint(page.Year) }</span></span></h1>
 			<div class="controls" id="git-controls">

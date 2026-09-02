@@ -4,11 +4,14 @@ import (
 	"fmt"
 
 	"github.com/Mirac61/lifelog/internal/store"
+	"github.com/Mirac61/lifelog/web/templ/todo"
 )
 
-templ Day(date string, events []store.DayEvent) {
+templ Day(events []store.DayEvent, todos todo.DayPage) {
 	<div class="panel day">
-		<h2>{ date }</h2>
+		<h2>{ todos.Day.Format("Mon, 2 Jan 2006") }</h2>
+		@todo.Panel(todos)
+		<h3>Events</h3>
 		if len(events) > 0 {
 			<ul>
 				for _, e := range events {

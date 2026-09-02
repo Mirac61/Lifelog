@@ -1,4 +1,91 @@
 package todo
 
+import (
+	"fmt"
 
-// templ todo()
+	"github.com/Mirac61/lifelog/internal/store"
+)
+
+func nextStatus(s string) string {
+	if s == "done" {
+		return "todo"
+	}
+	return "done"
+}
+
+// Clicking the text is the way into and out of in_progress, so no second button.
+func nextOnRowClick(s string) string {
+	if s == "in_progress" {
+		return "todo"
+	}
+	return "in_progress"
+}
+
+// Mutating handlers re-render this out of band to keep the number in sync.
+templ Planned(minutes int, oob bool) {
+	<small id="planned" if oob { hx-swap-oob="true" }>
+		if minutes > 0 {
+			{ fmt.Sprintf("%d min offen", minutes) }
+		}
+	</small>
+}
+
+templ Item(t store.Todo) {
+	<li class="todo">
+		<button
+			class={ "check", templ.KV("done", t.Status == "done"), templ.KV("doing", t.Status == "in_progress") }
+			hx-post={ fmt.Sprintf("/todos/%d/%s", t.ID, nextStatus(t.Status)) }
+			hx-target="closest li"
+			hx-swap="outerHTML"
+			title="Erledigt"
+		></button>
+		<span
+			class={ templ.KV("done-text", t.Status == "done") }
+			hx-post={ fmt.Sprintf("/todos/%d/%s", t.ID, nextOnRowClick(t.Status)) }
+			hx-target="closest li"
+			hx-swap="outerHTML"
+		>{ t.Text }</span>
+		if t.Estimate.Valid {
+			<b>{ fmt.Sprintf("%d min", t.Estimate.Int64) }</b>
+		}
+		<button
+			class="trash"
+			hx-delete={ fmt.Sprintf("/todos/%d", t.ID) }
+			hx-target="closest li"
+			hx-swap="outerHTML"
+			title="Löschen"
+		>×</button>
+	</li>
+}
+
+// ItemUpdate is the response to every mutation: the row, plus the budget out of band.
+templ ItemUpdate(t store.Todo, planned int) {
+	@Item(t)
+	@Planned(planned, true)
+}
+
+templ Panel(page DayPage) {
+	<h3>
+		Todos
+		@Planned(page.Planned, false)
+	</h3>
+	<ul class="todos">
+		for _, t := range page.Todos {
+			@Item(t)
+		}
+	</ul>
+	<form
+		hx-post="/todos"
+		hx-target=".todos"
+		hx-swap="beforeend"
+		hx-on::after-request="this.reset()"
+	>
+		<input type="hidden" name="date" value={ page.Day.Format("2006-01-02") }/>
+		<input
+			class="todo-input"
+			name="text"
+			placeholder="Kaffee kochen 15m #haushalt"
+			autocomplete="off"
+		/>
+	</form>
+}

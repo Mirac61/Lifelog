@@ -2,13 +2,23 @@ package todo
 
 import "github.com/Mirac61/lifelog/web/templ/layout"
 
-templ Page(page DayPage) {
+templ Page(page DayPage, today string) {
 	@layout.Shell("todos") {
 		<div class="page-head">
 			<h1><span class="dot"></span>Todos <span>/ { page.Day.Format("Mon, 2 Jan 2006") }</span></h1>
 		</div>
-		<div class="panel day todo-page">
-			@Panel(page)
+		<div class="board">
+			<div class="panel day board-todos">
+				@Panel(page, today)
+			</div>
+			<div class="panel day board-scratch">
+				<h3>Notizen</h3>
+				<p class="hint">Freitext-Notizen — später.</p>
+			</div>
+			<div class="panel day calendar-box">
+				<h3>Kalender</h3>
+				<p class="hint">Tagesplan — später.</p>
+			</div>
 		</div>
 	}
 }

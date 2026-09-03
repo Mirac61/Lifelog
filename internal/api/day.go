@@ -12,11 +12,16 @@ import (
 
 // loadTodos counts only unfinished todos into Planned: the time still ahead.
 func (s *Server) loadTodos(ctx context.Context, day time.Time) (todo.DayPage, error) {
-	todos, err := store.ListTodosForDay(ctx, s.db, day.Format("2006-01-02"))
+	key := day.Format("2006-01-02")
+	todos, err := store.ListTodosForDay(ctx, s.db, key)
 	if err != nil {
 		return todo.DayPage{}, err
 	}
-	page := todo.DayPage{Day: day, Todos: todos}
+	upcoming, err := store.ListUpcomingTodos(ctx, s.db, key)
+	if err != nil {
+		return todo.DayPage{}, err
+	}
+	page := todo.DayPage{Day: day, Todos: todos, Upcoming: upcoming}
 	for _, t := range todos {
 		if t.Estimate.Valid && t.Status != "done" {
 			page.Planned += int(t.Estimate.Int64)
@@ -42,7 +47,7 @@ func (s *Server) handleDay(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "query failed", http.StatusInternalServerError)
 		return
 	}
-	render(w, r, views.Day(events, todos))
+	render(w, r, views.Day(events, todos, time.Now().Format("2006-01-02")))
 }
 
 func (s *Server) handleTodos(w http.ResponseWriter, r *http.Request) {
@@ -60,5 +65,5 @@ func (s *Server) handleTodos(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "query failed", http.StatusInternalServerError)
 		return
 	}
-	render(w, r, todo.Page(page))
+	render(w, r, todo.Page(page, time.Now().Format("2006-01-02")))
 }

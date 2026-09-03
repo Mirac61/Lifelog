@@ -37,6 +37,8 @@
   /* The one amber: the year's best day, nothing else. */
   --highlight:   #F2A93B;
 
+  --danger:      #D98A7A;
+
   /* Per-page hue, set by body.domain-* below. */
   --accent:      #8FB0AA;
   --accent-deep: #47584F;
@@ -96,6 +98,8 @@ body.domain-calendar  { --accent: #A594B8; --accent-deep: #4C4257; }
     --text-faint:  #938B7D;
 
     --highlight:   #C97F12;
+
+    --danger:      #B4543F;
   }
 
   body.domain-git       { --accent: #3A6B82; --accent-deep: #CDDDE4; }
@@ -713,15 +717,82 @@ h1 span {
 
 .day h3 small { font-size: 10px; color: var(--accent); text-transform: none; letter-spacing: 0; }
 
-.day li.todo { justify-content: flex-start; gap: 10px; }
+/* A soft one-liner for empty panels. */
+.hint {
+  margin: 4px 0 0;
+  font-size: 13px;
+  color: var(--text-faint);
+}
+
+/* --- Todo board: a roomier, more modern module than the rest of the app. --- */
+.board .day h3 {
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  color: var(--text-dim);
+  margin: 22px 0 12px;
+}
+.board .day h3:first-child { margin-top: 0; }
+
+.board .todos { display: flex; flex-direction: column; }
+
+.day li.todo {
+  justify-content: flex-start;
+  align-items: center;
+  gap: 12px;
+  padding: 12px 0;
+  border: none;
+  border-bottom: 1px solid var(--line);
+  font-size: 15px;
+  line-height: 1.35;
+}
+.day li.todo:last-child { border-bottom: none; }
+
+.todo-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  transition: color 0.12s;
+}
+.todo-text:hover { color: var(--accent); }
+
+.todo .done-text { color: var(--text-faint); text-decoration: line-through; }
+.todo .done-text:hover { color: var(--text-faint); }
+
+.todo .meta {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-left: auto;
+  flex: 0 0 auto;
+}
+
+.todo .est {
+  font-family: var(--mono);
+  font-size: 12px;
+  color: var(--text-faint);
+  font-variant-numeric: tabular-nums;
+}
+
+.todo .date {
+  font-family: var(--mono);
+  font-size: 12px;
+  font-variant-numeric: tabular-nums;
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+.todo.overdue .date { color: var(--danger); }
 
 .check {
   flex: 0 0 auto;
-  width: 15px;
-  height: 15px;
+  width: 18px;
+  height: 18px;
   padding: 0;
-  border: 1px solid var(--line-strong);
-  border-radius: 4px;
+  border: 1.5px solid var(--line-strong);
+  border-radius: 6px;
   background: none;
   cursor: pointer;
   transition: border-color 0.15s, background 0.15s;
@@ -737,36 +808,76 @@ h1 span {
 .check.done::after {
   content: "";
   display: block;
-  width: 4px;
-  height: 8px;
+  width: 5px;
+  height: 9px;
   margin: 0 auto;
   border: solid var(--bg);
   border-width: 0 2px 2px 0;
   transform: translateY(-1px) rotate(45deg);
 }
 
-.check.doing { border-color: var(--highlight); box-shadow: inset 0 0 0 3px var(--highlight); }
+.check.doing {
+  border-color: var(--highlight);
+  background: var(--highlight);
+}
 
-.todo .done-text { color: var(--text-faint); text-decoration: line-through; }
+/* Project tag. Muted for now; later --tag is set per row from the
+   project's own colour. */
+.tag {
+  font-family: var(--mono);
+  font-size: 11px;
+  color: var(--text-dim);
+  background: color-mix(in srgb, var(--line) 55%, transparent);
+  padding: 1px 6px;
+  border-radius: 5px;
+}
+
+.todo-add { margin-top: 18px; }
 
 .todo-input {
   width: 100%;
-  margin-top: 10px;
-  padding: 7px 0;
+  padding: 10px 2px;
   border: none;
   border-bottom: 1px solid var(--line);
   background: none;
   color: var(--text);
-  font-family: var(--sans);
+  font-family: var(--mono);
   font-size: 13px;
+  transition: border-color 0.15s;
 }
 
 .todo-input::placeholder { color: var(--text-faint); }
 .todo-input:focus { outline: none; border-bottom-color: var(--accent); }
 
-.todo-page { max-width: 620px; }
-.todo-page h3:first-child { margin-top: 0; }
-.todo-page .todos li { padding: 10px 0; }
+.upcoming-sec {
+  margin-top: 20px;
+  padding-top: 4px;
+  border-top: 1px solid var(--line);
+}
+.upcoming-sec h3 { margin-top: 10px; }
+
+/* Todos board: todos + scratch stacked on the left, a full-height plan on the right. */
+.board {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  grid-template-rows: 1fr 1fr;
+  grid-template-areas:
+    "todos   calendar"
+    "scratch calendar";
+  gap: 16px;
+  min-height: calc(100vh - 172px);
+}
+
+.board-todos   { grid-area: todos; }
+.board-scratch { grid-area: scratch; }
+.calendar-box  { grid-area: calendar; }
+
+.board-todos h3:first-child { margin-top: 0; }
+.board-scratch h3:first-child,
+.calendar-box h3:first-child { margin-top: 0; }
+
+/* "Kommende" only shows once it holds something. */
+.upcoming-sec:not(:has(#todo-upcoming li)) { display: none; }
 
 .trash {
   margin-left: auto;
@@ -787,6 +898,14 @@ h1 span {
 /* Responsive */
 
 @media (max-width: 1120px) {
+  .board {
+    grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto;
+    grid-template-areas: "todos" "scratch" "calendar";
+    min-height: 0;
+  }
+  .calendar-box { min-height: 320px; }
+
   .dash { grid-template-columns: minmax(0, 1fr); }
   .dash.current-year #chart.panel,
   .dash.current-year .repo-panel,

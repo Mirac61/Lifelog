@@ -8,7 +8,8 @@ import (
 
 // Deliberately free of event data: the day detail view composes both.
 type DayPage struct {
-	Day     time.Time
-	Todos   []store.Todo
-	Planned int
+	Day      time.Time
+	Todos    []store.Todo
+	Upcoming []store.Todo // unfinished todos due after Day, earliest first
+	Planned  int
 }

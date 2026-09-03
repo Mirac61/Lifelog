@@ -55,7 +55,25 @@ func ListTodosForDay(ctx context.Context, db *sql.DB, day string) ([]Todo, error
 		return nil, fmt.Errorf("query todo list: %w", err)
 	}
 	defer rows.Close()
+	return scanTodoRows(rows)
+}
 
+// ListUpcomingTodos returns unfinished todos due after the given day, earliest first.
+func ListUpcomingTodos(ctx context.Context, db *sql.DB, day string) ([]Todo, error) {
+	const query = `SELECT id, text, due_date, status, estimate, category
+		FROM todos
+		WHERE due_date > ? AND status != 'done'
+		ORDER BY due_date, CASE status WHEN 'in_progress' THEN 0 ELSE 1 END`
+	rows, err := db.QueryContext(ctx, query, day)
+	if err != nil {
+		return nil, fmt.Errorf("query upcoming todos: %w", err)
+	}
+	defer rows.Close()
+	return scanTodoRows(rows)
+}
+
+// scanTodoRows drains a (id, text, due_date, status, estimate, category) result set.
+func scanTodoRows(rows *sql.Rows) ([]Todo, error) {
 	var todos []Todo
 	for rows.Next() {
 		var t Todo

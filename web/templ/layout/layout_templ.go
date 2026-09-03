@@ -29,7 +29,7 @@ func Shell(active string) templ.Component {
 			templ_7745c5c3_Var1 = templ.NopComponent
 		}
 		ctx = templ.ClearChildren(ctx)
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>lifelog</title><link rel=\"stylesheet\" href=\"/static/style.css\"><script src=\"/static/htmx.min.js\"></script></head>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 1, "<!doctype html><html lang=\"en\"><head><meta charset=\"utf-8\"><title>lifelog</title><link rel=\"icon\" href=\"data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%238FB0AA' stroke-width='1.6'%3E%3Ccircle cx='12' cy='12' r='8.5'/%3E%3Ccircle cx='10.8' cy='13.2' r='4.8'/%3E%3Ccircle cx='9.8' cy='14.2' r='1.5' fill='%238FB0AA' stroke='none'/%3E%3C/svg%3E\"><link rel=\"stylesheet\" href=\"/static/style.css\"><script src=\"/static/htmx.min.js\"></script></head>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -51,7 +51,7 @@ func Shell(active string) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><aside class=\"sidebar\"><a href=\"/\" class=\"logo\" title=\"lifelog\"><svg viewBox=\"0 0 24 24\"><circle cx=\"12\" cy=\"12\" r=\"3.6\" fill=\"currentColor\"></circle></svg></a><nav>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 3, "\"><aside class=\"sidebar\"><a href=\"/\" class=\"logo\" title=\"lifelog\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\"><circle cx=\"12\" cy=\"12\" r=\"8.5\"></circle> <circle cx=\"10.8\" cy=\"13.2\" r=\"4.8\"></circle> <circle cx=\"9.8\" cy=\"14.2\" r=\"1.5\" fill=\"currentColor\" stroke=\"none\"></circle></svg></a><nav>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

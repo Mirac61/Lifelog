@@ -2,6 +2,7 @@ package todo
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
 )
@@ -23,15 +24,51 @@ func nextOnRowClick(s string) string {
 
 // Mutating handlers re-render this out of band to keep the number in sync.
 templ Planned(minutes int, oob bool) {
-	<small id="planned" if oob { hx-swap-oob="true" }>
+	<small
+		id="planned"
+		if oob {
+			hx-swap-oob="true"
+		}
+	>
 		if minutes > 0 {
-			{ fmt.Sprintf("%d min offen", minutes) }
+			{ formatDuration(minutes) + " offen" }
 		}
 	</small>
 }
 
-templ Item(t store.Todo) {
-	<li class="todo">
+func formatDuration(minute int) string {
+	hour, minutes := minute/60, minute%60
+	switch {
+	case hour > 0 && minutes > 0:
+		return fmt.Sprintf("%dh%dm", hour, minutes)
+	case hour > 0:
+		return fmt.Sprintf("%dh", hour)
+	default:
+		return fmt.Sprintf("%dm", minutes)
+	}
+}
+
+var weekdayDE = [...]string{"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"}
+
+// formatDueDate renders "Fr 5.9." for the current year, "Fr 5.9.2027" otherwise.
+func formatDueDate(iso, today string) string {
+	d, err := time.Parse("2006-01-02", iso)
+	if err != nil {
+		return iso
+	}
+	out := fmt.Sprintf("%s %d.%d.", weekdayDE[d.Weekday()], d.Day(), int(d.Month()))
+	if now, err := time.Parse("2006-01-02", today); err == nil && d.Year() != now.Year() {
+		out += fmt.Sprint(d.Year())
+	}
+	return out
+}
+
+func isOverdue(t store.Todo, today string) bool {
+	return t.DueDate.Valid && t.DueDate.String < today && t.Status != "done"
+}
+
+templ Item(t store.Todo, today string) {
+	<li class={ "todo", templ.KV("overdue", isOverdue(t, today)) }>
 		<button
 			class={ "check", templ.KV("done", t.Status == "done"), templ.KV("doing", t.Status == "in_progress") }
 			hx-post={ fmt.Sprintf("/todos/%d/%s", t.ID, nextStatus(t.Status)) }
@@ -40,14 +77,22 @@ templ Item(t store.Todo) {
 			title="Erledigt"
 		></button>
 		<span
-			class={ templ.KV("done-text", t.Status == "done") }
+			class={ "todo-text", templ.KV("done-text", t.Status == "done") }
 			hx-post={ fmt.Sprintf("/todos/%d/%s", t.ID, nextOnRowClick(t.Status)) }
 			hx-target="closest li"
 			hx-swap="outerHTML"
 		>{ t.Text }</span>
-		if t.Estimate.Valid {
-			<b>{ fmt.Sprintf("%d min", t.Estimate.Int64) }</b>
-		}
+		<span class="meta">
+			if t.Estimate.Valid {
+				<span class="est">{ formatDuration(int(t.Estimate.Int64)) }</span>
+			}
+			if t.DueDate.Valid && t.DueDate.String != today {
+				<span class="date">{ formatDueDate(t.DueDate.String, today) }</span>
+			}
+			if t.Category.Valid {
+				<span class="tag">#{ t.Category.String }</span>
+			}
+		</span>
 		<button
 			class="trash"
 			hx-delete={ fmt.Sprintf("/todos/%d", t.ID) }
@@ -59,24 +104,45 @@ templ Item(t store.Todo) {
 }
 
 // ItemUpdate is the response to every mutation: the row, plus the budget out of band.
-templ ItemUpdate(t store.Todo, planned int) {
-	@Item(t)
+templ ItemUpdate(t store.Todo, planned int, today string) {
+	@Item(t, today)
 	@Planned(planned, true)
 }
 
-templ Panel(page DayPage) {
+// ItemUpcoming is the create response when the new todo is due past the shown
+// day: it drops into the "Kommende" list out of band, plus the budget.
+templ ItemUpcoming(t store.Todo, planned int, today string) {
+	<ul hx-swap-oob="beforeend:#todo-upcoming">
+		@Item(t, today)
+	</ul>
+	@Planned(planned, true)
+}
+
+templ Panel(page DayPage, today string) {
 	<h3>
 		Todos
 		@Planned(page.Planned, false)
 	</h3>
-	<ul class="todos">
+	<ul class="todos" id="todo-today">
 		for _, t := range page.Todos {
-			@Item(t)
+			@Item(t, today)
 		}
 	</ul>
+	if len(page.Todos) == 0 {
+		<p class="hint">Nichts für heute — tipp unten was ein.</p>
+	}
+	<div class="upcoming-sec">
+		<h3>Kommende</h3>
+		<ul class="todos" id="todo-upcoming">
+			for _, t := range page.Upcoming {
+				@Item(t, today)
+			}
+		</ul>
+	</div>
 	<form
+		class="todo-add"
 		hx-post="/todos"
-		hx-target=".todos"
+		hx-target="#todo-today"
 		hx-swap="beforeend"
 		hx-on::after-request="this.reset()"
 	>
@@ -84,7 +150,7 @@ templ Panel(page DayPage) {
 		<input
 			class="todo-input"
 			name="text"
-			placeholder="Kaffee kochen 15m #haushalt"
+			placeholder="Wäsche aufhängen 15m #haushalt @05.09.2026"
 			autocomplete="off"
 		/>
 	</form>

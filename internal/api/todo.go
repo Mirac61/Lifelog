@@ -8,6 +8,7 @@ import (
 	"slices"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
 	"github.com/Mirac61/lifelog/web/templ/todo"
@@ -37,17 +38,29 @@ func (s *Server) handleTodo(w http.ResponseWriter, r *http.Request) {
 }
 
 func (s *Server) handleCreateTodo(w http.ResponseWriter, r *http.Request) {
+	view := r.FormValue("date") // the day the list is showing
 	t := parseTodoInput(r.FormValue("text"))
 	if t.Text == "" {
 		http.Error(w, "empty todo", http.StatusBadRequest)
 		return
 	}
-	if date := r.FormValue("date"); date != "" {
-		t.DueDate = sql.NullString{String: date, Valid: true}
+	// An inline @date wins; the hidden field is only the fallback so every
+	// todo still lands on the day it was created from.
+	if !t.DueDate.Valid {
+		if date, ok := parseDueDate(view); ok {
+			t.DueDate = sql.NullString{String: date, Valid: true}
+		}
 	}
 	created, err := store.CreateTodo(r.Context(), s.db, t)
 	if err != nil {
 		http.Error(w, "create failed", http.StatusInternalServerError)
+		return
+	}
+	// A todo scheduled past the shown day (e.g. "... @05.09.") belongs in the
+	// "Kommende" list, not today's; drop it there out of band.
+	if view != "" && created.DueDate.Valid && created.DueDate.String > view {
+		planned := s.planned(r, sql.NullString{String: view, Valid: true})
+		render(w, r, todo.ItemUpcoming(created, planned, time.Now().Format("2006-01-02")))
 		return
 	}
 	s.renderRow(w, r, created)
@@ -74,7 +87,7 @@ func (s *Server) handleDeleteTodo(w http.ResponseWriter, r *http.Request) {
 
 // renderRow returns the changed row plus an out-of-band budget update.
 func (s *Server) renderRow(w http.ResponseWriter, r *http.Request, t store.Todo) {
-	render(w, r, todo.ItemUpdate(t, s.planned(r, t.DueDate)))
+	render(w, r, todo.ItemUpdate(t, s.planned(r, t.DueDate), time.Now().Format("2006-01-02")))
 }
 
 func (s *Server) planned(r *http.Request, due sql.NullString) int {
@@ -91,11 +104,14 @@ func (s *Server) planned(r *http.Request, due sql.NullString) int {
 // A bare number stays text, so "Kapitel 90 lesen" is not read as an estimate.
 var durationRe = regexp.MustCompile(`^(?:(\d+)h)?(?:(\d+)m)?$`)
 
-// parseTodoInput reads "Kaffee kochen 15m #haushalt" into text, estimate and category.
+// TODO: Projektfarben. Tabelle projects(name PK, color); Syntax #haushalt=e4707f
+// am Token (getrennt wuerde #e4707f eigene Kategorie). Rendering spaeter.
+
+// parseTodoInput reads "Kueche aufraumen 15m #haushalt @23.09.2026" into text, estimate, category and due date.
 func parseTodoInput(input string) store.Todo {
 	var t store.Todo
 	var words []string
-	for _, w := range strings.Fields(input) {
+	for w := range strings.FieldsSeq(input) {
 		switch {
 		case strings.HasPrefix(w, "#") && len(w) > 1:
 			t.Category = sql.NullString{String: w[1:], Valid: true}
@@ -104,10 +120,24 @@ func parseTodoInput(input string) store.Todo {
 			hours, _ := strconv.ParseInt(m[1], 10, 64)
 			mins, _ := strconv.ParseInt(m[2], 10, 64)
 			t.Estimate = sql.NullInt64{Int64: hours*60 + mins, Valid: true}
+		case strings.HasPrefix(w, "@") && len(w) > 1:
+			if date, ok := parseDueDate(w[1:]); ok {
+				t.DueDate = sql.NullString{String: date, Valid: true}
+			}
 		default:
 			words = append(words, w)
 		}
 	}
 	t.Text = strings.Join(words, " ")
 	return t
+}
+
+// parseDueDate normalises "23.09.2026" or ISO input to ISO "2006-01-02"; ok is false if unparseable.
+func parseDueDate(input string) (string, bool) {
+	for _, layout := range []string{"02.01.2006", "2006-01-02"} {
+		if date, err := time.Parse(layout, input); err == nil {
+			return date.Format("2006-01-02"), true
+		}
+	}
+	return "", false
 }

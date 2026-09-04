@@ -2,7 +2,6 @@ package github
 
 import "testing"
 
-
 const repoContributionsPayload = `{
   "viewer": {
     "contributionsCollection": {

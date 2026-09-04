@@ -10,7 +10,7 @@ import (
 	"github.com/Mirac61/lifelog/web/templ/todo"
 )
 
-// loadTodos counts only unfinished todos into Planned: the time still ahead.
+// loadTodos counts only unfinished todos into Planned.
 func (s *Server) loadTodos(ctx context.Context, day time.Time) (todo.DayPage, error) {
 	key := day.Format("2006-01-02")
 	todos, err := store.ListTodosForDay(ctx, s.db, key)

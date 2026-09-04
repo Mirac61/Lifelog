@@ -14,7 +14,7 @@ const (
 	leftMargin = 32
 	topMargin  = 20
 
-	// Sized to the best-day label's width so the SVG edge lands right after it.
+	// Width of the best-day label, so the SVG edge lands right after it.
 	bestLegendWidth = 106
 )
 
@@ -95,7 +95,7 @@ func buildHeatmap(totals []store.DailyTotal, year int, bestDate string) git.Heat
 	// 138 fits "Wenig"; offsets below shift with it.
 	legendX := width - 138
 
-	// Second legend entry (not a ramp rung), only when there's a best day.
+	// Best-day swatch, not a ramp rung.
 	hasBest := bestDate != ""
 	if hasBest {
 		width += bestLegendWidth

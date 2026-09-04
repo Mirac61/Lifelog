@@ -6,10 +6,9 @@ import (
 	"github.com/Mirac61/lifelog/internal/store"
 )
 
-// Deliberately free of event data: the day detail view composes both.
 type DayPage struct {
 	Day      time.Time
 	Todos    []store.Todo
-	Upcoming []store.Todo // unfinished todos due after Day, earliest first
+	Upcoming []store.Todo // due after Day, earliest first
 	Planned  int
 }

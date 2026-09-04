@@ -10,7 +10,7 @@ func BestDaySuffix(date string) string {
 	return " · " + FormatShortDate(date)
 }
 
-// FormatShortDate renders an ISO date as "2 Jan", matching the heatmap's month-label format.
+// FormatShortDate renders an ISO date as "2 Jan", like the heatmap month labels.
 func FormatShortDate(date string) string {
 	t, err := time.Parse("2006-01-02", date)
 	if err != nil {

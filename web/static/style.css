@@ -54,9 +54,8 @@ body.domain-dashboard { --accent: #C4BDB2; --accent-deep: #6B6458; }
 body.domain-todos     { --accent: #8FB08A; --accent-deep: #475845; }
 body.domain-calendar  { --accent: #A594B8; --accent-deep: #4C4257; }
 
-/* Theme: caelestia — follows ~/.local/state/caelestia/scheme.json.
-   Set <html data-theme="caelestia">. Static snapshot for now; a later
-   step injects this block per request from the live file. Dark only. */
+/* Theme: caelestia — snapshot of ~/.local/state/caelestia/scheme.json, dark only.
+   Set <html data-theme="caelestia">. Injected live per request later. */
 :root[data-theme="caelestia"] {
   --bg:          #0a0f0f;  /* background         */
   --panel:       #131b1a;  /* surfaceContainer   */
@@ -251,7 +250,7 @@ h1 span {
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 14%, transparent);
 }
 
-/* Controls: type pills + year stepper */
+/* Controls: type pills + year/date steppers */
 
 .controls {
   display: flex;
@@ -259,7 +258,7 @@ h1 span {
   gap: 10px;
 }
 
-.pillbar, .yearstep {
+.pillbar, .stepper {
   display: flex;
   align-items: center;
   gap: 2px;
@@ -284,6 +283,8 @@ h1 span {
   transition: background 0.16s ease, color 0.16s ease;
 }
 
+a.pill, a.step { text-decoration: none; }
+
 .pill:hover { color: var(--text); }
 
 .pill.active {
@@ -293,9 +294,9 @@ h1 span {
 
 .pill.active:hover { color: var(--bg); }
 
-.yearstep { padding: 3px; gap: 0; }
+.stepper { padding: 3px; gap: 0; }
 
-.ystep {
+.step {
   appearance: none;
   border: none;
   background: transparent;
@@ -310,13 +311,13 @@ h1 span {
   transition: background 0.16s ease, color 0.16s ease;
 }
 
-.ystep svg { width: 15px; height: 15px; }
+.step svg { width: 15px; height: 15px; }
 
-.ystep:hover:not(:disabled) { background: var(--panel-hi); color: var(--text); }
+.step:hover:not(:disabled) { background: var(--panel-hi); color: var(--text); }
 
-.ystep:disabled { color: var(--muted); cursor: default; }
+.step:disabled { color: var(--muted); cursor: default; }
 
-.yval {
+.stepval {
   min-width: 46px;
   text-align: center;
   font-family: var(--mono);
@@ -325,6 +326,9 @@ h1 span {
   font-variant-numeric: tabular-nums;
   color: var(--text);
 }
+
+/* 62px carries "Gestern" and "Sa 5.9.", so stepping days doesn't resize the bar. */
+.stepper.wide .stepval { min-width: 62px; }
 
 /* Hero */
 
@@ -360,8 +364,7 @@ h1 span {
   gap: 20px 28px;
 }
 
-/* max-content, not 1fr: 1fr would space the stat pairs apart across the
-   wide row next to the hero number. */
+/* max-content, not 1fr: 1fr would space the stat pairs apart. */
 .hero-stats {
   grid-template-columns: repeat(3, max-content);
   justify-content: start;
@@ -460,14 +463,13 @@ h1 span {
 
 #chart rect { stroke: none; }
 
-/* Only cells with an hx-get (dashboard) look clickable; the git page
-   renders the same partial without it and stays inert. */
+/* Only cells with an hx-get (dashboard) look clickable; the git page stays inert. */
 #chart rect[hx-get] { cursor: pointer; }
 #chart rect[hx-get]:hover { stroke: var(--text); stroke-width: 1.5; }
 #chart rect[hx-get].sel { stroke: var(--accent); stroke-width: 1.5; }
 
-/* Level 0–4 from Go; mixed in oklab here so the ramp follows --accent
-   per domain. Weighted low: l1/l2 hold most days of a real year. */
+/* Level 0–4 from Go, mixed in oklab so the ramp follows --accent. Weighted low:
+   l1/l2 hold most days of a real year. */
 #chart rect.l0 { fill: var(--panel-hi); stroke: var(--line); stroke-width: 1; }
 #chart rect.l1 { fill: color-mix(in oklab, var(--accent) 34%, var(--panel)); }
 #chart rect.l2 { fill: color-mix(in oklab, var(--accent) 57%, var(--panel)); }
@@ -488,9 +490,8 @@ h1 span {
 
 #chart .legend-div { stroke: var(--line-strong); stroke-width: 1; }
 
-/* Current-year layout — the in-progress heatmap is narrower (drawn only
-   through today + 1 week), so it sits boxed in the left column with the
-   repo ranking beside it and PRs on their own full-width row. */
+/* Current year: the heatmap stops a week past today, so it sits boxed left with
+   the repo ranking beside it and PRs on their own row. */
 
 .dash.current-year { align-items: stretch; }
 
@@ -717,14 +718,13 @@ h1 span {
 
 .day h3 small { font-size: 10px; color: var(--accent); text-transform: none; letter-spacing: 0; }
 
-/* A soft one-liner for empty panels. */
 .hint {
   margin: 4px 0 0;
   font-size: 13px;
   color: var(--text-faint);
 }
 
-/* --- Todo board: a roomier, more modern module than the rest of the app. --- */
+/* Todo board — roomier than the rest of the app. */
 .board .day h3 {
   font-size: 11px;
   letter-spacing: 0.12em;
@@ -821,8 +821,7 @@ h1 span {
   background: var(--highlight);
 }
 
-/* Project tag. Muted for now; later --tag is set per row from the
-   project's own colour. */
+/* Project tag. Muted until --tag is set per row from the project colour. */
 .tag {
   font-family: var(--mono);
   font-size: 11px;
@@ -856,7 +855,7 @@ h1 span {
 }
 .upcoming-sec h3 { margin-top: 10px; }
 
-/* Todos board: todos + scratch stacked on the left, a full-height plan on the right. */
+/* Todos + scratch stacked left, a full-height plan right. */
 .board {
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);

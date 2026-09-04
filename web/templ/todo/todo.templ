@@ -14,7 +14,7 @@ func nextStatus(s string) string {
 	return "done"
 }
 
-// Clicking the text is the way into and out of in_progress, so no second button.
+// Clicking the text toggles in_progress, so there is no second button.
 func nextOnRowClick(s string) string {
 	if s == "in_progress" {
 		return "todo"
@@ -22,7 +22,7 @@ func nextOnRowClick(s string) string {
 	return "in_progress"
 }
 
-// Mutating handlers re-render this out of band to keep the number in sync.
+// Mutating handlers re-render this out of band.
 templ Planned(minutes int, oob bool) {
 	<small
 		id="planned"
@@ -103,14 +103,14 @@ templ Item(t store.Todo, today string) {
 	</li>
 }
 
-// ItemUpdate is the response to every mutation: the row, plus the budget out of band.
+// ItemUpdate answers every mutation: the row, plus the budget out of band.
 templ ItemUpdate(t store.Todo, planned int, today string) {
 	@Item(t, today)
 	@Planned(planned, true)
 }
 
-// ItemUpcoming is the create response when the new todo is due past the shown
-// day: it drops into the "Kommende" list out of band, plus the budget.
+// ItemUpcoming answers a create due past the shown day: the row drops into
+// "Kommende" out of band, plus the budget.
 templ ItemUpcoming(t store.Todo, planned int, today string) {
 	<ul hx-swap-oob="beforeend:#todo-upcoming">
 		@Item(t, today)

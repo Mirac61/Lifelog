@@ -17,7 +17,7 @@ type viewData struct {
 	Heatmap git.HeatmapData
 }
 
-// Human labels for the pills; unlisted types fall back to their raw value.
+// Pill labels; unlisted types fall back to their raw value.
 var typeLabels = map[string]string{
 	"contributions": "Beiträge",
 	"pull_request":  "Pull Requests",

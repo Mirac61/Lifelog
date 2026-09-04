@@ -16,10 +16,10 @@ templ GitControls(page GitPage) {
 			>{ opt.Label }</button>
 		}
 	</div>
-	<div class="yearstep">
+	<div class="stepper">
 		<button
 			type="button"
-			class="ystep"
+			class="step"
 			aria-label="Vorheriges Jahr"
 			disabled?={ page.PrevYear == 0 }
 			hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", page.Type, page.PrevYear) }
@@ -28,10 +28,10 @@ templ GitControls(page GitPage) {
 		>
 			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 9,12 15,19"></polyline></svg>
 		</button>
-		<span class="yval">{ fmt.Sprint(page.Year) }</span>
+		<span class="stepval">{ fmt.Sprint(page.Year) }</span>
 		<button
 			type="button"
-			class="ystep"
+			class="step"
 			aria-label="Nächstes Jahr"
 			disabled?={ page.NextYear == 0 }
 			hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", page.Type, page.NextYear) }

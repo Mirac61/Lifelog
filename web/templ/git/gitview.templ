@@ -93,7 +93,7 @@ templ repoPanel(page GitPage) {
 }
 
 // GitViewSwap adds oob tags to sync the header year/controls. Only htmx's AJAX
-// swap honors hx-swap-oob, so full page loads must use GitView instead.
+// swap honors hx-swap-oob, so full page loads must use GitView.
 templ GitViewSwap(page GitPage) {
 	@GitView(page)
 	<span hx-swap-oob="innerHTML:#git-year" style="display:none">{ fmt.Sprint(page.Year) }</span>

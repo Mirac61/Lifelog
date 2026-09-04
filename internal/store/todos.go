@@ -108,8 +108,7 @@ func SwitchTodo(ctx context.Context, db *sql.DB, id int64, status string) (Todo,
 	return t, nil
 }
 
-// DeleteTodo returns the day the todo belonged to, so the caller can
-// recompute that day's budget.
+// DeleteTodo returns the day the todo belonged to, for recomputing its budget.
 func DeleteTodo(ctx context.Context, db *sql.DB, id int64) (sql.NullString, error) {
 	const query = `DELETE FROM todos WHERE id = ? RETURNING due_date`
 	var due sql.NullString

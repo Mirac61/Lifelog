@@ -208,7 +208,7 @@ func NormalizeRepoContributions(payload json.RawMessage) ([]collector.Event, err
 			return nil, fmt.Errorf("encode repo metadata: %w", err)
 		}
 
-		// GitHub gives no per-repo dates, only a window total, so OccurredAt is the window's start.
+		// GitHub gives only a window total, so OccurredAt is the window's start.
 		events = append(events, collector.Event{
 			Type:        "repo_commit",
 			OccurredAt:  startedAt,

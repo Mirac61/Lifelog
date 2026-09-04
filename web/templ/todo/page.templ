@@ -1,11 +1,57 @@
 package todo
 
-import "github.com/Mirac61/lifelog/web/templ/layout"
+import (
+	"time"
+
+	"github.com/Mirac61/lifelog/web/templ/layout"
+)
+
+// dayLabel names the day "Heute"/"Gestern"/"Morgen", else "Fr 5.9." like the rows.
+func dayLabel(day time.Time, today string) string {
+	iso := day.Format("2006-01-02")
+	if now, err := time.Parse("2006-01-02", today); err == nil {
+		switch iso {
+		case today:
+			return "Heute"
+		case now.AddDate(0, 0, -1).Format("2006-01-02"):
+			return "Gestern"
+		case now.AddDate(0, 0, 1).Format("2006-01-02"):
+			return "Morgen"
+		}
+	}
+	return formatDueDate(iso, today)
+}
+
+func dayHref(day time.Time) string {
+	return "/todos?date=" + day.Format("2006-01-02")
+}
+
+// DateControls steps the shown day. Plain links, not htmx swaps: the day lives
+// in the URL, so a navigation keeps it shareable.
+templ DateControls(page DayPage, today string) {
+	<div class="controls">
+		if page.Day.Format("2006-01-02") != today {
+			<div class="pillbar">
+				<a class="pill" href="/todos">Heute</a>
+			</div>
+		}
+		<div class="stepper wide">
+			<a class="step" href={ dayHref(page.Day.AddDate(0, 0, -1)) } aria-label="Vorheriger Tag">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 9,12 15,19"></polyline></svg>
+			</a>
+			<span class="stepval">{ dayLabel(page.Day, today) }</span>
+			<a class="step" href={ dayHref(page.Day.AddDate(0, 0, 1)) } aria-label="Nächster Tag">
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,5 15,12 9,19"></polyline></svg>
+			</a>
+		</div>
+	</div>
+}
 
 templ Page(page DayPage, today string) {
 	@layout.Shell("todos") {
 		<div class="page-head">
 			<h1><span class="dot"></span>Todos <span>/ { page.Day.Format("Mon, 2 Jan 2006") }</span></h1>
+			@DateControls(page, today)
 		</div>
 		<div class="board">
 			<div class="panel day board-todos">

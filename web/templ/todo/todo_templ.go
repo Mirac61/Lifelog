@@ -22,7 +22,7 @@ func nextStatus(s string) string {
 	return "done"
 }
 
-// Clicking the text is the way into and out of in_progress, so no second button.
+// Clicking the text toggles in_progress, so there is no second button.
 func nextOnRowClick(s string) string {
 	if s == "in_progress" {
 		return "todo"
@@ -30,7 +30,7 @@ func nextOnRowClick(s string) string {
 	return "in_progress"
 }
 
-// Mutating handlers re-render this out of band to keep the number in sync.
+// Mutating handlers re-render this out of band.
 func Planned(minutes int, oob bool) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -320,7 +320,7 @@ func Item(t store.Todo, today string) templ.Component {
 	})
 }
 
-// ItemUpdate is the response to every mutation: the row, plus the budget out of band.
+// ItemUpdate answers every mutation: the row, plus the budget out of band.
 func ItemUpdate(t store.Todo, planned int, today string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context
@@ -354,8 +354,8 @@ func ItemUpdate(t store.Todo, planned int, today string) templ.Component {
 	})
 }
 
-// ItemUpcoming is the create response when the new todo is due past the shown
-// day: it drops into the "Kommende" list out of band, plus the budget.
+// ItemUpcoming answers a create due past the shown day: the row drops into
+// "Kommende" out of band, plus the budget.
 func ItemUpcoming(t store.Todo, planned int, today string) templ.Component {
 	return templruntime.GeneratedTemplate(func(templ_7745c5c3_Input templruntime.GeneratedComponentInput) (templ_7745c5c3_Err error) {
 		templ_7745c5c3_W, ctx := templ_7745c5c3_Input.Writer, templ_7745c5c3_Input.Context

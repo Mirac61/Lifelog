@@ -1,0 +1,362 @@
+<!doctype html>
+<html lang="de">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>lifelog · Projekt · lifelog</title>
+<link rel="stylesheet" href="assets/lifelog.css" />
+<script>try{var t=localStorage.getItem('lifelog-theme');if(t)document.documentElement.dataset.theme=t;}catch(e){}</script>
+</head>
+<body>
+<div class="app">
+
+  <nav class="rail" data-od-id="rail" aria-label="Hauptnavigation">
+    <a class="rail-mark" href="index.html" aria-label="lifelog Übersicht">l</a>
+    <a class="rail-link" href="heute.html" data-label="Heute" aria-label="Heute">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l2.5 1.5"/></svg>
+    </a>
+    <a class="rail-link" href="projekte.html" aria-current="page" data-label="Projekte" aria-label="Projekte">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 7h6l1.5 2H20v9a1 1 0 0 1-1 1H5a1 1 0 0 1-1-1z"/></svg>
+    </a>
+    <a class="rail-link" href="notizen.html" data-label="Notizen" aria-label="Notizen">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 4h9l4 4v12H6z"/><path d="M9 12h7M9 16h5"/></svg>
+    </a>
+    <a class="rail-link" href="habits.html" data-label="Habits" aria-label="Habits">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 12h3.5l2.5-7 3.5 14 2.5-7H21"/></svg>
+    </a>
+    <a class="rail-link" href="kalender.html" data-label="Kalender" aria-label="Kalender">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="5" width="16" height="15" rx="2"/><path d="M4 10h16M9 3v4M15 3v4"/></svg>
+    </a>
+    <a class="rail-link" href="git.html" data-label="Git" aria-label="Git">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="7" cy="6" r="2.4"/><circle cx="7" cy="18" r="2.4"/><circle cx="17" cy="12" r="2.4"/><path d="M7 8.4v7.2M9.4 6h3.1a2 2 0 0 1 2 2v1.8"/></svg>
+    </a>
+    <a class="rail-link" href="rueckblick.html" data-label="Rückblick" aria-label="Rückblick">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 19v-6M10 19V5M15 19v-9M20 19v-4"/></svg>
+    </a>
+    <span class="rail-spacer"></span>
+    <button type="button" class="rail-link" data-theme-toggle data-label="Hell / Dunkel" aria-label="Zwischen hell und dunkel wechseln">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4.2"/><path d="M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4"/></svg>
+    </button>
+    <a class="rail-link" href="index.html" data-label="Übersicht" aria-label="Übersicht">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="4" y="4" width="7" height="7" rx="1.5"/><rect x="13" y="4" width="7" height="7" rx="1.5"/><rect x="4" y="13" width="7" height="7" rx="1.5"/><rect x="13" y="13" width="7" height="7" rx="1.5"/></svg>
+    </a>
+  </nav>
+
+  <main class="screen">
+
+    <header class="screen-head" data-od-id="screen-head">
+      <div class="screen-inner">
+        <div class="head-title">
+          <a class="meta" href="projekte.html" style="text-decoration: underline; text-underline-offset: 3px;">Projekte</a>
+          <span class="meta" aria-hidden="true">/</span>
+          <h1 class="h1">lifelog</h1>
+          <span class="tag">aktiv</span>
+        </div>
+        <span class="meta">seit 14. Juni · 26&nbsp;h 40 gemessen</span>
+      </div>
+    </header>
+
+    <div class="screen-inner">
+
+      <!-- htmx: jeder Tab wird hx-get="/projekte/lifelog/{tab}"
+           hx-target="#projekt-panel" hx-swap="innerHTML" hx-push-url="true" -->
+      <div class="tabs" role="tablist" data-tabs data-od-id="projekt-tabs" style="margin-bottom: var(--gap-lg);">
+        <button type="button" class="tab" role="tab" aria-selected="true"  aria-controls="tab-uebersicht" id="t-uebersicht">Übersicht</button>
+        <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-dateien"    id="t-dateien">Dateien <span class="meta">11</span></button>
+        <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-board"      id="t-board">Board <span class="meta">6</span></button>
+        <button type="button" class="tab" role="tab" aria-selected="false" aria-controls="tab-zeit"       id="t-zeit">Zeit</button>
+      </div>
+
+      <div id="projekt-panel">
+
+        <!-- ── Übersicht ──────────────────────────────────────────── -->
+        <section id="tab-uebersicht" role="tabpanel" aria-labelledby="t-uebersicht" data-od-id="panel-uebersicht">
+          <div class="cols-main">
+
+            <!-- Links: der einzige Teil, den du selbst schreibst.
+                 htmx: <div id="projekt-readme" hx-get="/projekte/lifelog/readme"> -->
+            <div id="projekt-readme">
+              <div class="pane-head">
+                <h2 class="pane-label">README.md</h2>
+                <span class="meta">von dir geschrieben · optional</span>
+              </div>
+
+              <div class="md" style="padding-top: var(--gap-md);">
+                <h2>Warum die Todo-Seite nicht funktioniert hat</h2>
+                <p>
+                  Drei gleich laute Kisten nebeneinander — Todos, Notizen, Kalender — und zwei
+                  davon leer mit <code>„später."</code> als Text. Das Problem war nie das CSS,
+                  sondern dass der Screen keine Frage beantwortet hat.
+                </p>
+                <blockquote>Ein Screen, eine Frage. „Heute" beantwortet: Was ist jetzt dran, was ist heute noch los, wie lief gestern. Alles Nachschlagbare wandert raus.</blockquote>
+                <h2>Entscheidungen</h2>
+                <ul>
+                  <li><strong>Eine Eingabe für alles.</strong> Die Capture-Zeile parst <code>#tag</code>, <code>+projekt</code>, <code>@datum</code> und Dauer. Keine Formulare pro Modul.</li>
+                  <li><strong>Tagesachse als Anker.</strong> Termine, Aufgaben und Habits liegen auf <em>einer</em> Linie.</li>
+                  <li><strong>Habits haben einen Rhythmus.</strong> Eine Lücke ist nur eine Lücke, wenn der Tag geplant war — siehe <a href="habits.html">Habits</a>.</li>
+                  <li><strong>Rückblick ist der Payoff.</strong> Ohne Auswertung ist Tracken Hausarbeit — siehe <a href="rueckblick.html">KW&nbsp;36</a>.</li>
+                </ul>
+              </div>
+
+              <p class="source-note" data-od-id="readme-hinweis">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="9"/><path d="M12 11v5M12 7.6v.6"/></svg>
+                <span>
+                  Diese Fläche ist die Datei <code>README.md</code> im Projekt — dieselbe, die
+                  im Tab <em>Dateien</em> liegt. Du musst hier nichts schreiben. Bleibt sie leer,
+                  steht an dieser Stelle nur ein Knopf <em>README anlegen</em> mit einer Vorlage
+                  aus drei Überschriften: Worum geht es · Entscheidungen · Offen.
+                </span>
+              </p>
+            </div>
+
+            <!-- Rechts: nichts davon wird getippt. Alles fällt aus dem an,
+                 was du ohnehin erfasst.
+                 htmx: <aside id="projekt-fakten" hx-get="/projekte/lifelog/fakten"
+                              hx-trigger="load, taskChanged from:body"> -->
+            <aside class="sticky-col" data-od-id="projekt-fakten" id="projekt-fakten">
+              <div class="pane-head" style="margin-bottom: var(--gap-xs);">
+                <h2 class="pane-label">Berechnet</h2>
+                <span class="meta">nichts zu tippen</span>
+              </div>
+
+              <div class="facts">
+                <span class="fact"><span class="fact-k">Status</span><span class="fact-v">aktiv<span class="sub">seit 14. Juni</span></span></span>
+                <span class="fact"><span class="fact-k">Fokuszeit KW&nbsp;36</span><span class="fact-v">8:45<span class="sub">gemessen, 5 Blöcke</span></span></span>
+                <span class="fact"><span class="fact-k">Aufgaben</span><span class="fact-v">6 offen<span class="sub">23 erledigt diese Woche</span></span></span>
+                <span class="fact"><span class="fact-k">Dateien</span><span class="fact-v">11<span class="sub">zuletzt heute 13:40</span></span></span>
+                <span class="fact"><span class="fact-k">Nächster Block</span><span class="fact-v">15:00<span class="sub">Deep Work · Tagesachse</span></span></span>
+                <span class="fact"><span class="fact-k">Überfällig</span><span class="fact-v" style="color: var(--warn);">1<span class="sub">Zeitmodell festlegen</span></span></span>
+              </div>
+
+              <div class="pane-head" style="margin: var(--gap-md) 0 var(--gap-xs);">
+                <h2 class="pane-label">Tags</h2>
+                <span class="meta">aus Aufgaben und Notizen</span>
+              </div>
+              <span style="display: flex; gap: 6px; flex-wrap: wrap;">
+                <span class="tag">#htmx</span><span class="tag">#design</span><span class="tag">#datenmodell</span>
+              </span>
+            </aside>
+          </div>
+        </section>
+
+        <!-- ── Dateien: Finder ────────────────────────────────────── -->
+        <section id="tab-dateien" role="tabpanel" aria-labelledby="t-dateien" data-od-id="panel-dateien" hidden>
+          <div class="finder" data-od-id="finder">
+            <div class="finder-side" data-finder-tree>
+            <span class="tree-group">Ordner</span>
+            <button type="button" class="tree-item" data-depth="0" data-od-id="tree-entwuerfe"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l1.5 2H20"/><path d="M3 7v11a1 1 0 0 0 1 1h16a1 1 0 0 0 1-1l1-8H6.5z"/></svg><span>entwuerfe</span><span class="tree-meta">2</span></button>
+            <button type="button" class="tree-item" data-depth="1" data-od-id="tree-tagesachse"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span>tagesachse.md</span><span class="tree-meta">6.9.</span></button>
+            <button type="button" class="tree-item" data-depth="1" data-od-id="tree-capture-syntax"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span>capture-syntax.md</span><span class="tree-meta">3.9.</span></button>
+            <button type="button" class="tree-item" data-depth="0" data-od-id="tree-recherche"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l1.5 2H21v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg><span>recherche</span><span class="tree-meta">2</span></button>
+            <button type="button" class="tree-item" data-depth="0" data-od-id="tree-archiv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M3 7h6l1.5 2H21v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1z"/></svg><span>archiv</span><span class="tree-meta">7</span></button>
+            <span class="tree-group">Im Projekt</span>
+            <button type="button" class="tree-item" data-depth="0" data-od-id="tree-readme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span>README.md</span><span class="tree-meta">14.6.</span></button>
+            <button type="button" class="tree-item" data-depth="0" aria-current="true" data-od-id="tree-entscheidungen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span>entscheidungen.md</span><span class="tree-meta">heute</span></button>
+            <button type="button" class="tree-item" data-depth="0" data-od-id="tree-offene-fragen"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3h8l4 4v14H6z"/><path d="M14 3v4h4"/></svg><span>offene-fragen.md</span><span class="tree-meta">5.9.</span></button>
+              <button type="button" class="kb-add" data-od-id="tree-neu" style="margin-top: var(--gap-sm);">+ Neue Notiz</button>
+            </div>
+
+            <div class="finder-main">
+              <div class="finder-bar">
+                <span class="crumb">lifelog <span aria-hidden="true">/</span> <b>entscheidungen.md</b> <span class="meta">· zuletzt heute 13:40</span></span>
+                <span style="display: flex; gap: var(--gap-xs); align-items: center;">
+                  <label for="finder-sort" class="meta">Sortieren</label>
+                  <select class="select" id="finder-sort" style="min-height: 34px; padding: 4px 34px 4px 12px; font-size: 13px;">
+                    <option>zuletzt geändert</option>
+                    <option>Name A–Z</option>
+                    <option>zuerst erstellt</option>
+                  </select>
+                </span>
+              </div>
+
+              <div class="md">
+                <h2>Entscheidungen</h2>
+                <p>Was festliegt und nicht mehr diskutiert wird, bis es sich als falsch erweist.</p>
+                <ul>
+                  <li><strong>Capture ist der einzige Eingabeweg.</strong> Kein „+ Neu" pro Modul.</li>
+                  <li><strong>Serverseitiges Parsing.</strong> Die Grammatik lebt an einer Stelle, nicht doppelt in JS und Backend.</li>
+                  <li><strong>Habits kennen drei Rhythmen:</strong> täglich, feste Tage, <em>n</em>× pro Woche.</li>
+                  <li><strong>Zeit wird gemessen, nicht geschätzt.</strong> Sonst lügt der Rückblick.</li>
+                </ul>
+                <h2>Bewusst offen</h2>
+                <p>Kalender-Schreibzugriff über CalDAV. Bis dahin nur ICS lesend — siehe <a href="#">offene-fragen.md</a>.</p>
+              </div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ── Board ──────────────────────────────────────────────── -->
+        <section id="tab-board" role="tabpanel" aria-labelledby="t-board" data-od-id="panel-board" hidden>
+          <div class="kanban" data-od-id="kanban">
+          <div class="kb-col" data-od-id="kb-col-1">
+            <div class="kb-head">
+              <span class="kb-title">Backlog</span>
+              <span class="kb-count">3</span>
+            </div>
+            <div class="kb-list">
+              <button type="button" class="kb-card" data-od-id="kb-parser">
+                <span class="kb-card-title">Capture-Parser auf den Server ziehen</span>
+                <span class="kb-card-meta">1&nbsp;h 30 · <span class="tag">#htmx</span></span>
+              </button>
+              <button type="button" class="kb-card" data-od-id="kb-mobil">
+                <span class="kb-card-title">Capture-Zeile für mobil entwerfen</span>
+                <span class="kb-card-meta">ohne Schätzung</span>
+              </button>
+              <button type="button" class="kb-card" data-od-id="kb-ics">
+                <span class="kb-card-title">ICS-Import prüfen — reicht lesend?</span>
+                <span class="kb-card-meta">1&nbsp;h · Di 8.9.</span>
+              </button>
+            </div>
+            <button type="button" class="kb-add" data-od-id="kb-add-1">+ Aufgabe</button>
+          </div>
+          <div class="kb-col" data-od-id="kb-col-2">
+            <div class="kb-head">
+              <span class="kb-title">Diese Woche</span>
+              <span class="kb-count">2</span>
+            </div>
+            <div class="kb-list">
+              <button type="button" class="kb-card" data-accent="true" data-od-id="kb-rueckblick">
+                <span class="kb-card-title">Rückblick KW&nbsp;36 schreiben</span>
+                <span class="kb-card-meta">45&nbsp;min · heute 20:30</span>
+              </button>
+              <button type="button" class="kb-card" data-accent="true" data-od-id="kb-zeitmodell">
+                <span class="kb-card-title">Zeitmodell festlegen: geschätzt oder gemessen</span>
+                <span class="kb-card-meta">überfällig seit Fr 4.9.</span>
+              </button>
+            </div>
+            <button type="button" class="kb-add" data-od-id="kb-add-2">+ Aufgabe</button>
+          </div>
+          <div class="kb-col" data-od-id="kb-col-3">
+            <div class="kb-head">
+              <span class="kb-title">In Arbeit</span>
+              <span class="kb-count">1</span>
+            </div>
+            <div class="kb-list">
+              <button type="button" class="kb-card" data-od-id="kb-tagesachse">
+                <span class="kb-card-title">Tagesachse-Komponente bauen</span>
+                <span class="kb-card-meta">2&nbsp;h · Block heute 15:00</span>
+              </button>
+            </div>
+            <button type="button" class="kb-add" data-od-id="kb-add-3">+ Aufgabe</button>
+          </div>
+          <div class="kb-col" data-od-id="kb-col-4">
+            <div class="kb-head">
+              <span class="kb-title">Erledigt</span>
+              <span class="kb-count">3</span>
+            </div>
+            <div class="kb-list">
+              <button type="button" class="kb-card" data-od-id="kb-rail">
+                <span class="kb-card-title">Rail mit Labels versehen</span>
+                <span class="kb-card-meta">Sa 5.9. · 35&nbsp;min</span>
+              </button>
+              <button type="button" class="kb-card" data-od-id="kb-tokens">
+                <span class="kb-card-title">Sechs Tokens festziehen</span>
+                <span class="kb-card-meta">Sa 5.9. · 50&nbsp;min</span>
+              </button>
+              <button type="button" class="kb-card" data-od-id="kb-empty">
+                <span class="kb-card-title">Empty States mit Syntax-Beispiel</span>
+                <span class="kb-card-meta">Fr 4.9. · 25&nbsp;min</span>
+              </button>
+            </div>
+            <button type="button" class="kb-add" data-od-id="kb-add-4">+ Aufgabe</button>
+          </div>
+          </div>
+          <p class="empty">
+            Spalten sind der Status einer Aufgabe. Was du mit <code>+lifelog</code> erfasst,
+            landet in <em>Backlog</em>; ein Datum schiebt es in <em>Diese Woche</em>.
+          </p>
+        </section>
+
+        <!-- ── Zeit ───────────────────────────────────────────────── -->
+        <section id="tab-zeit" role="tabpanel" aria-labelledby="t-zeit" data-od-id="panel-zeit" hidden>
+          <div class="cols-2">
+            <div>
+              <div class="pane-head">
+                <h2 class="pane-label">Gemessene Zeit je Woche</h2>
+                <span class="meta">26&nbsp;h 40 gesamt</span>
+              </div>
+              <div style="padding-top: var(--gap-xs);">
+              <div class="bar-row" data-od-id="zw-36">
+                <span class="bar-label">KW&nbsp;36</span>
+                <span class="bar-track"><span class="bar-fill is-good" style="width: 100%;"></span></span>
+                <span class="bar-val">8:45</span>
+              </div>
+              <div class="bar-row" data-od-id="zw-35">
+                <span class="bar-label">KW&nbsp;35</span>
+                <span class="bar-track"><span class="bar-fill" style="width: 60%;"></span></span>
+                <span class="bar-val">5:15</span>
+              </div>
+              <div class="bar-row" data-od-id="zw-34">
+                <span class="bar-label">KW&nbsp;34</span>
+                <span class="bar-track"><span class="bar-fill" style="width: 42.9%;"></span></span>
+                <span class="bar-val">3:45</span>
+              </div>
+              <div class="bar-row" data-od-id="zw-33">
+                <span class="bar-label">KW&nbsp;33</span>
+                <span class="bar-track is-zero"></span>
+                <span class="bar-val">0:00</span>
+              </div>
+              <div class="bar-row" data-od-id="zw-32">
+                <span class="bar-label">KW&nbsp;32</span>
+                <span class="bar-track"><span class="bar-fill" style="width: 68.6%;"></span></span>
+                <span class="bar-val">6:00</span>
+              </div>
+              <div class="bar-row" data-od-id="zw-31">
+                <span class="bar-label">KW&nbsp;31</span>
+                <span class="bar-track"><span class="bar-fill" style="width: 33.3%;"></span></span>
+                <span class="bar-val">2:55</span>
+              </div>
+              </div>
+              <p class="empty">KW&nbsp;33 war Urlaub — keine Blöcke. Wochen ohne Zeitblock zählt der Rückblick nicht als Rückgang.</p>
+            </div>
+            <div>
+              <div class="pane-head">
+                <h2 class="pane-label">Blöcke dieser Woche</h2>
+                <span class="meta">5 · 8&nbsp;h 45</span>
+              </div>
+              <ul style="padding-top: var(--gap-xs);">
+              <li class="note-row" data-od-id="blk-1">
+                <span><span class="note-title">Tagesachse-Komponente</span><span class="note-excerpt">Sa 5.9. · 15:00–17:40</span></span>
+                <span class="meta">2:40</span>
+              </li>
+              <li class="note-row" data-od-id="blk-2">
+                <span><span class="note-title">Sechs Tokens festziehen</span><span class="note-excerpt">Sa 5.9. · 10:20–11:10</span></span>
+                <span class="meta">0:50</span>
+              </li>
+              <li class="note-row" data-od-id="blk-3">
+                <span><span class="note-title">Rail mit Labels</span><span class="note-excerpt">Sa 5.9. · 09:40–10:15</span></span>
+                <span class="meta">0:35</span>
+              </li>
+              <li class="note-row" data-od-id="blk-4">
+                <span><span class="note-title">Empty States schreiben</span><span class="note-excerpt">Fr 4.9. · 21:05–21:30</span></span>
+                <span class="meta">0:25</span>
+              </li>
+              <li class="note-row" data-od-id="blk-5">
+                <span><span class="note-title">Wochenraster skizzieren</span><span class="note-excerpt">Do 3.9. · 18:00–19:55</span></span>
+                <span class="meta">1:55</span>
+              </li>
+              </ul>
+            </div>
+          </div>
+        </section>
+
+      </div>
+    </div>
+  </main>
+
+  <form class="capture" data-od-id="capture" autocomplete="off">
+    <div class="capture-inner">
+      <label for="capture-input" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0);">Neuer Eintrag</label>
+      <div style="flex:1; display:flex; flex-direction:column; gap:5px;">
+        <input class="capture-input" id="capture-input" type="text" placeholder="Fragmentgrenzen dokumentieren 40m +lifelog @morgen" />
+        <div class="capture-preview" id="capture-preview" aria-live="polite"></div>
+      </div>
+      <span class="kbd" aria-hidden="true">⌘K</span>
+      <button type="submit" class="btn">Anlegen ↵</button>
+    </div>
+  </form>
+
+</div>
+<script src="assets/lifelog.js"></script>
+</body>
+</html>

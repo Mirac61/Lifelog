@@ -319,9 +319,7 @@
                             ' Repos · ' + prs.replace(' im Jahr', '') + ' Pull Requests';
       sw.querySelectorAll('button').forEach(function (btn) {
         var next = y + parseInt(btn.dataset.step, 10);
-        btn.disabled = years.indexOf(next) === -1;
-        btn.style.opacity = btn.disabled ? '0.35' : '';
-        btn.style.cursor = btn.disabled ? 'default' : '';
+        btn.disabled = years.indexOf(next) === -1;   // Aussehen kommt aus :disabled im CSS
       });
     }
 

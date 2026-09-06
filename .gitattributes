@@ -3,4 +3,8 @@
 # dessen sourceFiles.all-Liste den kompletten Ordnerinhalt als Output ausweist.
 # vendored statt generated: nimmt die Dateien aus der Sprachstatistik,
 # laesst die Diffs im Review aber normal sichtbar.
-DesignPrototype/** linguist-vendored=true
+# Ein Pattern pro Ebene statt "**", weil Forgejo rekursive Globs
+# moeglicherweise anders aufloest als Git selbst.
+DesignPrototype/*              linguist-vendored=true
+DesignPrototype/assets/*       linguist-vendored=true
+DesignPrototype/assets/fonts/* linguist-vendored=true

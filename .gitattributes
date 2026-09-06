@@ -1,0 +1,6 @@
+# Von Open Design generierter Design-Prototyp.
+# Belegt durch DesignPrototype/DESIGN-MANIFEST.json ("open-design.design-manifest.v1"),
+# dessen sourceFiles.all-Liste den kompletten Ordnerinhalt als Output ausweist.
+# vendored statt generated: nimmt die Dateien aus der Sprachstatistik,
+# laesst die Diffs im Review aber normal sichtbar.
+DesignPrototype/** linguist-vendored=true

@@ -28,5 +28,5 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, r, dashboard.Page(stats))
+	render(w, r, dashboard.Page(stats, year))
 }

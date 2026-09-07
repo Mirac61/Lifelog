@@ -8,15 +8,64 @@ import (
 	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
-templ Page(stats store.Stats) {
-	@layout.Shell("dashboard") {
-		<h1>lifelog <span>/ personal data warehouse</span></h1>
-		<div class="stats">
-			<div class="stat"><b>{ fmt.Sprint(stats.Total) }</b><span>contributions</span></div>
-			<div class="stat"><b>{ fmt.Sprint(stats.ActiveDays) }</b><span>active days</span></div>
-			<div class="stat"><b>{ fmt.Sprint(stats.LongestStreak) }</b><span>longest streak</span></div>
-			<div class="stat"><b>{ fmt.Sprint(stats.BestValue) }</b><span>best day{ ui.BestDaySuffix(stats.BestDate) }</span></div>
+templ Page(stats store.Stats, year int) {
+	@layout.Screen("dashboard", nil) {
+		@ui.PageHead(ui.Head{Title: "lifelog", Sub: fmt.Sprintf("persönliches Data Warehouse · %d", year)})
+		<div class="screen-inner">
+			<section class="pane">
+				<div class="pane-head">
+					<h2 class="pane-label">Dieses Jahr</h2>
+					<span class="meta">aus GitHub</span>
+				</div>
+				<div class="cols-3" style="padding-top: var(--gap-md);">
+					<div class="figure figure-lead">
+						<span class="figure-num">{ fmt.Sprintf("%.0f", stats.Total) }</span>
+						<span class="figure-label">Beiträge</span>
+						if stats.BestValue > 0 {
+							<span class="figure-note">bester Tag: { fmt.Sprintf("%.0f", stats.BestValue) }{ ui.BestDaySuffix(stats.BestDate) }</span>
+						}
+					</div>
+					<div class="figure">
+						<span class="figure-num">{ fmt.Sprint(stats.ActiveDays) }</span>
+						<span class="figure-label">aktive Tage</span>
+						<span class="figure-note">von { fmt.Sprint(ui.DaysInYear(year)) }</span>
+					</div>
+					<div class="figure">
+						<span class="figure-num">{ fmt.Sprint(stats.LongestStreak) }</span>
+						<span class="figure-label">längste Serie</span>
+						<span class="figure-note">Tage am Stück</span>
+					</div>
+				</div>
+			</section>
+			<section class="pane">
+				<div class="pane-head">
+					<h2 class="pane-label">Screens</h2>
+					<span class="meta">was schon steht</span>
+				</div>
+				<ul>
+					<li>
+						<a class="entry" href="/todos">
+							<span class="entry-num">01</span>
+							<span class="entry-body">
+								<span class="entry-title"><span class="h3">Todos</span><em class="entry-role">Tag</em></span>
+								<span class="entry-desc">Aufgaben des Tages, Kommendes und die Capture-Leiste — <code>15m #tag @datum</code> wird beim Anlegen gelesen.</span>
+							</span>
+							<span class="entry-go" aria-hidden="true">→</span>
+						</a>
+					</li>
+					<li>
+						<a class="entry" href="/git">
+							<span class="entry-num">02</span>
+							<span class="entry-body">
+								<span class="entry-title"><span class="h3">Git</span><em class="entry-role">Jahr</em></span>
+								<span class="entry-desc">Ein Jahr GitHub in Zahlen: jeder Tag, jeder Monat, Repos, Pull Requests — und was die Zahlen sagen.</span>
+							</span>
+							<span class="entry-go" aria-hidden="true">→</span>
+						</a>
+					</li>
+				</ul>
+			</section>
+			<div id="detail"></div>
 		</div>
-		<div id="detail"></div>
 	}
 }

@@ -31,8 +31,8 @@ func dayHref(day time.Time) string {
 // navigation keeps it shareable.
 func dayStepper(page DayPage, today string) ui.Stepper {
 	return ui.Stepper{
-		Value:     dayLabel(page.Day, today),
-		Wide:      true,
+		Label:     dayLabel(page.Day, today),
+		Group:     "Tag wechseln",
 		Prev:      ui.Nav{Href: dayHref(page.Day.AddDate(0, 0, -1))},
 		PrevLabel: "Vorheriger Tag",
 		Next:      ui.Nav{Href: dayHref(page.Day.AddDate(0, 0, 1))},
@@ -40,33 +40,31 @@ func dayStepper(page DayPage, today string) ui.Stepper {
 	}
 }
 
-func todayPill() []ui.Pill {
-	return []ui.Pill{{Label: "Heute", Nav: ui.Nav{Href: "/todos"}}}
-}
-
-templ DateControls(page DayPage, today string) {
-	if page.Day.Format("2006-01-02") != today {
-		@ui.Pills(todayPill())
-	}
-	@ui.Steps(dayStepper(page, today))
-}
-
 templ Page(page DayPage, today string) {
-	@layout.Shell("todos") {
-		@ui.PageHead(ui.Head{Title: "Todos", Sub: page.Day.Format("Mon, 2 Jan 2006")}) {
-			@DateControls(page, today)
+	@layout.Screen("todos", Capture(page)) {
+		@ui.PageHead(ui.Head{Title: "Todos", Sub: ui.LongDate(page.Day)}) {
+			if page.Day.Format("2006-01-02") != today {
+				<a class="btn btn-ghost" href="/todos">Heute</a>
+			}
+			@ui.Steps(dayStepper(page, today))
 		}
-		<div class="board">
-			<div class="panel day board-todos">
-				@Panel(page, today)
-			</div>
-			<div class="panel day board-scratch">
-				<h3>Notizen</h3>
-				<p class="hint">Freitext-Notizen — später.</p>
-			</div>
-			<div class="panel day calendar-box">
-				<h3>Kalender</h3>
-				<p class="hint">Tagesplan — später.</p>
+		<div class="screen-inner">
+			<div class="cols-main">
+				<div>
+					@Panel(page, today)
+				</div>
+				<div class="sticky-col">
+					<div class="pane-head">
+						<h2 class="pane-label">Notizen</h2>
+						<span class="meta">später</span>
+					</div>
+					<p class="empty">Freitext zum Tag — noch nicht gebaut.</p>
+					<div class="pane-head">
+						<h2 class="pane-label">Kalender</h2>
+						<span class="meta">später</span>
+					</div>
+					<p class="empty">Der Tagesplan kommt, wenn Termine im Store liegen.</p>
+				</div>
 			</div>
 		</div>
 	}

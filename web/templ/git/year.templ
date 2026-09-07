@@ -1,0 +1,204 @@
+package git
+
+import "fmt"
+
+// Year is the swapped fragment: everything that changes when the year or the
+// type changes.
+templ Year(page GitPage) {
+	<div id="git-jahr">
+		<div class="year-block" data-year={ fmt.Sprint(page.Year) }>
+			@leadPane(page)
+			@heatPane(page)
+			@monthPane(page)
+			@listPane(page)
+			@insightPane(page)
+		</div>
+	</div>
+}
+
+// YearSwap answers an htmx switch: the block, plus the head out of band. Only
+// htmx's AJAX swap honours hx-swap-oob, so a full page load must use Git.
+templ YearSwap(page GitPage) {
+	@Year(page)
+	@Head(page, true)
+}
+
+// sentence prints a line with its accent-coloured middle.
+templ sentence(s Sentence) {
+	{ s.Before }
+	if s.Em != "" {
+		<em>{ s.Em }</em>
+	}
+	{ s.After }
+}
+
+templ leadPane(page GitPage) {
+	<section class="pane">
+		<div class="gh-lead">
+			<span class="gh-big">{ page.Lead.Total }<span class="k">{ page.Lead.Caption }</span></span>
+			<div>
+				<p class="gh-sentence">
+					@sentence(page.Lead.Sentence)
+				</p>
+				if len(page.Lead.Stats) > 0 {
+					<div class="gh-stats">
+						for _, f := range page.Lead.Stats {
+							<span class="gh-stat"><span class="v">{ f.Value }</span><span class="k">{ f.Label }</span></span>
+						}
+					</div>
+				}
+			</div>
+		</div>
+	</section>
+}
+
+templ heatPane(page GitPage) {
+	<section class="pane">
+		<div class="pane-head">
+			<h2 class="pane-label">Jeder Tag</h2>
+			<span class="heat-legend meta">
+				wenig
+				<span class="gh-cell" data-level="1" aria-hidden="true"></span>
+				<span class="gh-cell" data-level="2" aria-hidden="true"></span>
+				<span class="gh-cell" data-level="3" aria-hidden="true"></span>
+				<span class="gh-cell" data-level="4" aria-hidden="true"></span>
+				viel · <span class="gh-cell" data-level="4" data-best="true" aria-hidden="true"></span> bester Tag
+			</span>
+		</div>
+		<div class="year-scroll" style="padding-top: var(--gap-md);">
+			<div class="year-cal">
+				<span></span>
+				<div class="year-months" style={ fmt.Sprintf("grid-template-columns: repeat(%d, calc(var(--gh-cell) + var(--gh-gap)));", page.Heatmap.Weeks) }>
+					for _, m := range page.Heatmap.Months {
+						<span style={ fmt.Sprintf("grid-column: %d / %d;", m.From, m.To) }>{ m.Label }</span>
+					}
+				</div>
+				<div class="year-dows"><span>Mo</span><span></span><span>Mi</span><span></span><span>Fr</span><span></span><span>So</span></div>
+				<div class="year-heat" role="img" aria-label={ page.Heatmap.Label }>
+					for _, c := range page.Heatmap.Cells {
+						@heatCell(c)
+					}
+				</div>
+			</div>
+		</div>
+	</section>
+}
+
+templ heatCell(c HeatCell) {
+	if c.Void {
+		<span class="gh-cell" data-void="true" aria-hidden="true"></span>
+	} else {
+		<span
+			class="gh-cell"
+			if c.Level > 0 {
+				data-level={ fmt.Sprint(c.Level) }
+			}
+			if c.Best {
+				data-best="true"
+			}
+			if c.Date != "" {
+				data-date={ c.Date }
+				data-tip={ c.Tip }
+			}
+			aria-hidden="true"
+		></span>
+	}
+}
+
+templ monthPane(page GitPage) {
+	<section class="pane">
+		<div class="pane-head">
+			<h2 class="pane-label">Nach Monat</h2>
+			<span class="meta">stärkster Monat hervorgehoben</span>
+		</div>
+		<div class="gh-months" style="margin-top: var(--gap-md);">
+			for _, m := range page.Months {
+				<span
+					class="gh-mon"
+					if m.Peak {
+						data-peak="true"
+					}
+				>
+					<span class="gh-mon-v">{ m.Value }</span>
+					<span class="gh-mon-bar" style={ fmt.Sprintf("height: %dpx;", m.Height) }></span>
+					<span class="gh-mon-k">{ m.Label }</span>
+				</span>
+			}
+		</div>
+	</section>
+}
+
+templ listPane(page GitPage) {
+	<section class="pane">
+		<div class="cols-2">
+			<div>
+				<div class="pane-head">
+					<h2 class="pane-label">Repos</h2>
+					<span class="meta">{ page.RepoRest }</span>
+				</div>
+				if len(page.Repos) > 0 {
+					<ul style="padding-top: var(--gap-xs);">
+						for _, r := range page.Repos {
+							<li class="repo-row">
+								<span class="repo-rank">{ r.Rank }</span>
+								<span class="repo-name"><span class="owner">{ r.Owner }</span>{ r.Name }</span>
+								<span class="bar-track"><span class="bar-fill" style={ fmt.Sprintf("width: %.0f%%;", r.Percent) }></span></span>
+								<span class="repo-val">{ r.Value }</span>
+							</li>
+						}
+					</ul>
+				} else {
+					<p class="empty">Keine Commits in { fmt.Sprint(page.Year) }.</p>
+				}
+			</div>
+			<div>
+				<div class="pane-head">
+					<h2 class="pane-label">Pull Requests</h2>
+					<span class="meta">{ page.PRCount }</span>
+				</div>
+				if len(page.PRs) > 0 {
+					<ul>
+						for _, group := range page.PRs {
+							<li class="pr-month">{ group.Month }</li>
+							for _, pr := range group.Rows {
+								<li class="pr-row">
+									<span class="meta">{ pr.Date }</span>
+									<span class="pr-dot" data-state={ pr.State } aria-hidden="true"></span>
+									<span>
+										<a class="pr-title" href={ templ.URL(pr.URL) } target="_blank" rel="noopener" title={ pr.Title }>{ pr.Title }</a>
+										<span class="pr-repo">{ pr.Repo }</span>
+									</span>
+									<span class="tag">{ pr.Label }</span>
+								</li>
+							}
+						}
+					</ul>
+					if page.PRRest != "" {
+						<p class="empty">{ page.PRRest }</p>
+					}
+				} else {
+					<p class="empty">Keine Pull Requests in { fmt.Sprint(page.Year) }.</p>
+				}
+			</div>
+		</div>
+	</section>
+}
+
+templ insightPane(page GitPage) {
+	if len(page.Insights) > 0 {
+		<section class="pane">
+			<div class="pane-head">
+				<h2 class="pane-label">Das Jahr in Sätzen</h2>
+				<span class="meta">aus denselben Zahlen gelesen</span>
+			</div>
+			<div style="padding-top: var(--gap-xs);">
+				for _, insight := range page.Insights {
+					<div class="insight">
+						<span class="insight-k">{ insight.Key }</span>
+						<span class="insight-t">{ insight.Text }</span>
+					</div>
+				}
+			</div>
+		</section>
+	}
+}

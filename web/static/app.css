@@ -1,0 +1,100 @@
+/* Ergänzungen zum Design-System (lifelog.css bleibt unverändert, damit ein
+   neuer Export einfach drübergelegt werden kann). Nur was der Prototyp nicht
+   kennt: breitere Fenster, zwei Bedienelemente im Kopf, Zustände, die es im
+   Export nicht gibt, und Hover-Leben. */
+
+/* Der Export deckelt bei 1240px. Am 80-%-Zoom-Fenster des Users bleiben davon
+   zwei Handbreit Leere pro Seite — also mehr Raum, aber weiter zentriert. */
+.screen-inner { max-width: 1840px; }
+
+/* Die Heatmap wächst mit: der Export skaliert Zellen nur nach unten. */
+@media (min-width: 1600px) { .year-cal { --gh-cell: 22px; --gh-gap: 5px; } }
+
+.head-controls {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  flex-wrap: wrap;
+}
+
+/* Der Tages-Stepper navigiert per Link statt per htmx; der Export kennt nur
+   Buttons im Stepper. */
+.stepper a {
+  min-width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: var(--r-xs);
+  color: var(--muted);
+  transition: background .14s, color .14s;
+}
+.stepper a:hover { background: var(--raised); color: var(--fg); }
+
+/* Der Prototyp hält beide Jahre im Markup; hier tauscht htmx eins gegen das
+   andere. Die Blende deckt den Sprung ab. */
+#git-jahr { transition: opacity .15s ease; }
+#git-jahr.htmx-swapping,
+#git-jahr.htmx-settling { opacity: 0; }
+
+/* ─── Leben beim Hovern ──────────────────────────────────────────── */
+
+.gh-mon-bar { transition: background .16s ease, transform .16s ease; transform-origin: bottom; }
+.gh-mon-v, .gh-mon-k { transition: color .16s ease; }
+.gh-mon:hover .gh-mon-bar { background: var(--accent); transform: scaleY(1.05); }
+.gh-mon:hover .gh-mon-v { color: var(--accent); font-weight: 600; }
+.gh-mon:hover .gh-mon-k { color: var(--fg); }
+
+.repo-row .bar-fill { transition: background .16s ease; }
+.repo-row:hover .bar-fill { background: var(--accent); }
+
+/* Nur Tage mit Beiträgen reagieren — leere Felder sind keine Ziele. */
+.year-heat .gh-cell { transition: transform .12s ease; }
+.year-heat .gh-cell[data-date]:hover { transform: scale(1.28); }
+
+.tag, .pr-dot { transition: background .16s ease, color .16s ease; }
+.pr-row:hover .tag { background: var(--accent-soft); color: var(--accent); }
+
+#tip {
+  position: absolute;
+  z-index: 40;
+  padding: 6px 11px;
+  border-radius: var(--r-sm);
+  background: var(--fg);
+  color: var(--bg);
+  font-size: 12.5px;
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .12s ease;
+}
+
+/* ─── Aufgaben: Zustände, die der Export nicht führt ─────────────── */
+
+/* Der Export kennt offen und erledigt. Lifelog hat einen dritten Zustand:
+   angefangen — ein Klick auf den Text, kein zweiter Knopf. */
+.task[data-state="in_progress"] .check {
+  border-color: var(--accent);
+  background: var(--accent-soft);
+  color: var(--accent);
+}
+.task[data-state="in_progress"] .task-title { color: var(--accent); }
+
+.task-title { cursor: pointer; }
+
+/* Löschen bleibt zurückhaltend, bis die Zeile gemeint ist — wie die
+   Habit-Zeilen im Export. */
+.task .icon-btn { opacity: 0; }
+.task:hover .icon-btn, .task .icon-btn:focus-visible { opacity: .55; }
+.task .icon-btn:hover { opacity: 1; color: var(--warn); background: var(--warn-soft); }
+
+.capture-input:disabled { cursor: not-allowed; }
+
+/* Der Export löst versteckte Labels inline; als Klasse ist es einmal statt fünfmal. */
+.visually-hidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+}

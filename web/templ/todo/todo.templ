@@ -5,6 +5,7 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
 func nextStatus(s string) string {
@@ -24,7 +25,8 @@ func nextOnRowClick(s string) string {
 
 // Mutating handlers re-render this out of band.
 templ Planned(minutes int, oob bool) {
-	<small
+	<span
+		class="meta"
 		id="planned"
 		if oob {
 			hx-swap-oob="true"
@@ -33,7 +35,7 @@ templ Planned(minutes int, oob bool) {
 		if minutes > 0 {
 			{ formatDuration(minutes) + " offen" }
 		}
-	</small>
+	</span>
 }
 
 func formatDuration(minute int) string {
@@ -48,15 +50,13 @@ func formatDuration(minute int) string {
 	}
 }
 
-var weekdayDE = [...]string{"So", "Mo", "Di", "Mi", "Do", "Fr", "Sa"}
-
 // formatDueDate renders "Fr 5.9." for the current year, "Fr 5.9.2027" otherwise.
 func formatDueDate(iso, today string) string {
 	d, err := time.Parse("2006-01-02", iso)
 	if err != nil {
 		return iso
 	}
-	out := fmt.Sprintf("%s %d.%d.", weekdayDE[d.Weekday()], d.Day(), int(d.Month()))
+	out := fmt.Sprintf("%s %d.%d.", ui.WeekdayShort[d.Weekday()], d.Day(), int(d.Month()))
 	if now, err := time.Parse("2006-01-02", today); err == nil && d.Year() != now.Year() {
 		out += fmt.Sprint(d.Year())
 	}
@@ -68,38 +68,47 @@ func isOverdue(t store.Todo, today string) bool {
 }
 
 templ Item(t store.Todo, today string) {
-	<li class={ "todo", templ.KV("overdue", isOverdue(t, today)) }>
+	<li class="task" data-done={ fmt.Sprintf("%t", t.Status == "done") } data-state={ t.Status }>
 		<button
-			class={ "check", templ.KV("done", t.Status == "done"), templ.KV("doing", t.Status == "in_progress") }
+			type="button"
+			class="check"
+			role="checkbox"
+			aria-checked={ fmt.Sprintf("%t", t.Status == "done") }
+			aria-label={ t.Text + " abhaken" }
 			hx-post={ fmt.Sprintf("/todos/%d/%s", t.ID, nextStatus(t.Status)) }
 			hx-target="closest li"
 			hx-swap="outerHTML"
-			title="Erledigt"
-		></button>
+		>
+			<svg viewBox="0 0 12 12" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 6.3 4.6 9 10 3"></path></svg>
+		</button>
 		<span
-			class={ "todo-text", templ.KV("done-text", t.Status == "done") }
+			class="task-title"
+			title="Anfangen / zurücklegen"
 			hx-post={ fmt.Sprintf("/todos/%d/%s", t.ID, nextOnRowClick(t.Status)) }
 			hx-target="closest li"
 			hx-swap="outerHTML"
 		>{ t.Text }</span>
-		<span class="meta">
+		<span class="task-meta">
 			if t.Estimate.Valid {
-				<span class="est">{ formatDuration(int(t.Estimate.Int64)) }</span>
+				<span class="task-due num">{ formatDuration(int(t.Estimate.Int64)) }</span>
 			}
 			if t.DueDate.Valid && t.DueDate.String != today {
-				<span class="date">{ formatDueDate(t.DueDate.String, today) }</span>
+				<span class={ "task-due", "num", templ.KV("is-overdue", isOverdue(t, today)) }>{ formatDueDate(t.DueDate.String, today) }</span>
 			}
 			if t.Category.Valid {
 				<span class="tag">#{ t.Category.String }</span>
 			}
+			<button
+				type="button"
+				class="icon-btn"
+				aria-label={ t.Text + " löschen" }
+				hx-delete={ fmt.Sprintf("/todos/%d", t.ID) }
+				hx-target="closest li"
+				hx-swap="outerHTML"
+			>
+				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M5 7h14M10 7V5h4v2M8 7l.7 12h6.6L16 7"></path></svg>
+			</button>
 		</span>
-		<button
-			class="trash"
-			hx-delete={ fmt.Sprintf("/todos/%d", t.ID) }
-			hx-target="closest li"
-			hx-swap="outerHTML"
-			title="Löschen"
-		>×</button>
 	</li>
 }
 
@@ -112,46 +121,67 @@ templ ItemUpdate(t store.Todo, planned int, today string) {
 // ItemUpcoming answers a create due past the shown day: the row drops into
 // "Kommende" out of band, plus the budget.
 templ ItemUpcoming(t store.Todo, planned int, today string) {
-	<ul hx-swap-oob="beforeend:#todo-upcoming">
+	<ol hx-swap-oob="beforeend:#todo-upcoming">
 		@Item(t, today)
-	</ul>
+	</ol>
 	@Planned(planned, true)
 }
 
+// Panel is the day's list — also used inside the dashboard's day detail.
 templ Panel(page DayPage, today string) {
-	<h3>
-		Todos
-		@Planned(page.Planned, false)
-	</h3>
-	<ul class="todos" id="todo-today">
-		for _, t := range page.Todos {
-			@Item(t, today)
+	<section class="pane">
+		<div class="pane-head">
+			<h2 class="pane-label">Aufgaben</h2>
+			@Planned(page.Planned, false)
+		</div>
+		<ol id="todo-today">
+			for _, t := range page.Todos {
+				@Item(t, today)
+			}
+		</ol>
+		if len(page.Todos) == 0 {
+			<p class="empty">Nichts für diesen Tag — tipp unten was ein.</p>
 		}
-	</ul>
-	if len(page.Todos) == 0 {
-		<p class="hint">Nichts für heute — tipp unten was ein.</p>
-	}
-	<div class="upcoming-sec">
-		<h3>Kommende</h3>
-		<ul class="todos" id="todo-upcoming">
+	</section>
+	<section class="pane">
+		<div class="pane-head">
+			<h2 class="pane-label">Kommende</h2>
+			<span class="meta">nach diesem Tag fällig</span>
+		</div>
+		<ol id="todo-upcoming">
 			for _, t := range page.Upcoming {
 				@Item(t, today)
 			}
-		</ul>
-	</div>
+		</ol>
+		if len(page.Upcoming) == 0 {
+			<p class="empty">Nichts geplant.</p>
+		}
+	</section>
+}
+
+// Capture is the bar at the bottom edge. It writes into the shown day, and the
+// new row lands at the end of that day's list — unless it is due later, then
+// the handler drops it into "Kommende" instead.
+templ Capture(page DayPage) {
 	<form
-		class="todo-add"
+		class="capture"
+		autocomplete="off"
 		hx-post="/todos"
 		hx-target="#todo-today"
 		hx-swap="beforeend"
 		hx-on::after-request="this.reset()"
 	>
-		<input type="hidden" name="date" value={ page.Day.Format("2006-01-02") }/>
-		<input
-			class="todo-input"
-			name="text"
-			placeholder="Wäsche aufhängen 15m #haushalt @05.09.2026"
-			autocomplete="off"
-		/>
+		<div class="capture-inner">
+			<input type="hidden" name="date" value={ page.Day.Format("2006-01-02") }/>
+			<label for="capture-input" class="visually-hidden">Neue Aufgabe</label>
+			<input
+				class="capture-input"
+				id="capture-input"
+				name="text"
+				type="text"
+				placeholder="Wäsche aufhängen 15m #haushalt @05.09.2026"
+			/>
+			<button type="submit" class="btn">Anlegen ↵</button>
+		</div>
 	</form>
 }

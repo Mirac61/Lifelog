@@ -5,22 +5,31 @@ import (
 
 	"github.com/Mirac61/lifelog/internal/store"
 	"github.com/Mirac61/lifelog/web/templ/todo"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
-// Day fills #detail on the dashboard when a heatmap cell is clicked.
+// Day fills #detail when a day is asked for by name.
 templ Day(events []store.DayEvent, todos todo.DayPage, today string) {
-	<div class="panel day">
-		<h2>{ todos.Day.Format("Mon, 2 Jan 2006") }</h2>
+	<section class="pane">
+		<div class="pane-head">
+			<h2 class="pane-label">{ ui.LongDate(todos.Day) }</h2>
+			<span class="meta">{ fmt.Sprint(len(events)) } Ereignisse</span>
+		</div>
 		@todo.Panel(todos, today)
-		<h3>Events</h3>
+		<div class="pane-head">
+			<h2 class="pane-label">Ereignisse</h2>
+		</div>
 		if len(events) > 0 {
-			<ul>
+			<div class="facts">
 				for _, e := range events {
-					<li><span>{ e.Type }</span><b>{ fmt.Sprint(e.Value) } { e.Unit }</b></li>
+					<div class="fact">
+						<span class="fact-k">{ e.Type }</span>
+						<span class="fact-v">{ fmt.Sprint(e.Value) } { e.Unit }</span>
+					</div>
 				}
-			</ul>
+			</div>
 		} else {
-			<p class="empty">No events</p>
+			<p class="empty">Keine Ereignisse an diesem Tag.</p>
 		}
-	</div>
+	</section>
 }

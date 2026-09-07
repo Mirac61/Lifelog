@@ -2,70 +2,88 @@ package ui
 
 import "strconv"
 
-// Pills renders a pill bar. Each pill follows its Nav: a link navigates, a
-// swap is a tab.
-templ Pills(items []Pill) {
-	<div
-		class="pillbar"
-		if isTablist(items) {
-			role="tablist"
+// PageHead is the sticky title row; the children are its controls.
+templ PageHead(h Head) {
+	<header
+		class="screen-head"
+		if h.ID != "" {
+			id={ h.ID }
+		}
+		if h.OOB {
+			hx-swap-oob="true"
 		}
 	>
-		for _, p := range items {
-			if p.Nav.isLink() {
-				<a class={ "pill", templ.KV("active", p.Active) } href={ p.Nav.Href }>{ p.Label }</a>
+		<div class="screen-inner">
+			<div class="head-title">
+				<h1 class="h1">{ h.Title }</h1>
+				if h.Sub != "" {
+					<span class="meta">{ h.Sub }</span>
+				}
+			</div>
+			<div class="head-controls">
+				{ children... }
+			</div>
+		</div>
+	</header>
+}
+
+// Tabs switches what a page shows. Each tab follows its Nav: a link
+// navigates, a swap exchanges a fragment in place.
+templ Tabs(items []Tab) {
+	<div class="tabs" role="tablist">
+		for _, t := range items {
+			if t.Nav.isLink() {
+				<a class="tab" role="tab" aria-selected={ strconv.FormatBool(t.Active) } href={ t.Nav.Href }>
+					@tabLabel(t)
+				</a>
 			} else {
 				<button
 					type="button"
-					class={ "pill", templ.KV("active", p.Active) }
+					class="tab"
 					role="tab"
-					aria-selected={ strconv.FormatBool(p.Active) }
-					hx-get={ p.Nav.Get }
-					hx-target={ p.Nav.Target }
-					hx-swap={ p.Nav.Swap }
-				>{ p.Label }</button>
+					aria-selected={ strconv.FormatBool(t.Active) }
+					hx-get={ t.Nav.Get }
+					hx-target={ t.Nav.Target }
+					hx-swap={ t.Nav.Swap }
+					if t.Nav.Push != "" {
+						hx-push-url={ t.Nav.Push }
+					}
+				>
+					@tabLabel(t)
+				</button>
 			}
 		}
 	</div>
 }
 
+templ tabLabel(t Tab) {
+	{ t.Label }
+	if t.Count != "" {
+		<span class="meta">{ t.Count }</span>
+	}
+}
+
 templ Steps(s Stepper) {
-	<div class={ "stepper", templ.KV("wide", s.Wide) }>
-		@step(s.Prev, s.PrevLabel, true)
-		<span class="stepval">{ s.Value }</span>
-		@step(s.Next, s.NextLabel, false)
+	<div class="stepper" role="group" aria-label={ s.Group }>
+		@step(s.Prev, s.PrevLabel, "‹")
+		<span class="stepper-now">{ s.Label }</span>
+		@step(s.Next, s.NextLabel, "›")
 	</div>
 }
 
-templ step(n Nav, label string, back bool) {
-	if n.isLink() {
-		<a class="step" href={ n.Href } aria-label={ label }>
-			@chevron(back)
-		</a>
-	} else if n.isSwap() {
+templ step(n Nav, label, glyph string) {
+	if n.isSwap() {
 		<button
 			type="button"
-			class="step"
 			aria-label={ label }
 			hx-get={ n.Get }
 			hx-target={ n.Target }
 			hx-swap={ n.Swap }
-		>
-			@chevron(back)
-		</button>
+			if n.Push != "" {
+				hx-push-url={ n.Push }
+			}
+		>{ glyph }</button>
 	} else {
-		<button type="button" class="step" aria-label={ label } disabled>
-			@chevron(back)
-		</button>
+		<button type="button" aria-label={ label } disabled>{ glyph }</button>
 	}
-}
-
-templ chevron(back bool) {
-	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-		if back {
-			<polyline points="15,5 9,12 15,19"></polyline>
-		} else {
-			<polyline points="9,5 15,12 9,19"></polyline>
-		}
-	</svg>
 }

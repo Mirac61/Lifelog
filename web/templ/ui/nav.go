@@ -1,70 +1,41 @@
-// Package ui holds the building blocks every page shares: the title row, the
-// pill bar, the stepper, and the formatting helpers that go with them. It
-// imports nothing from the pages, so any page can import it.
+// Package ui holds the design-system building blocks — the sticky page head,
+// the tab bar and the year stepper from DesignPrototype/assets/lifelog.css —
+// plus the formatting helpers the pages share. It imports nothing from the
+// pages, so any page can import it.
 package ui
 
-import "github.com/a-h/templ"
-
-// Nav is how a control moves. Href navigates the page, Get swaps Target in
-// place via htmx — a control is one or the other. The zero value is a dead
-// end and renders disabled.
+// Nav is how a control moves: Get swaps Target in place via htmx, Href
+// navigates the page. Push is the browser URL to record while swapping, which
+// is rarely the same as Get. The zero value is a dead end and renders
+// disabled.
 type Nav struct {
 	Href   string
 	Get    string
 	Target string
 	Swap   string
+	Push   string
 }
 
 func (n Nav) isLink() bool { return n.Href != "" }
 
 func (n Nav) isSwap() bool { return n.Get != "" }
 
-// Pill is one entry of a pill bar.
-type Pill struct {
+// Tab is one entry of a tab bar.
+type Tab struct {
 	Label  string
+	Count  string // muted number beside the label, like the design's "Dateien 11"
 	Active bool
 	Nav    Nav
 }
 
-// isTablist: pills that swap a panel in place are tabs. Pills that navigate
-// away are links and must not claim the tab roles.
-func isTablist(items []Pill) bool {
-	for _, p := range items {
-		if !p.Nav.isSwap() {
-			return false
-		}
-	}
-	return len(items) > 0
-}
-
 // Stepper is the arrow · value · arrow control. A zero Prev or Next renders
-// that arrow disabled.
+// that arrow disabled. Its arrows are htmx buttons — lifelog.css styles
+// `.stepper button`, so a link variant would need a rule of its own.
 type Stepper struct {
-	Value     string
-	Wide      bool // roomier value box, for word labels like "Gestern"
+	Label     string
+	Group     string // aria-label of the group, e.g. "Jahr wechseln"
 	Prev      Nav
 	PrevLabel string
 	Next      Nav
 	NextLabel string
-}
-
-// Head is the page title row. The IDs are only needed where htmx swaps that
-// part out of band; they go through spread attributes so the markup keeps its
-// exact spacing.
-type Head struct {
-	Title      string
-	Sub        string
-	SubID      string
-	ControlsID string
-}
-
-func (h Head) subAttrs() templ.Attributes { return idAttr(h.SubID) }
-
-func (h Head) controlsAttrs() templ.Attributes { return idAttr(h.ControlsID) }
-
-func idAttr(id string) templ.Attributes {
-	if id == "" {
-		return nil
-	}
-	return templ.Attributes{"id": id}
 }

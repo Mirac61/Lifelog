@@ -1,20 +1,21 @@
-package templ
+package dashboard
 
 import (
-	"github.com/Mirac61/lifelog/web/templ/layout"
 	"fmt"
 
 	"github.com/Mirac61/lifelog/internal/store"
+	"github.com/Mirac61/lifelog/web/templ/layout"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
-templ Dashboard(stats store.Stats) {
+templ Page(stats store.Stats) {
 	@layout.Shell("dashboard") {
 		<h1>lifelog <span>/ personal data warehouse</span></h1>
 		<div class="stats">
 			<div class="stat"><b>{ fmt.Sprint(stats.Total) }</b><span>contributions</span></div>
 			<div class="stat"><b>{ fmt.Sprint(stats.ActiveDays) }</b><span>active days</span></div>
 			<div class="stat"><b>{ fmt.Sprint(stats.LongestStreak) }</b><span>longest streak</span></div>
-			<div class="stat"><b>{ fmt.Sprint(stats.BestValue) }</b><span>best day{ BestDaySuffix(stats.BestDate) }</span></div>
+			<div class="stat"><b>{ fmt.Sprint(stats.BestValue) }</b><span>best day{ ui.BestDaySuffix(stats.BestDate) }</span></div>
 		</div>
 		<div id="detail"></div>
 	}

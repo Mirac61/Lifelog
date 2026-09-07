@@ -1,4 +1,4 @@
-package templ
+package ui
 
 import "time"
 

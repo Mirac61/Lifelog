@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/dashboard"
 	"github.com/Mirac61/lifelog/web/templ/todo"
 )
 
@@ -47,7 +47,7 @@ func (s *Server) handleDay(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "query failed", http.StatusInternalServerError)
 		return
 	}
-	render(w, r, views.Day(events, todos, time.Now().Format("2006-01-02")))
+	render(w, r, dashboard.Day(events, todos, time.Now().Format("2006-01-02")))
 }
 
 func (s *Server) handleTodos(w http.ResponseWriter, r *http.Request) {

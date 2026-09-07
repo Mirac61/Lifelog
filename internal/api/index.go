@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/dashboard"
 )
 
 func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
@@ -28,5 +28,5 @@ func (s *Server) handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	render(w, r, views.Dashboard(stats))
+	render(w, r, dashboard.Page(stats))
 }

@@ -4,16 +4,19 @@ import (
 	"fmt"
 
 	"github.com/Mirac61/lifelog/web/templ/layout"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
 templ Git(page GitPage) {
 	@layout.Shell("git") {
-		<div class="page-head">
-			<h1><span class="dot"></span>Git <span>/ <span id="git-year">{ fmt.Sprint(page.Year) }</span></span></h1>
-			<div class="controls" id="git-controls">
-				@GitControls(page)
-			</div>
-		</div>
+		@ui.PageHead(ui.Head{
+			Title:      "Git",
+			Sub:        fmt.Sprint(page.Year),
+			SubID:      "git-year",
+			ControlsID: "git-controls",
+		}) {
+			@GitControls(page)
+		}
 		<div id="gitview">
 			@GitView(page)
 		</div>

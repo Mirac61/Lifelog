@@ -3,7 +3,7 @@ package git
 import (
 	"fmt"
 
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
 templ GitView(page GitPage) {
@@ -15,7 +15,7 @@ templ GitView(page GitPage) {
 		<div class="hero-stats">
 			<div class="hstat"><b>{ fmt.Sprint(page.Stats.ActiveDays) }</b><span>aktive Tage</span></div>
 			<div class="hstat"><b>{ fmt.Sprint(page.Stats.LongestStreak) }</b><span>längste Streak</span></div>
-			<div class="hstat"><b>{ fmt.Sprintf("%.0f", page.Stats.BestValue) }</b><span>bester Tag{ views.BestDaySuffix(page.Stats.BestDate) }</span></div>
+			<div class="hstat"><b>{ fmt.Sprintf("%.0f", page.Stats.BestValue) }</b><span>bester Tag{ ui.BestDaySuffix(page.Stats.BestDate) }</span></div>
 		</div>
 	</div>
 	<div class={ "dash", templ.KV("current-year", page.IsCurrentYear) }>
@@ -57,7 +57,7 @@ templ prPanel(page GitPage) {
 			<ul class="prs">
 				for _, pr := range page.PRs {
 					<li>
-						<span class="pr-date">{ views.FormatShortDate(pr.LocalDate) }</span>
+						<span class="pr-date">{ ui.FormatShortDate(pr.LocalDate) }</span>
 						<span class="pr-dot" data-state={ pr.State } title={ pr.State }></span>
 						<a class="pr-title" href={ templ.URL(pr.URL) } target="_blank" rel="noopener" title={ pr.Title }>{ pr.Title }</a>
 						<span class="pr-repo">{ pr.Repo }</span>

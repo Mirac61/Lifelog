@@ -1,44 +1,51 @@
 package git
 
-import "fmt"
+import (
+	"fmt"
+
+	"github.com/Mirac61/lifelog/web/templ/ui"
+)
+
+// The view swaps in place instead of navigating; the timings match the
+// #gitview fade in style.css.
+const swapView = "innerHTML swap:120ms settle:150ms"
+
+// viewNav points at a year of a type. Year 0 means "no such year" — the zero
+// Nav renders the step disabled.
+func viewNav(eventType string, year int) ui.Nav {
+	if year == 0 {
+		return ui.Nav{}
+	}
+	return ui.Nav{
+		Get:    fmt.Sprintf("/git/view?type=%s&year=%d", eventType, year),
+		Target: "#gitview",
+		Swap:   swapView,
+	}
+}
+
+func typePills(page GitPage) []ui.Pill {
+	pills := make([]ui.Pill, 0, len(page.TypeOptions))
+	for _, opt := range page.TypeOptions {
+		pills = append(pills, ui.Pill{
+			Label:  opt.Label,
+			Active: opt.Value == page.Type,
+			Nav:    viewNav(opt.Value, page.Year),
+		})
+	}
+	return pills
+}
+
+func yearStepper(page GitPage) ui.Stepper {
+	return ui.Stepper{
+		Value:     fmt.Sprint(page.Year),
+		Prev:      viewNav(page.Type, page.PrevYear),
+		PrevLabel: "Vorheriges Jahr",
+		Next:      viewNav(page.Type, page.NextYear),
+		NextLabel: "Nächstes Jahr",
+	}
+}
 
 templ GitControls(page GitPage) {
-	<div class="pillbar" role="tablist">
-		for _, opt := range page.TypeOptions {
-			<button
-				type="button"
-				class={ "pill", templ.KV("active", opt.Value == page.Type) }
-				role="tab"
-				aria-selected={ fmt.Sprintf("%t", opt.Value == page.Type) }
-				hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", opt.Value, page.Year) }
-				hx-target="#gitview"
-				hx-swap="innerHTML swap:120ms settle:150ms"
-			>{ opt.Label }</button>
-		}
-	</div>
-	<div class="stepper">
-		<button
-			type="button"
-			class="step"
-			aria-label="Vorheriges Jahr"
-			disabled?={ page.PrevYear == 0 }
-			hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", page.Type, page.PrevYear) }
-			hx-target="#gitview"
-			hx-swap="innerHTML swap:120ms settle:150ms"
-		>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 9,12 15,19"></polyline></svg>
-		</button>
-		<span class="stepval">{ fmt.Sprint(page.Year) }</span>
-		<button
-			type="button"
-			class="step"
-			aria-label="Nächstes Jahr"
-			disabled?={ page.NextYear == 0 }
-			hx-get={ fmt.Sprintf("/git/view?type=%s&year=%d", page.Type, page.NextYear) }
-			hx-target="#gitview"
-			hx-swap="innerHTML swap:120ms settle:150ms"
-		>
-			<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,5 15,12 9,19"></polyline></svg>
-		</button>
-	</div>
+	@ui.Pills(typePills(page))
+	@ui.Steps(yearStepper(page))
 }

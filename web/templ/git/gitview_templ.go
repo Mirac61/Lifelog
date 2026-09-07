@@ -11,7 +11,7 @@ import templruntime "github.com/a-h/templ/runtime"
 import (
 	"fmt"
 
-	views "github.com/Mirac61/lifelog/web/templ"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
 func GitView(page GitPage) templ.Component {
@@ -105,9 +105,9 @@ func GitView(page GitPage) templ.Component {
 			return templ_7745c5c3_Err
 		}
 		var templ_7745c5c3_Var7 string
-		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(views.BestDaySuffix(page.Stats.BestDate))
+		templ_7745c5c3_Var7, templ_7745c5c3_Err = templ.JoinStringErrs(ui.BestDaySuffix(page.Stats.BestDate))
 		if templ_7745c5c3_Err != nil {
-			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/git/gitview.templ`, Line: 18, Col: 132}
+			return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/git/gitview.templ`, Line: 18, Col: 129}
 		}
 		_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var7))
 		if templ_7745c5c3_Err != nil {
@@ -276,9 +276,9 @@ func prPanel(page GitPage) templ.Component {
 					return templ_7745c5c3_Err
 				}
 				var templ_7745c5c3_Var13 string
-				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(views.FormatShortDate(pr.LocalDate))
+				templ_7745c5c3_Var13, templ_7745c5c3_Err = templ.JoinStringErrs(ui.FormatShortDate(pr.LocalDate))
 				if templ_7745c5c3_Err != nil {
-					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/git/gitview.templ`, Line: 60, Col: 65}
+					return templ.Error{Err: templ_7745c5c3_Err, FileName: `web/templ/git/gitview.templ`, Line: 60, Col: 62}
 				}
 				_, templ_7745c5c3_Err = templ_7745c5c3_Buffer.WriteString(templ.EscapeString(templ_7745c5c3_Var13))
 				if templ_7745c5c3_Err != nil {

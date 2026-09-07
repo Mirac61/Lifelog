@@ -4,6 +4,7 @@ import (
 	"time"
 
 	"github.com/Mirac61/lifelog/web/templ/layout"
+	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
 // dayLabel names the day "Heute"/"Gestern"/"Morgen", else "Fr 5.9." like the rows.
@@ -26,33 +27,35 @@ func dayHref(day time.Time) string {
 	return "/todos?date=" + day.Format("2006-01-02")
 }
 
-// DateControls steps the shown day. Plain links, not htmx swaps: the day lives
-// in the URL, so a navigation keeps it shareable.
+// The steps are plain links, not htmx swaps: the day lives in the URL, so a
+// navigation keeps it shareable.
+func dayStepper(page DayPage, today string) ui.Stepper {
+	return ui.Stepper{
+		Value:     dayLabel(page.Day, today),
+		Wide:      true,
+		Prev:      ui.Nav{Href: dayHref(page.Day.AddDate(0, 0, -1))},
+		PrevLabel: "Vorheriger Tag",
+		Next:      ui.Nav{Href: dayHref(page.Day.AddDate(0, 0, 1))},
+		NextLabel: "Nächster Tag",
+	}
+}
+
+func todayPill() []ui.Pill {
+	return []ui.Pill{{Label: "Heute", Nav: ui.Nav{Href: "/todos"}}}
+}
+
 templ DateControls(page DayPage, today string) {
-	<div class="controls">
-		if page.Day.Format("2006-01-02") != today {
-			<div class="pillbar">
-				<a class="pill" href="/todos">Heute</a>
-			</div>
-		}
-		<div class="stepper wide">
-			<a class="step" href={ dayHref(page.Day.AddDate(0, 0, -1)) } aria-label="Vorheriger Tag">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="15,5 9,12 15,19"></polyline></svg>
-			</a>
-			<span class="stepval">{ dayLabel(page.Day, today) }</span>
-			<a class="step" href={ dayHref(page.Day.AddDate(0, 0, 1)) } aria-label="Nächster Tag">
-				<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9,5 15,12 9,19"></polyline></svg>
-			</a>
-		</div>
-	</div>
+	if page.Day.Format("2006-01-02") != today {
+		@ui.Pills(todayPill())
+	}
+	@ui.Steps(dayStepper(page, today))
 }
 
 templ Page(page DayPage, today string) {
 	@layout.Shell("todos") {
-		<div class="page-head">
-			<h1><span class="dot"></span>Todos <span>/ { page.Day.Format("Mon, 2 Jan 2006") }</span></h1>
+		@ui.PageHead(ui.Head{Title: "Todos", Sub: page.Day.Format("Mon, 2 Jan 2006")}) {
 			@DateControls(page, today)
-		</div>
+		}
 		<div class="board">
 			<div class="panel day board-todos">
 				@Panel(page, today)

@@ -1,0 +1,71 @@
+package ui
+
+import "strconv"
+
+// Pills renders a pill bar. Each pill follows its Nav: a link navigates, a
+// swap is a tab.
+templ Pills(items []Pill) {
+	<div
+		class="pillbar"
+		if isTablist(items) {
+			role="tablist"
+		}
+	>
+		for _, p := range items {
+			if p.Nav.isLink() {
+				<a class={ "pill", templ.KV("active", p.Active) } href={ p.Nav.Href }>{ p.Label }</a>
+			} else {
+				<button
+					type="button"
+					class={ "pill", templ.KV("active", p.Active) }
+					role="tab"
+					aria-selected={ strconv.FormatBool(p.Active) }
+					hx-get={ p.Nav.Get }
+					hx-target={ p.Nav.Target }
+					hx-swap={ p.Nav.Swap }
+				>{ p.Label }</button>
+			}
+		}
+	</div>
+}
+
+templ Steps(s Stepper) {
+	<div class={ "stepper", templ.KV("wide", s.Wide) }>
+		@step(s.Prev, s.PrevLabel, true)
+		<span class="stepval">{ s.Value }</span>
+		@step(s.Next, s.NextLabel, false)
+	</div>
+}
+
+templ step(n Nav, label string, back bool) {
+	if n.isLink() {
+		<a class="step" href={ n.Href } aria-label={ label }>
+			@chevron(back)
+		</a>
+	} else if n.isSwap() {
+		<button
+			type="button"
+			class="step"
+			aria-label={ label }
+			hx-get={ n.Get }
+			hx-target={ n.Target }
+			hx-swap={ n.Swap }
+		>
+			@chevron(back)
+		</button>
+	} else {
+		<button type="button" class="step" aria-label={ label } disabled>
+			@chevron(back)
+		</button>
+	}
+}
+
+templ chevron(back bool) {
+	<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+		if back {
+			<polyline points="15,5 9,12 15,19"></polyline>
+		} else {
+			<polyline points="9,5 15,12 9,19"></polyline>
+		}
+	</svg>
+}

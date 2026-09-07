@@ -28,9 +28,8 @@ type Tab struct {
 	Nav    Nav
 }
 
-// Stepper is the arrow · value · arrow control. A zero Prev or Next renders
-// that arrow disabled. Its arrows are htmx buttons — lifelog.css styles
-// `.stepper button`, so a link variant would need a rule of its own.
+// Stepper is the arrow · value · arrow control. An arrow follows its Nav: a
+// Href navigates, a Get swaps, the zero value renders disabled.
 type Stepper struct {
 	Label     string
 	Group     string // aria-label of the group, e.g. "Jahr wechseln"

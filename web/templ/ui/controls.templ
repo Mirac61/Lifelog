@@ -72,7 +72,9 @@ templ Steps(s Stepper) {
 }
 
 templ step(n Nav, label, glyph string) {
-	if n.isSwap() {
+	if n.isLink() {
+		<a aria-label={ label } href={ n.Href }>{ glyph }</a>
+	} else if n.isSwap() {
 		<button
 			type="button"
 			aria-label={ label }

@@ -1,7 +1,7 @@
 [
   {
     "label": "run: lifelog",
-    "command": "templ generate && go run ./cmd/lifelog",
+    "command": "go tool templ generate && go run ./cmd/lifelog",
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "use_new_terminal": false,
@@ -10,7 +10,7 @@
   },
   {
     "label": "dev: watch + reload",
-    "command": "templ generate -watch -cmd 'go run ./cmd/lifelog' -proxy 'http://localhost:8080' -open-browser=false",
+    "command": "go tool templ generate -watch -cmd 'go run ./cmd/lifelog' -proxy 'http://localhost:8080' -open-browser=false",
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "use_new_terminal": false,
@@ -19,16 +19,39 @@
   },
   {
     "label": "templ generate",
-    "command": "templ",
-    "args": ["generate"],
+    "command": "go tool templ generate",
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "hide": "on_success"
   },
   {
     "label": "check: generate + build + test",
-    "command": "templ generate && go build ./... && go vet ./... && go test ./...",
+    "command": "go tool templ generate && go build ./... && go vet ./... && go test ./...",
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all"
+  },
+  {
+    "label": "build: binary",
+    "command": "go tool templ generate && CGO_ENABLED=0 go build -ldflags='-s -w' -o bin/lifelog ./cmd/lifelog && ls -lh bin/lifelog",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all"
+  },
+  {
+    "label": "docker: up (build)",
+    "command": "sudo docker compose up -d --build && sudo docker compose ps",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "save": "all",
+    "reveal": "always"
+  },
+  {
+    "label": "docker: down",
+    "command": "sudo docker compose down",
+    "cwd": "$ZED_WORKTREE_ROOT"
+  },
+  {
+    "label": "docker: logs",
+    "command": "sudo docker compose logs -f --tail=50",
+    "cwd": "$ZED_WORKTREE_ROOT",
+    "use_new_terminal": true
   }
 ]

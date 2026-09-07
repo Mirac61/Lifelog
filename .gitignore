@@ -41,3 +41,10 @@ go.work.sum
 Lifelog Daily Cockpit.zip
 Lifelog Daily Cockpit
 Web-Prototype.zip
+
+# Laufzeitdaten des Containers
+data/
+notes/
+
+# gebautes Binary
+bin/

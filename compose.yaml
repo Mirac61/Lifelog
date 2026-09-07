@@ -1,0 +1,11 @@
+services:
+  lifelog:
+    build: .
+    container_name: lifelog
+    ports:
+      - "127.0.0.1:8080:8080"
+    volumes:
+      - ./data:/data
+      - ./notes:/notes
+    env_file: .env
+    restart: unless-stopped

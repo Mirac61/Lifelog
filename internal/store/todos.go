@@ -118,17 +118,20 @@ func DeleteTodo(ctx context.Context, db *sql.DB, id int64) (sql.NullString, erro
 	return due, nil
 }
 
-// PlannedForDay sums the estimates of everything still unfinished.
-func PlannedForDay(ctx context.Context, db *sql.DB, day string) (int, error) {
+// BudgetForDay counts what is still unfinished on a day and sums its estimates.
+func BudgetForDay(ctx context.Context, db *sql.DB, day string) (open, minutes int, err error) {
 	todos, err := ListTodosForDay(ctx, db, day)
 	if err != nil {
-		return 0, err
+		return 0, 0, err
 	}
-	var planned int
 	for _, t := range todos {
-		if t.Estimate.Valid && t.Status != "done" {
-			planned += int(t.Estimate.Int64)
+		if t.Status == "done" {
+			continue
+		}
+		open++
+		if t.Estimate.Valid {
+			minutes += int(t.Estimate.Int64)
 		}
 	}
-	return planned, nil
+	return open, minutes, nil
 }

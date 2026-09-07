@@ -57,8 +57,8 @@ func (s *Server) handleCreateTodo(w http.ResponseWriter, r *http.Request) {
 	}
 	// Due past the shown day: belongs in "Kommende", swapped there out of band.
 	if view != "" && created.DueDate.Valid && created.DueDate.String > view {
-		planned := s.planned(r, sql.NullString{String: view, Valid: true})
-		render(w, r, todo.ItemUpcoming(created, planned, time.Now().Format("2006-01-02")))
+		open, minutes := s.budget(r, sql.NullString{String: view, Valid: true})
+		render(w, r, todo.ItemUpcoming(created, open, minutes, time.Now().Format("2006-01-02")))
 		return
 	}
 	s.renderRow(w, r, created)
@@ -80,23 +80,38 @@ func (s *Server) handleDeleteTodo(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	// Empty body swaps the row away; only the budget comes back.
-	render(w, r, todo.Planned(s.planned(r, due), true))
+	open, minutes := s.budget(r, due)
+	render(w, r, todo.Planned(open, minutes, true))
+}
+
+// handleParseTodo runs the same parseTodoInput the create path runs. The shown
+// day is deliberately no fallback here: a date chip means you typed one.
+func (s *Server) handleParseTodo(w http.ResponseWriter, r *http.Request) {
+	raw := strings.TrimSpace(r.FormValue("text"))
+	if raw == "" {
+		render(w, r, todo.CapturePreview(todo.Preview{Empty: true}))
+		return
+	}
+	preview := todo.NewPreview(parseTodoInput(raw), r.FormValue("date"), time.Now().Format("2006-01-02"))
+	render(w, r, todo.CapturePreview(preview))
 }
 
 // renderRow returns the changed row plus an out-of-band budget update.
 func (s *Server) renderRow(w http.ResponseWriter, r *http.Request, t store.Todo) {
-	render(w, r, todo.ItemUpdate(t, s.planned(r, t.DueDate), time.Now().Format("2006-01-02")))
+	open, minutes := s.budget(r, t.DueDate)
+	render(w, r, todo.ItemUpdate(t, open, minutes, time.Now().Format("2006-01-02")))
 }
 
-func (s *Server) planned(r *http.Request, due sql.NullString) int {
+// budget is the pane head's "N offen · Xh".
+func (s *Server) budget(r *http.Request, due sql.NullString) (open, minutes int) {
 	if !due.Valid {
-		return 0
+		return 0, 0
 	}
-	n, err := store.PlannedForDay(r.Context(), s.db, due.String)
+	open, minutes, err := store.BudgetForDay(r.Context(), s.db, due.String)
 	if err != nil {
-		return 0
+		return 0, 0
 	}
-	return n
+	return open, minutes
 }
 
 // A bare number stays text: "Kapitel 90 lesen" holds no estimate.

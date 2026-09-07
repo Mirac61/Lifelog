@@ -24,7 +24,7 @@ func nextOnRowClick(s string) string {
 }
 
 // Mutating handlers re-render this out of band.
-templ Planned(minutes int, oob bool) {
+templ Planned(open, minutes int, oob bool) {
 	<span
 		class="meta"
 		id="planned"
@@ -32,21 +32,32 @@ templ Planned(minutes int, oob bool) {
 			hx-swap-oob="true"
 		}
 	>
-		if minutes > 0 {
-			{ formatDuration(minutes) + " offen" }
-		}
+		{ budgetLabel(open, minutes) }
 	</span>
 }
 
+// budgetLabel is the design's "3 offen · 3 h".
+func budgetLabel(open, minutes int) string {
+	if open == 0 {
+		return ""
+	}
+	label := fmt.Sprintf("%d offen", open)
+	if minutes > 0 {
+		label += " · " + formatDuration(minutes)
+	}
+	return label
+}
+
+// The spaces are non-breaking, so a number never wraps away from its unit.
 func formatDuration(minute int) string {
 	hour, minutes := minute/60, minute%60
 	switch {
 	case hour > 0 && minutes > 0:
-		return fmt.Sprintf("%dh%dm", hour, minutes)
+		return fmt.Sprintf("%d h %d min", hour, minutes)
 	case hour > 0:
-		return fmt.Sprintf("%dh", hour)
+		return fmt.Sprintf("%d h", hour)
 	default:
-		return fmt.Sprintf("%dm", minutes)
+		return fmt.Sprintf("%d min", minutes)
 	}
 }
 
@@ -68,7 +79,11 @@ func isOverdue(t store.Todo, today string) bool {
 }
 
 templ Item(t store.Todo, today string) {
-	<li class="task" data-done={ fmt.Sprintf("%t", t.Status == "done") } data-state={ t.Status }>
+	<li
+		class={ "task", templ.KV("task-now", t.Status == "in_progress") }
+		data-done={ fmt.Sprintf("%t", t.Status == "done") }
+		data-state={ t.Status }
+	>
 		<button
 			type="button"
 			class="check"
@@ -113,18 +128,18 @@ templ Item(t store.Todo, today string) {
 }
 
 // ItemUpdate answers every mutation: the row, plus the budget out of band.
-templ ItemUpdate(t store.Todo, planned int, today string) {
+templ ItemUpdate(t store.Todo, open, minutes int, today string) {
 	@Item(t, today)
-	@Planned(planned, true)
+	@Planned(open, minutes, true)
 }
 
 // ItemUpcoming answers a create due past the shown day: the row drops into
 // "Kommende" out of band, plus the budget.
-templ ItemUpcoming(t store.Todo, planned int, today string) {
+templ ItemUpcoming(t store.Todo, open, minutes int, today string) {
 	<ol hx-swap-oob="beforeend:#todo-upcoming">
 		@Item(t, today)
 	</ol>
-	@Planned(planned, true)
+	@Planned(open, minutes, true)
 }
 
 // Panel is the day's list — also used inside the dashboard's day detail.
@@ -132,7 +147,7 @@ templ Panel(page DayPage, today string) {
 	<section class="pane">
 		<div class="pane-head">
 			<h2 class="pane-label">Aufgaben</h2>
-			@Planned(page.Planned, false)
+			@Planned(page.Open, page.Planned, false)
 		</div>
 		<ol id="todo-today">
 			for _, t := range page.Todos {
@@ -159,6 +174,30 @@ templ Panel(page DayPage, today string) {
 	</section>
 }
 
+// CapturePreview mirrors the parser back while typing.
+templ CapturePreview(p Preview) {
+	if p.Empty {
+		<span>Erkannt wird: #tag · @23.09.2026 · Dauer wie 15m oder 2h</span>
+	} else {
+		<span class="chip chip-type">Aufgabe</span>
+		if p.Title != "" {
+			<span class="chip">{ p.Title }</span>
+		}
+		if p.Estimate != "" {
+			<span class="chip">{ p.Estimate }</span>
+		}
+		if p.Due != "" {
+			<span class="chip">{ p.Due }</span>
+		}
+		if p.Category != "" {
+			<span class="chip">{ "#" + p.Category }</span>
+		}
+		if p.Upcoming {
+			<span>→ landet in Kommende</span>
+		}
+	}
+}
+
 // Capture is the bar at the bottom edge. It writes into the shown day, and the
 // new row lands at the end of that day's list — unless it is due later, then
 // the handler drops it into "Kommende" instead.
@@ -169,18 +208,29 @@ templ Capture(page DayPage) {
 		hx-post="/todos"
 		hx-target="#todo-today"
 		hx-swap="beforeend"
-		hx-on::after-request="this.reset()"
+		hx-on::after-request="if (event.detail.elt === this) { this.reset(); this.querySelector('#capture-input').dispatchEvent(new Event('preview')) }"
 	>
 		<div class="capture-inner">
 			<input type="hidden" name="date" value={ page.Day.Format("2006-01-02") }/>
 			<label for="capture-input" class="visually-hidden">Neue Aufgabe</label>
-			<input
-				class="capture-input"
-				id="capture-input"
-				name="text"
-				type="text"
-				placeholder="Wäsche aufhängen 15m #haushalt @05.09.2026"
-			/>
+			<div class="capture-field">
+				<input
+					class="capture-input"
+					id="capture-input"
+					name="text"
+					type="text"
+					placeholder="Wäsche aufhängen 15m #haushalt @05.09.2026"
+					hx-post="/todos/parse"
+					hx-trigger="keyup changed delay:120ms, preview"
+					hx-target="#capture-preview"
+					hx-swap="innerHTML"
+					hx-include="[name='date']"
+				/>
+				<div class="capture-preview" id="capture-preview" aria-live="polite">
+					@CapturePreview(Preview{Empty: true})
+				</div>
+			</div>
+			<span class="kbd" data-shortcut aria-hidden="true">Strg K</span>
 			<button type="submit" class="btn">Anlegen ↵</button>
 		</div>
 	</form>

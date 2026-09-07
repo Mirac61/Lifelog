@@ -10,7 +10,7 @@ import (
 	"github.com/Mirac61/lifelog/web/templ/todo"
 )
 
-// loadTodos counts only unfinished todos into Planned.
+// loadTodos counts only unfinished todos into Open and Planned.
 func (s *Server) loadTodos(ctx context.Context, day time.Time) (todo.DayPage, error) {
 	key := day.Format("2006-01-02")
 	todos, err := store.ListTodosForDay(ctx, s.db, key)
@@ -23,7 +23,11 @@ func (s *Server) loadTodos(ctx context.Context, day time.Time) (todo.DayPage, er
 	}
 	page := todo.DayPage{Day: day, Todos: todos, Upcoming: upcoming}
 	for _, t := range todos {
-		if t.Estimate.Valid && t.Status != "done" {
+		if t.Status == "done" {
+			continue
+		}
+		page.Open++
+		if t.Estimate.Valid {
 			page.Planned += int(t.Estimate.Int64)
 		}
 	}

@@ -34,3 +34,33 @@ func TestListTodosForDay(t *testing.T) {
 		t.Fatalf("want 2 todos (heute + überfällig), got %d", len(todos))
 	}
 }
+
+func TestBudgetForDay(t *testing.T) {
+	db, err := sql.Open("sqlite", ":memory:")
+	if err != nil {
+		t.Fatal(err)
+	}
+	defer db.Close()
+	if err := Migrate(db); err != nil {
+		t.Fatal(err)
+	}
+
+	ctx := context.Background()
+	if _, err := db.ExecContext(ctx, `INSERT INTO todos (text, due_date, status, estimate, created_at) VALUES
+		('offen mit Schaetzung', '2026-08-27', 'todo',        120, '2026-08-27'),
+		('schon erledigt',       '2026-08-27', 'done',         15, '2026-08-27'),
+		('angefangen, ungenau',  '2026-08-27', 'in_progress', NULL, '2026-08-27')`); err != nil {
+		t.Fatal(err)
+	}
+
+	open, minutes, err := BudgetForDay(ctx, db, "2026-08-27")
+	if err != nil {
+		t.Fatalf("BudgetForDay: %v", err)
+	}
+	if open != 2 {
+		t.Errorf("open = %d, want 2 (erledigtes zaehlt nicht mit)", open)
+	}
+	if minutes != 120 {
+		t.Errorf("minutes = %d, want 120 (nur die offene Schaetzung)", minutes)
+	}
+}

@@ -98,3 +98,17 @@
   clip-path: inset(50%);
   white-space: nowrap;
 }
+
+/* ─── Capture: Vorschau unter dem Feld ───────────────────────────── */
+
+/* Der Export stapelt Feld und Vorschau per inline-style. */
+.capture-field {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+/* Ohne Blende flackert die Vorschau bei jedem Tastendruck. */
+#capture-preview { transition: opacity .1s ease; }
+#capture-preview.htmx-swapping { opacity: .35; }

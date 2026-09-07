@@ -108,6 +108,21 @@ templ Screen(active string, capture templ.Component) {
 				tip.style.top = (box.top + window.scrollY - 36) + 'px';
 				tip.style.opacity = 1;
 			});
+
+			// Beschriftung nach Plattform: Mac ⌘, sonst Strg.
+			const capture = document.getElementById('capture-input');
+			if (capture) {
+				const mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);
+				document.querySelectorAll('[data-shortcut]').forEach(el => {
+					el.textContent = mac ? '⌘K' : 'Strg K';
+				});
+				document.addEventListener('keydown', e => {
+					if (e.key.toLowerCase() !== 'k' || !(mac ? e.metaKey : e.ctrlKey)) return;
+					e.preventDefault();
+					capture.focus();
+					capture.select();
+				});
+			}
 			</script>
 		</body>
 	</html>

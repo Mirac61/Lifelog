@@ -14,10 +14,8 @@ RUN CGO_ENABLED=0 go build -ldflags="-s -w" -o /out/lifelog ./cmd/lifelog
 FROM alpine:3
 # ca-certificates für die GitHub-API, tzdata damit "heute" der richtige Tag ist.
 RUN apk add --no-cache ca-certificates tzdata
-# Gleiche UID wie du auf dem Host: sonst gehören die Notizdateien root
-# und MarkText darf sie nicht speichern.
-RUN adduser -D -u 1000 lifelog
-USER lifelog
+# Kein eigener USER: rootless Podman bildet Container-root auf deine UID ab,
+# ein "USER 1000" landete in der subuid-Range und dürfte nicht mehr schreiben.
 COPY --from=build /out/lifelog /usr/local/bin/lifelog
 ENV DATABASE_PATH=/data/data.db \
     NOTES_PATH=/notes \

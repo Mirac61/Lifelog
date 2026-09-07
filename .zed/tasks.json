@@ -38,19 +38,19 @@
   },
   {
     "label": "docker: up (build)",
-    "command": "sudo docker compose up -d --build && sudo docker compose ps",
+    "command": "docker compose up -d --build && docker compose ps",
     "cwd": "$ZED_WORKTREE_ROOT",
     "save": "all",
     "reveal": "always"
   },
   {
     "label": "docker: down",
-    "command": "sudo docker compose down",
+    "command": "docker compose down",
     "cwd": "$ZED_WORKTREE_ROOT"
   },
   {
     "label": "docker: logs",
-    "command": "sudo docker compose logs -f --tail=50",
+    "command": "docker compose logs -f --tail=50",
     "cwd": "$ZED_WORKTREE_ROOT",
     "use_new_terminal": true
   }

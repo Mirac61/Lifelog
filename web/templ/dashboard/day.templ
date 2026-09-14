@@ -2,20 +2,19 @@ package dashboard
 
 import (
 	"fmt"
+	"time"
 
 	"github.com/Mirac61/lifelog/internal/store"
-	"github.com/Mirac61/lifelog/web/templ/todo"
 	"github.com/Mirac61/lifelog/web/templ/ui"
 )
 
 // Day fills #detail when a day is asked for by name.
-templ Day(events []store.DayEvent, todos todo.DayPage, today string) {
+templ Day(events []store.DayEvent, day time.Time) {
 	<section class="pane">
 		<div class="pane-head">
-			<h2 class="pane-label">{ ui.LongDate(todos.Day) }</h2>
+			<h2 class="pane-label">{ ui.LongDate(day) }</h2>
 			<span class="meta">{ fmt.Sprint(len(events)) } Ereignisse</span>
 		</div>
-		@todo.Panel(todos, today)
 		<div class="pane-head">
 			<h2 class="pane-label">Ereignisse</h2>
 		</div>

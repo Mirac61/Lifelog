@@ -48,7 +48,7 @@ Tagesachse.
 
 Dazu `/day`-Detailansicht, Backfill über vergangene Jahre, PR- und
 Repo-Commit-Events. Todos wurden eingebaut, passten aber nicht zur
-Grundvision des Projekts und werden zurückgebaut, siehe M2.
+Grundvision des Projekts und sind wieder draußen (M2, 2026-09-14).
 
 ---
 
@@ -62,8 +62,8 @@ getippt und nie berechnet. Sie sind die Zielvariable, gegen die M7 alles
 andere prüft.
 
 Erfassung muss billiger sein als sie zu überspringen: ein Feld, ein Enter,
-null Klicks. Keine Dropdowns, keine Pflichtfelder. Der Inline-Parser aus den
-Todos wird wiederverwendet.
+null Klicks. Keine Dropdowns, keine Pflichtfelder. Inline geparst, wie bei
+den Todos — der Parser ist mit M2 gegangen und wird hier neu geschrieben.
 
 Der Freitext ist **eine Zeile und bleibt es**. Nicht durchsuchbar, nicht
 editierbar, keine Tags. Sonst ist es eine Notiz, und Notizen gehören nach
@@ -83,18 +83,20 @@ etwas daran erinnert.
 
 ---
 
-## M2 — Todos raus
+## M2 — Todos raus ✓ (2026-09-14)
 
 Aufgaben leben in Apple Reminders und Obsidian, und zwar besser.
 
-Weg müssen Store-Funktionen, Handler, Templates, Seite, Nav-Eintrag und die
-Tabelle über eine neue Drop-Migration. Migrationen 00003–00006 bleiben
-stehen, goose-Historie wird nicht umgeschrieben.
+Weg sind Store-Funktionen, Handler, Templates, Seite und Nav-Eintrag; die
+Tabelle fällt über `00007_drop_todos.sql`. Migrationen 00003–00006 bleiben
+stehen, goose-Historie wurde nicht umgeschrieben. Das Down von 00007 ist
+bewusst ein `RAISE(FAIL)`: zurück geht es nicht.
 
-Das ist mehr als Löschen. `internal/api/day.go` ist heute eine Todo-Seite mit
-Event-Beilage, und `views.Day(events, todos, today)` trägt Todos in der
-Signatur. Der Tages-View wird um M1 herum neu gebaut. Rund ein Fünftel des
-handgeschriebenen Codes geht weg.
+`dashboard.Day(events, day)` trägt keine Todos mehr in der Signatur. Der
+Tages-View wird um M1 herum neu gebaut.
+
+Mit weg ist der Inline-Parser (`15m #tag @datum`). M1 baut ihn gegen seine
+eigene Eingabe neu; die alte Fassung steht in der Historie.
 
 ---
 

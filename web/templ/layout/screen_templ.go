@@ -55,37 +55,27 @@ func Screen(active string, capture templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg></a> <a href=\"/todos\" class=\"rail-link\" data-label=\"Todos\" aria-label=\"Todos\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 5, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"13\" y=\"4\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"4\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"></rect><rect x=\"13\" y=\"13\" width=\"7\" height=\"7\" rx=\"1.5\"></rect></svg></a> <a href=\"/calendar\" class=\"rail-link\" data-label=\"Kalender\" aria-label=\"Kalender\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if active == "todos" {
+		if active == "calendar" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 6, " aria-current=\"page\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><polyline points=\"3,7.2 5.6,9.8 10.2,5.2\"></polyline><line x1=\"13\" y1=\"7\" x2=\"21\" y2=\"7\"></line><line x1=\"13\" y1=\"13\" x2=\"21\" y2=\"13\"></line><line x1=\"3\" y1=\"17\" x2=\"21\" y2=\"17\"></line></svg></a> <a href=\"/calendar\" class=\"rail-link\" data-label=\"Kalender\" aria-label=\"Kalender\"")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 7, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2\"></rect><path d=\"M4 10h16M9 3v4M15 3v4\"></path></svg></a> <a href=\"/git\" class=\"rail-link\" data-label=\"Git\" aria-label=\"Git\"")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		if active == "calendar" {
+		if active == "git" {
 			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 8, " aria-current=\"page\"")
 			if templ_7745c5c3_Err != nil {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><rect x=\"4\" y=\"5\" width=\"16\" height=\"15\" rx=\"2\"></rect><path d=\"M4 10h16M9 3v4M15 3v4\"></path></svg></a> <a href=\"/git\" class=\"rail-link\" data-label=\"Git\" aria-label=\"Git\"")
-		if templ_7745c5c3_Err != nil {
-			return templ_7745c5c3_Err
-		}
-		if active == "git" {
-			templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, " aria-current=\"page\"")
-			if templ_7745c5c3_Err != nil {
-				return templ_7745c5c3_Err
-			}
-		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"6\" r=\"2.4\"></circle><circle cx=\"7\" cy=\"18\" r=\"2.4\"></circle><circle cx=\"17\" cy=\"12\" r=\"2.4\"></circle><path d=\"M7 8.4v7.2M9.4 6h3.1a2 2 0 0 1 2 2v1.8\"></path></svg></a> <span class=\"rail-spacer\"></span> <button type=\"button\" class=\"rail-link\" data-theme-toggle data-label=\"Hell / Dunkel\" aria-label=\"Zwischen hell und dunkel wechseln\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"4.2\"></circle><path d=\"M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4\"></path></svg></button></nav><main class=\"screen\">")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 9, "><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"7\" cy=\"6\" r=\"2.4\"></circle><circle cx=\"7\" cy=\"18\" r=\"2.4\"></circle><circle cx=\"17\" cy=\"12\" r=\"2.4\"></circle><path d=\"M7 8.4v7.2M9.4 6h3.1a2 2 0 0 1 2 2v1.8\"></path></svg></a> <span class=\"rail-spacer\"></span> <button type=\"button\" class=\"rail-link\" data-theme-toggle data-label=\"Hell / Dunkel\" aria-label=\"Zwischen hell und dunkel wechseln\"><svg viewBox=\"0 0 24 24\" fill=\"none\" stroke=\"currentColor\" stroke-width=\"1.6\" stroke-linecap=\"round\" stroke-linejoin=\"round\" aria-hidden=\"true\"><circle cx=\"12\" cy=\"12\" r=\"4.2\"></circle><path d=\"M12 3v2M12 19v2M3 12h2M19 12h2M5.6 5.6l1.4 1.4M17 17l1.4 1.4M18.4 5.6 17 7M7 17l-1.4 1.4\"></path></svg></button></nav><main class=\"screen\">")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -93,7 +83,7 @@ func Screen(active string, capture templ.Component) templ.Component {
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 12, "</main>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 10, "</main>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}
@@ -103,7 +93,7 @@ func Screen(active string, capture templ.Component) templ.Component {
 				return templ_7745c5c3_Err
 			}
 		}
-		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 13, "</div><div id=\"tip\"></div><script>\n\t\t\tdocument.querySelector('[data-theme-toggle]').addEventListener('click', () => {\n\t\t\t\tconst root = document.documentElement;\n\t\t\t\tconst next = root.dataset.theme === 'dark' ? 'light' : 'dark';\n\t\t\t\troot.dataset.theme = next;\n\t\t\t\ttry { localStorage.setItem('lifelog-theme', next); } catch (e) {}\n\t\t\t});\n\n\t\t\t// Die Heatmap-Zellen tragen ihren Tag als data-Attribut; der Tooltip\n\t\t\t// hängt am document, damit ein htmx-Tausch ihn nicht mitreißt.\n\t\t\tdocument.addEventListener('mouseover', e => {\n\t\t\t\tconst cell = e.target.closest('[data-date]');\n\t\t\t\tconst tip = document.getElementById('tip');\n\t\t\t\tif (!cell) { tip.style.opacity = 0; return; }\n\t\t\t\ttip.textContent = cell.dataset.tip;\n\t\t\t\tconst box = cell.getBoundingClientRect();\n\t\t\t\ttip.style.left = (box.left + window.scrollX - 8) + 'px';\n\t\t\t\ttip.style.top = (box.top + window.scrollY - 36) + 'px';\n\t\t\t\ttip.style.opacity = 1;\n\t\t\t});\n\n\t\t\t// Beschriftung nach Plattform: Mac ⌘, sonst Strg.\n\t\t\tconst capture = document.getElementById('capture-input');\n\t\t\tif (capture) {\n\t\t\t\tconst mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);\n\t\t\t\tdocument.querySelectorAll('[data-shortcut]').forEach(el => {\n\t\t\t\t\tel.textContent = mac ? '⌘K' : 'Strg K';\n\t\t\t\t});\n\t\t\t\tdocument.addEventListener('keydown', e => {\n\t\t\t\t\tif (e.key.toLowerCase() !== 'k' || !(mac ? e.metaKey : e.ctrlKey)) return;\n\t\t\t\t\te.preventDefault();\n\t\t\t\t\tcapture.focus();\n\t\t\t\t\tcapture.select();\n\t\t\t\t});\n\t\t\t}\n\t\t\t</script></body></html>")
+		templ_7745c5c3_Err = templruntime.WriteString(templ_7745c5c3_Buffer, 11, "</div><div id=\"tip\"></div><script>\n\t\t\tdocument.querySelector('[data-theme-toggle]').addEventListener('click', () => {\n\t\t\t\tconst root = document.documentElement;\n\t\t\t\tconst next = root.dataset.theme === 'dark' ? 'light' : 'dark';\n\t\t\t\troot.dataset.theme = next;\n\t\t\t\ttry { localStorage.setItem('lifelog-theme', next); } catch (e) {}\n\t\t\t});\n\n\t\t\t// Die Heatmap-Zellen tragen ihren Tag als data-Attribut; der Tooltip\n\t\t\t// hängt am document, damit ein htmx-Tausch ihn nicht mitreißt.\n\t\t\tdocument.addEventListener('mouseover', e => {\n\t\t\t\tconst cell = e.target.closest('[data-date]');\n\t\t\t\tconst tip = document.getElementById('tip');\n\t\t\t\tif (!cell) { tip.style.opacity = 0; return; }\n\t\t\t\ttip.textContent = cell.dataset.tip;\n\t\t\t\tconst box = cell.getBoundingClientRect();\n\t\t\t\ttip.style.left = (box.left + window.scrollX - 8) + 'px';\n\t\t\t\ttip.style.top = (box.top + window.scrollY - 36) + 'px';\n\t\t\t\ttip.style.opacity = 1;\n\t\t\t});\n\n\t\t\t// Beschriftung nach Plattform: Mac ⌘, sonst Strg.\n\t\t\tconst capture = document.getElementById('capture-input');\n\t\t\tif (capture) {\n\t\t\t\tconst mac = /Mac|iPhone|iPad/.test(navigator.platform || navigator.userAgent);\n\t\t\t\tdocument.querySelectorAll('[data-shortcut]').forEach(el => {\n\t\t\t\t\tel.textContent = mac ? '⌘K' : 'Strg K';\n\t\t\t\t});\n\t\t\t\tdocument.addEventListener('keydown', e => {\n\t\t\t\t\tif (e.key.toLowerCase() !== 'k' || !(mac ? e.metaKey : e.ctrlKey)) return;\n\t\t\t\t\te.preventDefault();\n\t\t\t\t\tcapture.focus();\n\t\t\t\t\tcapture.select();\n\t\t\t\t});\n\t\t\t}\n\t\t\t</script></body></html>")
 		if templ_7745c5c3_Err != nil {
 			return templ_7745c5c3_Err
 		}

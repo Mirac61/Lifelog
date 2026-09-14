@@ -18,7 +18,6 @@ RUN apk add --no-cache ca-certificates tzdata
 # ein "USER 1000" landete in der subuid-Range und dürfte nicht mehr schreiben.
 COPY --from=build /out/lifelog /usr/local/bin/lifelog
 ENV DATABASE_PATH=/data/data.db \
-    NOTES_PATH=/notes \
     LISTEN_ADDRESS=0.0.0.0:8080 \
     TZ=Europe/Berlin
 EXPOSE 8080

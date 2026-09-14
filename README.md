@@ -227,6 +227,16 @@ The canonical repository is on
 [Codeberg](https://codeberg.org/Mirac61/Lifelog); GitHub is a push mirror.
 Issues belong on Codeberg.
 
+## License
+
+[MIT](LICENSE).
+
+Two sets of bundled files carry their own terms: the fonts under
+`web/static/fonts/` are SIL OFL 1.1 (text and copyright lines in
+[`OFL.txt`](web/static/fonts/OFL.txt), background in
+[`LIZENZEN.md`](web/static/fonts/LIZENZEN.md)), and the vendored
+`web/static/htmx.min.js` is Zero-Clause BSD, which attaches no conditions.
+
 ---
 
 This README is in English. The user interface and `docs/Roadmap.md` are in

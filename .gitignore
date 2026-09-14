@@ -48,3 +48,6 @@ notes/
 
 # gebautes Binary
 bin/
+
+# Serena local config
+.serena/
